@@ -11,3 +11,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.MuiAppBar-colorPrimary .MuiButton-text.MuiButton-colorInherit:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
