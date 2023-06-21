@@ -3,7 +3,7 @@ import { Button, Input, Link, Sheet, Typography } from '@mui/joy'
 import { useForm, SubmitHandler } from 'react-hook-form'
 
 export default function Register() {
-  const { registerUser } = useSession()
+  const { registerUser, registering } = useSession()
   const { register, handleSubmit, formState } = useForm<LoginForm>()
   const onSubmit: SubmitHandler<LoginForm> = (data) => registerUser(data)
 
@@ -35,8 +35,8 @@ export default function Register() {
 
         <Button
           type="submit"
-          loading={formState.isSubmitting}
-          disabled={formState.isSubmitting || !formState.isValid}
+          loading={registering}
+          disabled={registering || !formState.isValid}
         >
           注册
         </Button>

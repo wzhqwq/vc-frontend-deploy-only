@@ -1,9 +1,11 @@
+import { useSession, useUser } from '@/api/user'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { NormalMenuButton } from '@/component/basic/CustomMenu'
 import {
   AccountCircle,
   Cloud,
   DeleteSweep,
+  ExitToApp,
   ExploreTwoTone,
   HelpTwoTone,
   InfoTwoTone,
@@ -16,6 +18,7 @@ import {
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   Divider,
   IconButton,
@@ -25,9 +28,12 @@ import {
 } from '@mui/joy'
 import { AppBar, Toolbar } from '@mui/material'
 import { memo, useCallback, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 export default function MainFrame() {
+  const { loggedIn } = useSession()
+  const navigate = useNavigate()
+
   return (
     <Box
       sx={{
@@ -38,29 +44,42 @@ export default function MainFrame() {
     >
       <AppBar position="static">
         <Toolbar sx={{ gap: 1 }}>
-          <Typography level="h6" component="div" sx={{ mr: 1 }}>
+          <Typography level="h6" component="a" sx={{ mr: 1, textDecoration: 'none' }} href="/">
             多模态可视化平台
           </Typography>
-          <SearchInput />
-          <Button variant='plain' color='neutral'>
+          <SearchInput placeholder="平台内搜索…" />
+          <Button variant="plain" color="neutral">
             <ExploreTwoTone fontSize="small" sx={{ mr: 1 }} />
             探索
           </Button>
-          <Button variant='plain' color='neutral'>
+          <Button variant="plain" color="neutral">
             <TaskTwoTone fontSize="small" sx={{ mr: 1 }} />
             公开任务
           </Button>
-          <Button variant='plain' color='neutral'>
+          <Button variant="plain" color="neutral">
             <HelpTwoTone fontSize="small" sx={{ mr: 1 }} />
             指引
           </Button>
-          <Button variant='plain' color='neutral'>
+          <Button variant="plain" color="neutral">
             <InfoTwoTone fontSize="small" sx={{ mr: 1 }} />
             关于
           </Button>
           <Box sx={{ flexGrow: 1 }} />
-          <MessageControl />
-          <UserControl />
+          {loggedIn ? (
+            <>
+              <MessageControl />
+              <UserControl />
+            </>
+          ) : (
+            <>
+              <Button variant="plain" color="neutral" onClick={() => navigate('/login')}>
+                登录
+              </Button>
+              <Button variant="plain" color="neutral" onClick={() => navigate('/register')}>
+                注册
+              </Button>
+            </>
+          )}
         </Toolbar>
       </AppBar>
       <Container
@@ -77,6 +96,7 @@ export default function MainFrame() {
 }
 
 const UserControl = memo(() => {
+  const { user } = useUser()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -85,17 +105,25 @@ const UserControl = memo(() => {
   const handleClose = useCallback(() => {
     setAnchorEl(null)
   }, [])
+
   return (
     <>
-      <IconButton onClick={handleClick} variant='plain' color='neutral'>
+      <IconButton onClick={handleClick} variant="plain" color="neutral">
         <Person />
       </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        placement='bottom-end'
-      >
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose} placement="bottom-end">
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: 1 }}>
+          {user ? (
+            <Typography level="h6" sx={{ flexGrow: 1 }}>
+              {user.email}
+            </Typography>
+          ) : (
+            <CircularProgress />
+          )}
+          <IconButton color="danger">
+            <ExitToApp />
+          </IconButton>
+        </Box>
         <NormalMenuButton Icon={AccountCircle} text="个人信息" />
         <NormalMenuButton Icon={Notifications} text="通知" />
         <Divider sx={{ my: 1 }} />
@@ -119,28 +147,28 @@ const MessageControl = memo(() => {
 
   return (
     <>
-      <IconButton onClick={handleClick} variant='plain' color='neutral'>
+      <IconButton onClick={handleClick} variant="plain" color="neutral">
         <Notifications />
       </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        placement='bottom-end'
+        placement="bottom-end"
         sx={{
           minWidth: 300,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: 1 }}>
-          <Typography level="h6" sx={{ flexGrow: 1 }}>消息中心</Typography>
+          <Typography level="h6" sx={{ flexGrow: 1 }}>
+            消息中心
+          </Typography>
           <IconButton color="danger">
             <DeleteSweep />
           </IconButton>
         </Box>
         <Divider sx={{ mb: 1 }} />
-        <MenuItem>
-          暂无消息
-        </MenuItem>
+        <MenuItem>暂无消息</MenuItem>
       </Menu>
     </>
   )
