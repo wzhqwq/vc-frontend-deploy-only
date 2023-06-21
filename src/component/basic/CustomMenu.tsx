@@ -1,5 +1,5 @@
 import { SvgIconComponent } from '@mui/icons-material'
-import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
+import { MenuItem, ListItemDecorator } from '@mui/joy'
 import { memo } from 'react'
 
 interface CustomMenuProps {
@@ -9,10 +9,10 @@ interface CustomMenuProps {
 }
 
 export const NormalMenuButton = memo(({ Icon, text, onClick }: CustomMenuProps) => (
-  <ListItemButton onClick={onClick}>
-    <ListItemIcon sx={{ minWidth: '32px' }}>
+  <MenuItem onClick={onClick}>
+    <ListItemDecorator sx={{ minWidth: '32px' }}>
       <Icon fontSize="small" />
-    </ListItemIcon>
-    <ListItemText primary={text} />
-  </ListItemButton>
+    </ListItemDecorator>
+    {text}
+  </MenuItem>
 ))

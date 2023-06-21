@@ -10,20 +10,20 @@ import {
   Notifications,
   Person,
   Task,
+  TaskTwoTone,
   ViewInAr,
 } from '@mui/icons-material'
 import {
-  AppBar,
   Box,
   Button,
   Container,
   Divider,
   IconButton,
-  ListItem,
   Menu,
-  Toolbar,
+  MenuItem,
   Typography,
-} from '@mui/material'
+} from '@mui/joy'
+import { AppBar, Toolbar } from '@mui/material'
 import { memo, useCallback, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
@@ -38,19 +38,23 @@ export function MainFrame() {
     >
       <AppBar position="static">
         <Toolbar sx={{ gap: 1 }}>
-          <Typography variant="h6" component="div" sx={{ mr: 1 }}>
+          <Typography level="h6" component="div" sx={{ mr: 1 }}>
             多模态可视化平台
           </Typography>
           <SearchInput />
-          <Button color="inherit">
+          <Button variant='plain' color='neutral'>
             <ExploreTwoTone fontSize="small" sx={{ mr: 1 }} />
             探索
           </Button>
-          <Button color="inherit">
+          <Button variant='plain' color='neutral'>
+            <TaskTwoTone fontSize="small" sx={{ mr: 1 }} />
+            公开任务
+          </Button>
+          <Button variant='plain' color='neutral'>
             <HelpTwoTone fontSize="small" sx={{ mr: 1 }} />
             指引
           </Button>
-          <Button color="inherit">
+          <Button variant='plain' color='neutral'>
             <InfoTwoTone fontSize="small" sx={{ mr: 1 }} />
             关于
           </Button>
@@ -83,16 +87,14 @@ const UserControl = memo(() => {
   }, [])
   return (
     <>
-      <IconButton color="inherit" edge="end" onClick={handleClick}>
+      <IconButton onClick={handleClick} variant='plain' color='neutral'>
         <Person />
       </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          dense: true,
-        }}
+        placement='bottom-end'
       >
         <NormalMenuButton Icon={AccountCircle} text="个人信息" />
         <NormalMenuButton Icon={Notifications} text="通知" />
@@ -117,28 +119,28 @@ const MessageControl = memo(() => {
 
   return (
     <>
-      <IconButton color="inherit" onClick={handleClick}>
+      <IconButton onClick={handleClick} variant='plain' color='neutral'>
         <Notifications />
       </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          dense: true,
-          sx: {
-            width: 300,
-          },
+        placement='bottom-end'
+        sx={{
+          minWidth: 300,
         }}
       >
-        <ListItem secondaryAction={
-          <IconButton color="error">
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: 1 }}>
+          <Typography level="h6" sx={{ flexGrow: 1 }}>消息中心</Typography>
+          <IconButton color="danger">
             <DeleteSweep />
           </IconButton>
-        }>
-          <Typography variant="h6">消息中心</Typography>
-        </ListItem>
-        <Divider sx={{ my: 1 }} />
+        </Box>
+        <Divider sx={{ mb: 1 }} />
+        <MenuItem>
+          暂无消息
+        </MenuItem>
       </Menu>
     </>
   )

@@ -1435,6 +1435,11 @@
   resolved "https://registry.npmmirror.com/@eslint/js/-/js-8.43.0.tgz#559ca3d9ddbd6bf907ad524320a0d14b85586af0"
   integrity sha512-s2UHCoiXfxMvmfzqoN+vrQ84ahUSYde9qNO1MdxmoEhyHWsfmwOpFlwYV+ePJEVc7gFnATGUi376WowX1N7tFg==
 
+"@fontsource/public-sans@^5.0.3":
+  version "5.0.3"
+  resolved "https://registry.npmjs.org/@fontsource/public-sans/-/public-sans-5.0.3.tgz#483c13f0ba320ec570d4161495a28c7f1bfaba6a"
+  integrity sha512-qoP6K/rmKIe6TP31kV9ImR73u/R1opPA3sx+4NLH4wQWbxTOQNLbH9nDzKF2PN7IQ9xLpu5e6XnQLgwlPpjeTQ==
+
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
   resolved "https://registry.npmmirror.com/@humanwhocodes/config-array/-/config-array-0.11.10.tgz#5a3ffe32cc9306365fb3fd572596cd602d5e12d2"
@@ -1794,6 +1799,22 @@
   integrity sha512-oKkx9z9Kwg40NtcIajF9uOXhxiyTZrrm9nmIJ4UjkU2IdHpd4QVLbCc/5hZN/y0C6qzi2Zlxyr9TGddQx2vx2A==
   dependencies:
     "@babel/runtime" "^7.21.0"
+
+"@mui/joy@^5.0.0-alpha.84":
+  version "5.0.0-alpha.84"
+  resolved "https://registry.npmjs.org/@mui/joy/-/joy-5.0.0-alpha.84.tgz#c7d06d625438fdc4b8bd7e0fe4135aa4a1caa1ad"
+  integrity sha512-sBPBtjmn5q7PCJLTKiwP64Im0shA473hY62fBy6PbZ4J3lhHh548pKDleuGiUXKpELG3eQiD6UDwSUEP8T4yIg==
+  dependencies:
+    "@babel/runtime" "^7.21.0"
+    "@mui/base" "5.0.0-beta.4"
+    "@mui/core-downloads-tracker" "^5.13.4"
+    "@mui/system" "^5.13.5"
+    "@mui/types" "^7.2.4"
+    "@mui/utils" "^5.13.1"
+    clsx "^1.2.1"
+    csstype "^3.1.2"
+    prop-types "^15.8.1"
+    react-is "^18.2.0"
 
 "@mui/lab@^5.0.0-alpha.134":
   version "5.0.0-alpha.134"
