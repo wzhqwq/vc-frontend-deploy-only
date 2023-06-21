@@ -1,8 +1,18 @@
-### `yarn start`
+## 项目说明
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 安装依赖
+```bash
+yarn
+```
+
+## 启动开发服务器
+```bash
+yarn start
+```
+
+## 构建生产版本
+```bash
+yarn build
+```
 

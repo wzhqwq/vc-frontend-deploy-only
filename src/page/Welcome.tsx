@@ -16,7 +16,7 @@ export function Welcome() {
               <li>文本数据</li>
               <li>图像数据</li>
             </ul>
-            <Button sx={{ mt: 2 }} fullWidth>
+            <Button sx={{ mt: 1 }} fullWidth>
               探索数据集
               <ChevronRightRounded />
             </Button>
@@ -29,7 +29,7 @@ export function Welcome() {
               <li>图片增强</li>
               <li>图片调整</li>
             </ul>
-            <Button sx={{ mt: 2 }} fullWidth>
+            <Button sx={{ mt: 1 }} fullWidth>
               了解更多
               <ChevronRightRounded />
             </Button>
@@ -43,7 +43,7 @@ export function Welcome() {
               <li>深度学习</li>
               <li>用户自上传模型</li>
             </ul>
-            <Button sx={{ mt: 2 }} fullWidth>
+            <Button sx={{ mt: 1 }} fullWidth>
               探索模型
               <ChevronRightRounded />
             </Button>
@@ -54,7 +54,7 @@ export function Welcome() {
               <li>质量评估</li>
               <li>聚类结果导出</li>
             </ul>
-            <Button sx={{ mt: 2 }} fullWidth>
+            <Button sx={{ mt: 1 }} fullWidth>
               了解更多
               <ChevronRightRounded />
             </Button>
