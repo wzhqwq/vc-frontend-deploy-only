@@ -27,7 +27,7 @@ import { AppBar, Toolbar } from '@mui/material'
 import { memo, useCallback, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
-export function MainFrame() {
+export default function MainFrame() {
   return (
     <Box
       sx={{

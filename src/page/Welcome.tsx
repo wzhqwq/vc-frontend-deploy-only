@@ -2,7 +2,7 @@ import { ChevronRightRounded } from '@mui/icons-material'
 import { Badge, Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { memo } from 'react'
 
-export function Welcome() {
+export default function Welcome() {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
       <Box>

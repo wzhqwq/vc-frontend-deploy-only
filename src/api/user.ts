@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, usePatch, usePost } from './common'
+import { usePatch, usePost } from './common'
 import { queryClient } from './queryClient'
 import { useCallback } from 'react'
 
@@ -10,12 +10,13 @@ export interface User {
   createdAt: number
   lastLoginAt: number
   role: number
-  _links: Link[]
 }
-export interface UserForm {
-  password?: string
-  email?: string
+export interface UserCreatingForm {
+  email: string
+  password: string
 }
+export type UserForm = Partial<UserCreatingForm>
+export type LoginForm = UserCreatingForm
 
 export function useUser() {
   const { loggedIn } = useSession()
@@ -40,13 +41,6 @@ export function useUser() {
   }
 }
 
-export interface LoginForm {
-  username: string
-  password: string
-}
-export interface RegisterForm extends LoginForm {
-  email: string
-}
 export function useSession() {
   const { data: loggedIn } = useQuery<boolean>(
     ['state', 'loggedIn'],
@@ -55,19 +49,13 @@ export function useSession() {
       initialData: () => localStorage.getItem('token') !== null,
     },
   )
-  const { mutate: logIn, isLoading: loggingIn } = usePost<string, LoginForm>(
-    ['public', 'users', 'session'],
-    {
-      onSuccess: (data) => {
-        localStorage.setItem('token', data)
-        queryClient.invalidateQueries(['state', 'loggedIn'])
-      },
+  const { mutateAsync: logIn } = usePost<string, LoginForm>(['public', 'user', 'login'], {
+    onSuccess: (data) => {
+      localStorage.setItem('token', data)
+      queryClient.invalidateQueries(['state', 'loggedIn'])
     },
-  )
-  const {
-    mutateAsync: register,
-    isLoading: registering,
-  } = usePost<User, RegisterForm>(['public', 'users', 'new'])
+  })
+  const { mutateAsync: registerUser } = usePost<User, UserCreatingForm>(['public', 'user', 'register'])
 
   const logOut = useCallback(() => {
     localStorage.removeItem('token')
@@ -78,9 +66,7 @@ export function useSession() {
   return {
     loggedIn,
     logIn,
-    loggingIn,
-    register,
-    registering,
+    registerUser,
     logOut,
   }
 }
