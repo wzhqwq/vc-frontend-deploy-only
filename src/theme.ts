@@ -48,10 +48,10 @@ export const muiTheme = materialExtendTheme({
     light: {
       palette: {
         primary: {
-          main: joyTheme.colorSchemes.light.palette.primary.mainChannel,
+          main: joyTheme.colorSchemes.light.palette.primary[500],
         },
         secondary: {
-          main: joyTheme.colorSchemes.light.palette.neutral.mainChannel,
+          main: joyTheme.colorSchemes.light.palette.neutral[500],
         },
       },
     },

@@ -30,6 +30,8 @@ import { AppBar, Toolbar } from '@mui/material'
 import { memo, useCallback, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 
+import logo from '@/logo.svg'
+
 export default function MainFrame() {
   const { loggedIn } = useSession()
   const navigate = useNavigate()
@@ -44,7 +46,21 @@ export default function MainFrame() {
     >
       <AppBar position="static">
         <Toolbar sx={{ gap: 1 }}>
-          <Typography level="h6" component="a" sx={{ mr: 1, textDecoration: 'none' }} href="/">
+          <Typography
+            level="h6"
+            component="a"
+            sx={{
+              mr: 1,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              img: { filter: 'grayscale(1)', transition: 'filter 0.3s' },
+              '&:hover': { img: { filter: 'grayscale(0)' } },
+            }}
+            href="/"
+          >
+            <img src={logo} alt="logo" height={32} width={32} />
             多模态可视化平台
           </Typography>
           <SearchInput placeholder="平台内搜索…" />
@@ -119,10 +135,10 @@ const UserControl = memo(() => {
               {user.email}
             </Typography>
           ) : (
-            <CircularProgress size='sm' sx={{ flexGrow: 1 }} />
+            <CircularProgress size="sm" sx={{ flexGrow: 1 }} />
           )}
-          <IconButton color="danger" size='sm'>
-            <ExitToApp fontSize='small' onClick={logOut} />
+          <IconButton color="danger" size="sm">
+            <ExitToApp fontSize="small" onClick={logOut} />
           </IconButton>
         </Box>
         <Divider sx={{ mb: 1 }} />
@@ -165,8 +181,8 @@ const MessageControl = memo(() => {
           <Typography level="h6" sx={{ flexGrow: 1 }}>
             消息中心
           </Typography>
-          <IconButton color="danger" size='sm'>
-            <DeleteSweep fontSize='small' />
+          <IconButton color="danger" size="sm">
+            <DeleteSweep fontSize="small" />
           </IconButton>
         </Box>
         <Divider sx={{ mb: 1 }} />

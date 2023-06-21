@@ -2,11 +2,14 @@ import { ChevronRightRounded } from '@mui/icons-material'
 import { Badge, Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { memo } from 'react'
 
+import logo from '@/logo.svg'
+
 export default function Welcome() {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <Box>
-        <Typography level="h4" sx={{ textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <img src={logo} alt="logo" width="200" />
+        <Typography level="h4" >
           多模态可视化平台
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 4 }}>
