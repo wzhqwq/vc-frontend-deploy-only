@@ -97,6 +97,7 @@ export default function MainFrame() {
 
 const UserControl = memo(() => {
   const { user } = useUser()
+  const { logOut } = useSession()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -112,18 +113,19 @@ const UserControl = memo(() => {
         <Person />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose} placement="bottom-end">
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, pt: 0 }}>
           {user ? (
             <Typography level="h6" sx={{ flexGrow: 1 }}>
               {user.email}
             </Typography>
           ) : (
-            <CircularProgress />
+            <CircularProgress size='sm' sx={{ flexGrow: 1 }} />
           )}
-          <IconButton color="danger">
-            <ExitToApp />
+          <IconButton color="danger" size='sm'>
+            <ExitToApp fontSize='small' onClick={logOut} />
           </IconButton>
         </Box>
+        <Divider sx={{ mb: 1 }} />
         <NormalMenuButton Icon={AccountCircle} text="个人信息" />
         <NormalMenuButton Icon={Notifications} text="通知" />
         <Divider sx={{ my: 1 }} />
@@ -159,12 +161,12 @@ const MessageControl = memo(() => {
           minWidth: 300,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, pt: 0 }}>
           <Typography level="h6" sx={{ flexGrow: 1 }}>
             消息中心
           </Typography>
-          <IconButton color="danger">
-            <DeleteSweep />
+          <IconButton color="danger" size='sm'>
+            <DeleteSweep fontSize='small' />
           </IconButton>
         </Box>
         <Divider sx={{ mb: 1 }} />

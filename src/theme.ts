@@ -18,16 +18,16 @@ export const joyTheme = extendTheme({
           900: '#04201e',
         },
         neutral: {
-          50: '#ecf0f4',
-          100: '#d9e1e9',
-          200: '#b3c2d3',
-          300: '#8da4be',
-          400: '#6785a8',
-          500: '#416792',
-          600: '#345275',
-          700: '#273e58',
-          800: '#1a293a',
-          900: '#0d151d',
+          50: '#edf1f6',
+          100: '#dae3ed',
+          200: '#b5c7db',
+          300: '#90abc9',
+          400: '#6b8fb7',
+          500: '#4673a5',
+          600: '#385c84',
+          700: '#2a4563',
+          800: '#1c2e42',
+          900: '#0e1721',
         },
       },
     },
@@ -48,13 +48,10 @@ export const muiTheme = materialExtendTheme({
     light: {
       palette: {
         primary: {
-          main: '#416792',
+          main: joyTheme.colorSchemes.light.palette.primary.mainChannel,
         },
         secondary: {
-          main: '#16a094',
-        },
-        info: {
-          main: '#0097a7',
+          main: joyTheme.colorSchemes.light.palette.neutral.mainChannel,
         },
       },
     },
