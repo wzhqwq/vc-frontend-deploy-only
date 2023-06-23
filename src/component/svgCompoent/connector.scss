@@ -1,0 +1,22 @@
+.connector {
+  user-select: none;
+  transition: opacity 0.2s ease-in-out;
+  text {
+    transition: opacity 0.2s ease-in-out;
+  }
+  rect {
+    transition: transform 0.2s ease-in-out;
+  }
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  &.dragging {
+    text {
+      opacity: 0;
+    }
+    rect {
+      transform: scale(0);
+    }
+  }
+}
