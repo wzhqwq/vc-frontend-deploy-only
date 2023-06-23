@@ -51,6 +51,7 @@
     ]
   },
   "devDependencies": {
+    "@types/qs": "^6.9.7",
     "@vitejs/plugin-react": "^4.0.1",
     "vite": "^4.3.9",
     "vite-plugin-svgr": "^3.2.0",
