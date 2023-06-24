@@ -1,5 +1,5 @@
 import { joyTheme } from '@/theme'
-import { ConnectorFacing, ConnectorOrigin, ConnectorType } from '@/types/config/deepLearning'
+import { ConnectorSide, ConnectorOrigin, ConnectorType } from '@/types/config/deepLearning'
 import { Box, Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
 import { scene } from './scene'
 
@@ -7,9 +7,9 @@ const LINE_WIDTH = 4
 const CONNECTOR_LENGTH = 40
 const CONNECTOR_PADDING = [10, 4]
 
-const connectorFacingMap: Record<ConnectorFacing, [number, number]> = {
-  // left: [-CONNECTOR_LENGTH, 0],
-  // right: [CONNECTOR_LENGTH, 0],
+const connectorDirectionMap: Record<ConnectorSide, [number, number]> = {
+  left: [-CONNECTOR_LENGTH, 0],
+  right: [CONNECTOR_LENGTH, 0],
   top: [0, -CONNECTOR_LENGTH],
   bottom: [0, CONNECTOR_LENGTH],
 }
@@ -32,7 +32,6 @@ export class Connector {
 
   constructor(
     layer: Container,
-    surrounding: Box,
     label: string,
     origin: ConnectorOrigin,
     public type: ConnectorType,
@@ -40,14 +39,14 @@ export class Connector {
   ) {
     this.connector = layer
       .group()
-      .translate(...origin.getPos(surrounding))
+      .translate(...origin.pos)
       .addClass('connector')
 
-    const endPos = connectorFacingMap[origin.facing]
+    const endPos = connectorDirectionMap[origin.side]
     this.line = this.connector
       .line([[0, 0], endPos])
       .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR })
-    this.end = this.connector.group().transform({ translate: endPos })
+    this.end = this.connector.group().translate(...endPos)
     this.pill = this.end.rect().fill(ISOLATED_COLOR)
     this.text = this.end.text('').font({ size: 18 }).fill('#FFF')
 
@@ -70,6 +69,10 @@ export class Connector {
       .radius(height / 2)
       .center(0, 0)
 
+    return this
+  }
+  move(x: number, y: number) {
+    this.connector.move(x, y)
     return this
   }
 

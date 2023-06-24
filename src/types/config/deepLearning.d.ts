@@ -1,25 +1,17 @@
 import { Box, Element } from "@svgdotjs/svg.js"
 import { ShapeParameter } from "./parameter"
 
-export type ConnectorFacing = 'top' | 'bottom'
+export type ConnectorSide = 'top' | 'bottom' | 'left' | 'right'
 export interface ConnectorOrigin {
-  facing: ConnectorFacing
-  getPos(box: Box): [number, number]
+  side: ConnectorSide
+  pos: [number, number]
 }
 
 export type ConnectorStatus = 'isolated' | 'connected' | 'dragging'
 export type ConnectorType = 'input' | 'output'
 
-export type ConnectorOriginName =
-  | 'topLeft'
-  | 'topRight'
-  | 'topCenter'
-  | 'bottomLeft'
-  | 'bottomRight'
-  | 'bottomCenter'
-
 export interface ConnectorConfig {
-  origin: ConnectorOriginName
+  origin: ConnectorOrigin
   type: ConnectorType
   shape: ShapeParameter
 }
