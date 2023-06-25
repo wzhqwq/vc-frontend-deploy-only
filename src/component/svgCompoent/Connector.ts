@@ -41,8 +41,7 @@ export class Connector {
     this.connector = layer
       .group()
       .addClass('connector')
-      .addClass(`connector-${type}`)
-      .addClass(`connector-${shapeDimension}d`)
+      .addClass(`connector-${type}-${shapeDimension}d`)
 
     const endPos = connectorDirectionMap[side]
     this.line = this.connector
@@ -118,13 +117,17 @@ export class Connector {
   startDragging(e: Event) {
     if (this.connectedConnector) return
     e.stopPropagation()
-    this.connector.addClass('dragging')
+    scene
+      .addClass('connecting-within')
+      .addClass(`start-${this.type}-${this.shapeDimension}d`)
+
+    this.connector.addClass('connecting')
     const { x, y, width, height } = this.end.rbox()
-    new ConnectorDraggingIndicator(
-      [x + width / 2, y + height / 2],
-      this,
-    ).startListen(() => {
-      this.connector.removeClass('dragging')
+    new ConnectorDraggingIndicator([x + width / 2, y + height / 2], this).startListen(() => {
+      scene
+        .removeClass('connecting-within')
+        .removeClass(`start-${this.type}-${this.shapeDimension}d`)
+      this.connector.removeClass('connecting')
       ConnectorDraggingIndicator.currentIndicator = null
     })
   }

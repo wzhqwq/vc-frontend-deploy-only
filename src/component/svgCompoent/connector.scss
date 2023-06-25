@@ -11,12 +11,47 @@
     cursor: not-allowed;
     opacity: 0.5;
   }
-  &.dragging {
+  &.connecting {
     text {
       opacity: 0;
     }
     rect {
       transform: scale(0);
+    }
+  }
+}
+
+.connecting-within {
+  .connector {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  &.start-input {
+    &-1d .connector.connector-output-1d,
+    &-2d .connector.connector-output-2d,
+    &-3d .connector.connector-output-3d,
+    &-4d .connector.connector-output-4d {
+      cursor: copy;
+      opacity: 1;
+      &:hover {
+        rect {
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
+  &.start-output {
+    &-1d .connector.connector-input-1d,
+    &-2d .connector.connector-input-2d,
+    &-3d .connector.connector-input-3d,
+    &-4d .connector.connector-input-4d {
+      cursor: copy;
+      opacity: 1;
+      &:hover {
+        rect {
+          transform: scale(1.2);
+        }
+      }
     }
   }
 }
