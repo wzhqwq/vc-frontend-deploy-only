@@ -19,10 +19,11 @@ const { palette } = joyTheme.vars
 const ISOLATED_COLOR = palette.neutral[500]
 const CONNECTED_COLOR = palette.primary[500]
 
+const connectors = new Map<string, Connector>()
+
 export class Connector {
   private connector: G
   private line: Line
-
   private end: G
   private text: Text | null = null
   private pill: Rect
@@ -32,6 +33,7 @@ export class Connector {
 
   constructor(
     layer: Container,
+    public readonly id: string,
     public readonly side: ConnectorSide,
     public readonly type: ConnectorType,
     public readonly shapeDimension: number,
@@ -100,6 +102,16 @@ export class Connector {
     this.connectedConnector = null
     this.line.stroke({ color: ISOLATED_COLOR })
     this.pill.fill(ISOLATED_COLOR).removeClass('connected')
+    return this
+  }
+  get peer() {
+    return this.connectedConnector
+  }
+  connectById(id: string) {
+    const peer = connectors.get(id)
+    if (!peer) return
+    this.connect(peer)
+    peer.connect(this)
     return this
   }
 

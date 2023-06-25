@@ -29,3 +29,15 @@ export interface DynamicShape {
   shapeValue: VirtualValue[]
   connected: boolean
 }
+
+export interface LayerData<P extends LayerParameters> {
+  id: string
+  name: string
+  parameters: P
+  inputs: ConnectorData[]
+  outputs: ConnectorData[]
+}
+export interface ConnectorData {
+  id: string
+  peer?: string
+}

@@ -6,8 +6,7 @@ export type LayerParameters = Record<string, LayerParameterValue>
 
 export interface LayerParameter {
   key: string
-  type: [LayerParameterType] | [LayerParameterType, LayerParameterType]
-  default: LayerParameterValue
+  type: LayerParameterType
   description: string
   inShape: boolean
 }
