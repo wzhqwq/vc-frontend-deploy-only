@@ -10,7 +10,7 @@ const CONNECTOR_GAP_X = 100
 const CONNECTOR_GAP_Y = 40
 
 export class Layer<P extends LayerParameters = LayerParameters> {
-  private layer: G
+  public readonly layer: G
   private boundary: Rect
   private shape: Shape | null = null
   private text: Text
@@ -32,14 +32,10 @@ export class Layer<P extends LayerParameters = LayerParameters> {
       connected: false,
     }))
 
-    this.connectors = [...config.inputs, ...config.outputs].map(
-      (c) =>
-        new Connector(
-          this.layer,
-          renderConnectorLabel(c.shape, this.inputShapes, this.parameters),
-          c.side,
-          c.type,
-        ),
+    this.connectors = [...config.inputs, ...config.outputs].map((c) =>
+      new Connector(this.layer, c.side, c.type, c.shape.placeholders.length).label(
+        renderConnectorLabel(c.shape, this.inputShapes, this.parameters),
+      ),
     )
 
     this.boundary = this.layer.rect().fill('transparent')

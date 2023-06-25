@@ -16,28 +16,31 @@ const connectorDirectionMap: Record<ConnectorSide, [number, number]> = {
 
 const { palette } = joyTheme.vars
 
-const ISOLATED_COLOR = palette.neutral[800]
+const ISOLATED_COLOR = palette.neutral[500]
 const CONNECTED_COLOR = palette.primary[500]
 
 export class Connector {
-  public connector: G
-  public line: Line
+  private connector: G
+  private line: Line
 
-  public end: G
-  public text: Text
-  public pill: Rect
+  private end: G
+  private text: Text | null = null
+  private pill: Rect
 
-  disabled = false
-  connectedConnector: Connector | null = null
+  private disabled = false
+  private connectedConnector: Connector | null = null
 
   constructor(
     layer: Container,
-    label: string,
     public readonly side: ConnectorSide,
     public readonly type: ConnectorType,
-    public acceptedShape: string[] = [],
+    public readonly shapeDimension: number,
   ) {
-    this.connector = layer.group().addClass('connector')
+    this.connector = layer
+      .group()
+      .addClass('connector')
+      .addClass(`connector-${type}`)
+      .addClass(`connector-${shapeDimension}d`)
 
     const endPos = connectorDirectionMap[side]
     this.line = this.connector
@@ -45,15 +48,16 @@ export class Connector {
       .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR, linecap: 'round' })
     this.end = this.connector.group().translate(...endPos)
     this.pill = this.end.rect().fill(ISOLATED_COLOR)
-    this.text = this.end.text('').font({ size: 18 }).fill('#FFF')
-
-    this.label(label)
 
     this.end.on('mousedown', this.startDragging.bind(this))
+    this.end.on('mouseup', this.dropped.bind(this))
   }
 
-  label(label: string) {
-    this.text.text(label).center(0, 0)
+  label(text: Text) {
+    if (this.text) this.text.remove()
+    this.text = text
+    this.end.add(this.text)
+    this.text.center(0, 0)
 
     const textBBox = this.text.bbox()
     const { width: textWidth, height: textHeight } = textBBox
@@ -87,46 +91,77 @@ export class Connector {
   connect(peer: Connector) {
     if (this.connectedConnector) return
     this.connectedConnector = peer
-    if (this.type == 'input') {
-      this.connector.hide()
-    }
+    this.line.stroke({ color: CONNECTED_COLOR })
+    this.pill.fill(CONNECTED_COLOR).addClass('connected')
     return this
   }
   disconnect() {
     if (!this.connectedConnector) return
     this.connectedConnector = null
-    if (this.type == 'input') {
-      this.connector.show()
-    }
+    this.line.stroke({ color: ISOLATED_COLOR })
+    this.pill.fill(ISOLATED_COLOR).removeClass('connected')
     return this
   }
 
   startDragging(e: Event) {
+    if (this.connectedConnector) return
     e.stopPropagation()
     this.connector.addClass('dragging')
     const { x, y, width, height } = this.end.rbox()
-    const dragging = new DragConnector([x + width / 2, y + height / 2])
-    dragging.startListen(() => {
+    new ConnectorDraggingIndicator(
+      [x + width / 2, y + height / 2],
+      this,
+    ).startListen(() => {
       this.connector.removeClass('dragging')
+      ConnectorDraggingIndicator.currentIndicator = null
     })
+  }
+
+  dropped() {
+    const peer = ConnectorDraggingIndicator.currentIndicator?.starter
+    if (!peer || peer == this) return
+    if (peer.type == this.type) return
+    if (peer.shapeDimension != this.shapeDimension) return
+
+    if (this.disabled) return
+    if (this.connectedConnector) return
+
+    this.connect(peer)
+    peer.connect(this)
+    ConnectorDraggingIndicator.currentIndicator = null
   }
 }
 
-export class DragConnector {
-  startPoint: [number, number]
+export class ConnectorDraggingIndicator {
+  static currentIndicator: ConnectorDraggingIndicator | null = null
   dashedLine: Line
 
-  constructor(startPoint: [number, number]) {
-    this.startPoint = startPoint
+  constructor(private readonly startPoint: [number, number], public readonly starter: Connector) {
     this.dashedLine = scene
       .line([startPoint, startPoint])
       .stroke({ width: LINE_WIDTH, dasharray: '2,8', color: '#888', linecap: 'round' })
   }
 
   startListen(restore: () => void) {
+    ConnectorDraggingIndicator.currentIndicator = this
     const { x: offsetX, y: offsetY } = scene.rbox()
+
     const moveHandler = (e: MouseEvent) => {
-      this.updateLine([e.clientX - offsetX, e.clientY - offsetY])
+      let [x0, y0] = this.startPoint
+      let x1 = e.clientX - offsetX,
+        y1 = e.clientY - offsetY
+      // the line formula: P = P0 + t * (P1 - P0)
+      // the circle around point P1: (x - x1)^2 + (y - y1)^2 = r^2
+      // the intersection: (x0 + t * (x1 - x0) - x1)^2 + (y0 + t * (y1 - y0) - y1)^2 = r^2
+      // equivalent to: (1 - t)^2 * (x1 - x0)^2 + (1 - t)^2 * (y1 - y0)^2 = r^2
+      // equivalent to: (1 - t)^2 * = r^2 / ((x1 - x0)^2 + (y1 - y0)^2)
+      // solve t: t = 1 - sqrt(r^2 / ((x1 - x0)^2 + (y1 - y0)^2))
+      // P = P0 + (1 - sqrt(r^2 / ((x1 - x0)^2 + (y1 - y0)^2))) * (P1 - P0)
+      //   = P1 - sqrt(r^2 / (dx^2 + dy^2)) * (P1 - P0)
+      let dx = x1 - x0,
+        dy = y1 - y0
+      let m = Math.sqrt(16 / (dx ** 2 + dy ** 2))
+      this.updateLine([x1 - m * dx, y1 - m * dy])
     }
     const endHandler = () => {
       window.removeEventListener('mousemove', moveHandler)
