@@ -1,31 +1,31 @@
 import { Box, Element } from "@svgdotjs/svg.js"
-import { ShapeParameter } from "./parameter"
+import { LayerParameters, ShapeParameter } from "./parameter"
 
 export type ConnectorSide = 'top' | 'bottom' | 'left' | 'right'
-export interface ConnectorOrigin {
-  side: ConnectorSide
-  pos: [number, number]
-}
-
 export type ConnectorStatus = 'isolated' | 'connected' | 'dragging'
 export type ConnectorType = 'input' | 'output'
 
-export interface ConnectorConfig {
-  origin: ConnectorOrigin
+export interface ConnectorConfig<P extends LayerParameters> {
   type: ConnectorType
-  shape: ShapeParameter
+  side: ConnectorSide
+  shape: ShapeParameter<P>
 }
-export interface LayerConfig {
+export interface LayerConfig<P extends LayerParameters> {
   name: string
+  displayName?: string
   renderer: (box: Box) => Element
-  connectors: (parameters: Record<string, string>) => ConnectorConfig[]
+  inputs: ConnectorConfig<P>[]
+  outputs: ConnectorConfig<P>[]
+  defaultParameters: P
+  shapeChecker: (inputShapes: DynamicShape[], parameters: P) => string | null
 }
 
 export interface VirtualValue {
   value: number
   virtual: boolean
+  available: boolean
 }
-export interface ShapeCalculatingEnv {
-  inputShape: VirtualValue[]
-  parameters: Record<string, string>
+export interface DynamicShape {
+  shapeValue: VirtualValue[]
+  connected: boolean
 }

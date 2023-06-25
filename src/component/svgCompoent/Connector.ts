@@ -1,6 +1,6 @@
 import { joyTheme } from '@/theme'
-import { ConnectorSide, ConnectorOrigin, ConnectorType } from '@/types/config/deepLearning'
-import { Box, Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
+import { ConnectorSide, ConnectorType } from '@/types/config/deepLearning'
+import { Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
 import { scene } from './scene'
 
 const LINE_WIDTH = 4
@@ -33,19 +33,16 @@ export class Connector {
   constructor(
     layer: Container,
     label: string,
-    origin: ConnectorOrigin,
-    public type: ConnectorType,
+    public readonly side: ConnectorSide,
+    public readonly type: ConnectorType,
     public acceptedShape: string[] = [],
   ) {
-    this.connector = layer
-      .group()
-      .translate(...origin.pos)
-      .addClass('connector')
+    this.connector = layer.group().addClass('connector')
 
-    const endPos = connectorDirectionMap[origin.side]
+    const endPos = connectorDirectionMap[side]
     this.line = this.connector
       .line([[0, 0], endPos])
-      .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR })
+      .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR, linecap: 'round' })
     this.end = this.connector.group().translate(...endPos)
     this.pill = this.end.rect().fill(ISOLATED_COLOR)
     this.text = this.end.text('').font({ size: 18 }).fill('#FFF')
@@ -72,7 +69,7 @@ export class Connector {
     return this
   }
   move(x: number, y: number) {
-    this.connector.move(x, y)
+    this.connector.translate(x, y)
     return this
   }
 
@@ -104,11 +101,14 @@ export class Connector {
     return this
   }
 
-  startDragging() {
+  startDragging(e: Event) {
+    e.stopPropagation()
     this.connector.addClass('dragging')
     const { x, y, width, height } = this.end.rbox()
     const dragging = new DragConnector([x + width / 2, y + height / 2])
-    dragging.startListen()
+    dragging.startListen(() => {
+      this.connector.removeClass('dragging')
+    })
   }
 }
 
@@ -120,18 +120,19 @@ export class DragConnector {
     this.startPoint = startPoint
     this.dashedLine = scene
       .line([startPoint, startPoint])
-      .stroke({ width: LINE_WIDTH, dasharray: '5,5', color: CONNECTED_COLOR })
+      .stroke({ width: LINE_WIDTH, dasharray: '2,8', color: '#888', linecap: 'round' })
   }
 
-  startListen() {
+  startListen(restore: () => void) {
     const { x: offsetX, y: offsetY } = scene.rbox()
     const moveHandler = (e: MouseEvent) => {
       this.updateLine([e.clientX - offsetX, e.clientY - offsetY])
     }
-    const endHandler = (e: MouseEvent) => {
+    const endHandler = () => {
       window.removeEventListener('mousemove', moveHandler)
       window.removeEventListener('mouseup', endHandler)
       this.dispose()
+      restore()
     }
     window.addEventListener('mousemove', moveHandler)
     window.addEventListener('mouseup', endHandler)
