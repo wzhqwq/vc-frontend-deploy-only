@@ -1,7 +1,6 @@
 import { Container, G, Rect, Shape, Text } from '@svgdotjs/svg.js'
 import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearning'
 import { Connector } from './Connector'
-import { renderConnectorLabel } from '@/config/connector'
 import { LayerParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
 
@@ -42,8 +41,8 @@ export class Layer<P extends LayerParameters = LayerParameters> {
           .fill('')
           .map((_, i) => this.id + '-' + i)
     this.connectors = [...config.inputs, ...config.outputs].map((c, i) => {
-      let connector = new Connector(this.layer, ids[i], c.side, c.type, c.shape.placeholders.length)
-      connector.label(renderConnectorLabel(c.shape, this.inputShapes, this.parameters))
+      let connector = new Connector(this.layer, ids[i], c.side, c.type, c.shape)
+      connector.update(this.inputShapes, this.parameters)
       if (c.type == 'input' && data?.inputs[i].peer) {
         connector.connectById(data.inputs[i].peer!)
       }

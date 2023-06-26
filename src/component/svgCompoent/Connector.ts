@@ -1,7 +1,9 @@
 import { joyTheme } from '@/theme'
-import { ConnectorSide, ConnectorType } from '@/types/config/deepLearning'
+import { ConnectorSide, ConnectorType, DynamicShape } from '@/types/config/deepLearning'
 import { Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
 import { scene } from './scene'
+import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
+import { Label } from './Label'
 
 const LINE_WIDTH = 4
 const CONNECTOR_LENGTH = 40
@@ -21,29 +23,32 @@ const CONNECTED_COLOR = palette.primary[500]
 
 const connectors = new Map<string, Connector>()
 
-export class Connector {
+export class Connector<P extends LayerParameters = any> {
   private connector: G
   private line: Line
-  private end: G
-  private text: Text | null = null
+  public readonly end: G
+  public readonly label: Label<P>
   private pill: Rect
 
   private disabled = false
   private connectedConnector: Connector | null = null
+
+  public readonly shapeDimension: number
 
   constructor(
     layer: Container,
     public readonly id: string,
     public readonly side: ConnectorSide,
     public readonly type: ConnectorType,
-    public readonly shapeDimension: number,
+    shape: ShapeParameter<P>,
   ) {
+    this.shapeDimension = shape.placeholders.length
     this.connector = layer
       .group()
       .addClass('connector')
       .addClass(`connector-${side}`)
       .addClass(`connector-${type}`)
-      .addClass(`connector-${type}-${shapeDimension}d`)
+      .addClass(`connector-${type}-${this.shapeDimension}d`)
 
     const endPos = connectorDirectionMap[side]
     this.line = this.connector
@@ -51,18 +56,14 @@ export class Connector {
       .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR, linecap: 'round' })
     this.end = this.connector.group().translate(...endPos)
     this.pill = this.end.rect().fill(ISOLATED_COLOR)
+    this.label = new Label(this.end, shape)
 
     this.end.on('mousedown', this.startDragging.bind(this))
     this.end.on('mouseup', this.dropped.bind(this))
   }
 
-  label(text: Text) {
-    if (this.text) this.text.remove()
-    this.text = text
-    this.end.add(this.text)
-    this.text.center(0, 0)
-
-    const textBBox = this.text.bbox()
+  update(inputs: DynamicShape[], parameters: P) {
+    const textBBox = this.label.update(inputs, parameters).center(0, 0).bbox()
     const { width: textWidth, height: textHeight } = textBBox
     const width = textWidth + CONNECTOR_PADDING[0] * 2,
       height = textHeight + CONNECTOR_PADDING[1] * 2
@@ -91,7 +92,7 @@ export class Connector {
     return this
   }
 
-  connect(peer: Connector) {
+  connect(peer: Connector<any>) {
     if (this.connectedConnector) return
     this.connectedConnector = peer
     this.line.stroke({ color: CONNECTED_COLOR })
