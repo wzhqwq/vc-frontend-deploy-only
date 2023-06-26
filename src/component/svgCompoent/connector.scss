@@ -1,6 +1,9 @@
 .connector {
   user-select: none;
   transition: opacity 0.2s ease-in-out;
+  line {
+    transition: transform 0.2s ease-in-out;
+  }
   text {
     transition: opacity 0.2s ease-in-out;
   }
@@ -11,6 +14,7 @@
     cursor: not-allowed;
     opacity: 0.5;
   }
+  &-input.connected,
   &.connecting {
     text {
       opacity: 0;
@@ -19,6 +23,28 @@
       transform: scale(0);
     }
   }
+  &.connected {
+    &.connector-top line,
+    &.connector-bottom line {
+      transform: scaleY(0);
+    }
+    &.connector-left line,
+    &.connector-right line {
+      transform: scaleX(0);
+    }
+  }
+  &-top {
+    transform-origin: center bottom;
+  }
+  &-bottom {
+    transform-origin: center top;
+  }
+  &-left {
+    transform-origin: right center;
+  }
+  &-right {
+    transform-origin: left center;
+  }
 }
 
 .connecting-within {
@@ -26,31 +52,21 @@
     cursor: not-allowed;
     opacity: 0.5;
   }
-  &.start-input {
-    &-1d .connector.connector-output-1d,
-    &-2d .connector.connector-output-2d,
-    &-3d .connector.connector-output-3d,
-    &-4d .connector.connector-output-4d {
-      cursor: copy;
-      opacity: 1;
-      &:hover {
-        rect {
-          transform: scale(1.2);
-        }
-      }
-    }
-  }
-  &.start-output {
-    &-1d .connector.connector-input-1d,
-    &-2d .connector.connector-input-2d,
-    &-3d .connector.connector-input-3d,
-    &-4d .connector.connector-input-4d {
-      cursor: copy;
-      opacity: 1;
-      &:hover {
-        rect {
-          transform: scale(1.2);
-        }
+  &.start-input-1d .connector.connector-output-1d,
+  &.start-input-2d .connector.connector-output-2d,
+  &.start-input-3d .connector.connector-output-3d,
+  &.start-input-4d .connector.connector-output-4d,
+  &.start-input-5d .connector.connector-output-5d,
+  &.start-output-1d .connector.connector-input-1d,
+  &.start-output-2d .connector.connector-input-2d,
+  &.start-output-3d .connector.connector-input-3d,
+  &.start-output-4d .connector.connector-input-4d,
+  &.start-output-5d .connector.connector-input-5d {
+    cursor: copy;
+    opacity: 1;
+    &:hover {
+      rect {
+        transform: scale(1.2);
       }
     }
   }

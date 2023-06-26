@@ -41,6 +41,8 @@ export class Connector {
     this.connector = layer
       .group()
       .addClass('connector')
+      .addClass(`connector-${side}`)
+      .addClass(`connector-${type}`)
       .addClass(`connector-${type}-${shapeDimension}d`)
 
     const endPos = connectorDirectionMap[side]
@@ -93,14 +95,16 @@ export class Connector {
     if (this.connectedConnector) return
     this.connectedConnector = peer
     this.line.stroke({ color: CONNECTED_COLOR })
-    this.pill.fill(CONNECTED_COLOR).addClass('connected')
+    this.pill.fill(CONNECTED_COLOR)
+    this.connector.addClass('connected')
     return this
   }
   disconnect() {
     if (!this.connectedConnector) return
     this.connectedConnector = null
     this.line.stroke({ color: ISOLATED_COLOR })
-    this.pill.fill(ISOLATED_COLOR).removeClass('connected')
+    this.pill.fill(ISOLATED_COLOR)
+    this.connector.removeClass('connected')
     return this
   }
   get peer() {
@@ -128,14 +132,19 @@ export class Connector {
         .removeClass('connecting-within')
         .removeClass(`start-${this.type}-${this.shapeDimension}d`)
       this.connector.removeClass('connecting')
-      ConnectorDraggingIndicator.currentIndicator = null
     })
   }
 
   dropped() {
+    // 注意该函数会在window上注册的事件之前执行，所以无需处理连接后的善后工作
     const peer = ConnectorDraggingIndicator.currentIndicator?.starter
-    if (!peer || peer == this) return
+    // 必须存在peer，且不是自己
+    if (!peer || peer.id == this.id) return
+    // 不能是同一个层
+    if (peer.id.split('-')[0] == this.id.split('-')[0]) return
+    // 输出对输入
     if (peer.type == this.type) return
+    // 张量维度必须相同
     if (peer.shapeDimension != this.shapeDimension) return
 
     if (this.disabled) return
@@ -143,7 +152,6 @@ export class Connector {
 
     this.connect(peer)
     peer.connect(this)
-    ConnectorDraggingIndicator.currentIndicator = null
   }
 }
 
@@ -165,6 +173,7 @@ export class ConnectorDraggingIndicator {
       let [x0, y0] = this.startPoint
       let x1 = e.clientX - offsetX,
         y1 = e.clientY - offsetY
+      // 需要连接线保持在鼠标周围4px，以下计算新的终点坐标
       // the line formula: P = P0 + t * (P1 - P0)
       // the circle around point P1: (x - x1)^2 + (y - y1)^2 = r^2
       // the intersection: (x0 + t * (x1 - x0) - x1)^2 + (y0 + t * (y1 - y0) - y1)^2 = r^2
@@ -183,6 +192,7 @@ export class ConnectorDraggingIndicator {
       window.removeEventListener('mouseup', endHandler)
       this.dispose()
       restore()
+      ConnectorDraggingIndicator.currentIndicator = null
     }
     window.addEventListener('mousemove', moveHandler)
     window.addEventListener('mouseup', endHandler)

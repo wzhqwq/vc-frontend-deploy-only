@@ -11,6 +11,7 @@ export default function DLEditor() {
   useEffect(() => {
     scene.addTo(containerRef.current!)
     const testLayer = new Layer(scene, exampleLayer)
+    const testLayer2 = new Layer(scene, exampleLayer)
     return () => {
       scene.clear().remove()
     }
