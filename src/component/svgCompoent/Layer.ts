@@ -9,7 +9,7 @@ const MIN_WIDTH = 140
 const CONNECTOR_GAP_X = 100
 const CONNECTOR_GAP_Y = 40
 
-export class Layer<P extends LayerParameters = LayerParameters> {
+export class Layer<P extends LayerParameters = any> {
   public readonly id: string
 
   public readonly layer: G

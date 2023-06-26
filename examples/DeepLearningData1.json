@@ -1,0 +1,36 @@
+[
+  {
+    "id": "5eZV6H0tPILWpDVwilQVw",
+    "name": "Conv2D",
+    "parameters": {
+      "in_channels": 3,
+      "out_channels": 32,
+      "kernel_size": [3, 3],
+      "stride": [1, 1],
+      "padding": [0, 0],
+      "dilation": [1, 1],
+      "groups": 1,
+      "bias": true,
+      "padding_mode": "zeros"
+    },
+    "inputs": [{ "id": "5eZV6H0tPILWpDVwilQVw-0" }],
+    "outputs": [{ "id": "5eZV6H0tPILWpDVwilQVw-1", "peer": "ZZ6NDnVR7PPwQbAMN6oa3-0" }]
+  },
+  {
+    "id": "ZZ6NDnVR7PPwQbAMN6oa3",
+    "name": "Conv2D",
+    "parameters": {
+      "in_channels": 3,
+      "out_channels": 32,
+      "kernel_size": [3, 3],
+      "stride": [1, 1],
+      "padding": [0, 0],
+      "dilation": [1, 1],
+      "groups": 1,
+      "bias": true,
+      "padding_mode": "zeros"
+    },
+    "inputs": [{ "id": "ZZ6NDnVR7PPwQbAMN6oa3-0", "peer": "5eZV6H0tPILWpDVwilQVw-1" }],
+    "outputs": [{ "id": "ZZ6NDnVR7PPwQbAMN6oa3-1" }]
+  }
+]

@@ -2,16 +2,19 @@ import { Layer } from '@/component/svgCompoent/Layer'
 import { scene } from '@/component/svgCompoent/scene'
 import { exampleLayer } from '@/config/layer'
 
-import { Box } from '@mui/joy'
+import { Box, Button } from '@mui/joy'
 import { useEffect, useRef } from 'react'
 
 export default function DLEditor() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const testLayerRef = useRef<Layer>()
+  const testLayer2Ref = useRef<Layer>()
 
   useEffect(() => {
     scene.addTo(containerRef.current!)
-    const testLayer = new Layer(scene, exampleLayer)
-    const testLayer2 = new Layer(scene, exampleLayer)
+    testLayerRef.current = new Layer(scene, exampleLayer)
+    testLayer2Ref.current = new Layer(scene, exampleLayer)
+
     return () => {
       scene.clear().remove()
     }
@@ -27,6 +30,15 @@ export default function DLEditor() {
         }}
         ref={containerRef}
       />
+      <Button
+        onClick={() =>
+          console.log(
+            JSON.stringify([testLayerRef.current?.toJSON(), testLayer2Ref.current?.toJSON()]),
+          )
+        }
+      >
+        保存至控制台
+      </Button>
     </Box>
   )
 }
