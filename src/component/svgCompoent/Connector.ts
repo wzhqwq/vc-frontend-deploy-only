@@ -5,7 +5,7 @@ import { scene } from './scene'
 import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
 
-const LINE_WIDTH = 4
+export const LINE_WIDTH = 4
 const CONNECTOR_LENGTH = 40
 const CONNECTOR_PADDING = [10, 4]
 
@@ -29,6 +29,9 @@ export class Connector<P extends LayerParameters = any> {
   public readonly end: G
   public readonly label: Label<P>
   private pill: Rect
+
+  private x = 0
+  private y = 0
 
   private disabled = false
   private connectedConnector: Connector | null = null
@@ -77,8 +80,16 @@ export class Connector<P extends LayerParameters = any> {
     return this
   }
   move(x: number, y: number) {
-    this.connector.translate(x, y)
+    this.connector.translate(x - this.x, y - this.y)
+    this.x = x
+    this.y = y
     return this
+  }
+  get points() {
+    return [
+      [this.x, this.y],
+      [this.x + connectorDirectionMap[this.side][0], this.y + connectorDirectionMap[this.side][1]],
+    ] as [number, number][]
   }
 
   disable() {
@@ -122,9 +133,7 @@ export class Connector<P extends LayerParameters = any> {
   startDragging(e: Event) {
     if (this.connectedConnector) return
     e.stopPropagation()
-    scene
-      .addClass('connecting-within')
-      .addClass(`start-${this.type}-${this.shapeDimension}d`)
+    scene.addClass('connecting-within').addClass(`start-${this.type}-${this.shapeDimension}d`)
 
     this.connector.addClass('connecting')
     const { x, y, width, height } = this.end.rbox()

@@ -36,6 +36,7 @@ export interface LayerData<P extends LayerParameters> {
   parameters: P
   inputs: ConnectorData[]
   outputs: ConnectorData[]
+  row: number
 }
 export interface ConnectorData {
   id: string

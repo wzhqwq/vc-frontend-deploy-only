@@ -11,13 +11,17 @@ const CONNECTOR_GAP_Y = 40
 
 export class Layer<P extends LayerParameters = any> {
   public readonly id: string
+  public row: number
 
   public readonly layer: G
   private boundary: Rect
   private shape: Shape | null = null
   private text: Text
 
-  private connectors: Connector[]
+  private x = 0
+  private y = 0
+
+  public readonly connectors: Connector[]
 
   private inputShapes: DynamicShape[] = []
   private parameters: P
@@ -26,6 +30,7 @@ export class Layer<P extends LayerParameters = any> {
     this.layer = parent.group().addClass('layer')
     this.parameters = data?.parameters ?? config.defaultParameters
     this.id = data?.id ?? nanoid()
+    this.row = data?.row ?? 0
     this.inputShapes = config.inputs.map((c) => ({
       shapeValue: new Array(c.shape.placeholders.length).fill({
         value: 0,
@@ -77,6 +82,7 @@ export class Layer<P extends LayerParameters = any> {
       parameters: this.parameters,
       inputs: inputConnectors.map((c) => ({ id: c.id, peer: c.peer?.id })),
       outputs: outputConnectors.map((c) => ({ id: c.id, peer: c.peer?.id })),
+      row: this.row,
     }
   }
 
@@ -124,6 +130,15 @@ export class Layer<P extends LayerParameters = any> {
     this.text.front()
   }
 
+  move(x: number, y: number, animated = false) {
+    ;(animated ? this.layer.animate() : this.layer).transform({
+      translate: [x - this.x, y - this.y],
+    })
+    this.x = x
+    this.y = y
+    return this
+  }
+
   private startDrag = () => {
     this.layer.addClass('dragging')
     window.addEventListener('mousemove', this.drag)
@@ -136,5 +151,7 @@ export class Layer<P extends LayerParameters = any> {
   }
   private drag = (e: MouseEvent) => {
     this.layer.translate(e.movementX, e.movementY)
+    this.x += e.movementX
+    this.y += e.movementY
   }
 }
