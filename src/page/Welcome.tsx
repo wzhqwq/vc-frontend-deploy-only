@@ -1,4 +1,4 @@
-import { ChevronRightRounded } from '@mui/icons-material'
+import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import { Badge, Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { memo } from 'react'
 
