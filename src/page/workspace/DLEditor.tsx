@@ -1,3 +1,4 @@
+import { SimpleErrorBoundary } from '@/component/basic/errorBoundaries'
 import { Layer } from '@/component/svgCompoent/Layer'
 import { scene } from '@/component/svgCompoent/scene'
 import { exampleLayer } from '@/config/layer'
@@ -5,7 +6,7 @@ import { exampleLayer } from '@/config/layer'
 import { Box, Button } from '@mui/joy'
 import { useEffect, useRef } from 'react'
 
-export default function DLEditor() {
+export function Component() {
   const containerRef = useRef<HTMLDivElement>(null)
   const testLayerRef = useRef<Layer>()
   const testLayer2Ref = useRef<Layer>()
@@ -42,3 +43,6 @@ export default function DLEditor() {
     </Box>
   )
 }
+Component.displayName = 'DLEditor'
+
+export const ErrorBoundary = SimpleErrorBoundary
