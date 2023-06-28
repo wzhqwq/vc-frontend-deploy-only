@@ -46,7 +46,7 @@ export class Layer<P extends LayerParameters = any> {
           .fill('')
           .map((_, i) => this.id + '-' + i)
     this.connectors = [...config.inputs, ...config.outputs].map((c, i) => {
-      let connector = new Connector(this.layer, ids[i], c.side, c.type, c.shape)
+      let connector = new Connector(this, ids[i], c.side, c.type, c.shape)
       connector.update(this.inputShapes, this.parameters)
       if (c.type == 'input' && data?.inputs[i].peer) {
         connector.connectById(data.inputs[i].peer!)
@@ -84,6 +84,9 @@ export class Layer<P extends LayerParameters = any> {
       outputs: outputConnectors.map((c) => ({ id: c.id, peer: c.peer?.id })),
       row: this.row,
     }
+  }
+  public has(connector: Connector) {
+    return connector.id.startsWith(this.id)
   }
 
   private doConnectorLayout() {

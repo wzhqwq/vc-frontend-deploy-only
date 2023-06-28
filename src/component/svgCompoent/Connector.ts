@@ -4,6 +4,7 @@ import { Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
 import { scene } from './scene'
 import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
+import { Layer } from './Layer'
 
 export const LINE_WIDTH = 4
 const CONNECTOR_LENGTH = 40
@@ -39,14 +40,14 @@ export class Connector<P extends LayerParameters = any> {
   public readonly shapeDimension: number
 
   constructor(
-    layer: Container,
+    public layer: Layer<P>,
     public readonly id: string,
     public readonly side: ConnectorSide,
     public readonly type: ConnectorType,
     shape: ShapeParameter<P>,
   ) {
     this.shapeDimension = shape.placeholders.length
-    this.connector = layer
+    this.connector = layer.layer
       .group()
       .addClass('connector')
       .addClass(`connector-${side}`)
