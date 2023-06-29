@@ -3,6 +3,8 @@ import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearnin
 import { Connector } from './Connector'
 import { LayerParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
+import { Layout } from './Layout'
+import { Scene } from './scene'
 
 const MIN_HEIGHT = 80
 const MIN_WIDTH = 140
@@ -13,10 +15,13 @@ export class Layer<P extends LayerParameters = any> {
   public readonly id: string
   public row: number
 
-  public readonly layer: G
+  public readonly el: G
   private boundary: Rect
   private shape: Shape | null = null
   private text: Text
+
+  public layout: Layout | null = null
+  public scene: Scene | null = null
 
   private x = 0
   private y = 0
@@ -26,8 +31,8 @@ export class Layer<P extends LayerParameters = any> {
   private inputShapes: DynamicShape[] = []
   private parameters: P
 
-  constructor(parent: Container, private config: LayerConfig<P>, data?: LayerData<P>) {
-    this.layer = parent.group().addClass('layer')
+  constructor(private config: LayerConfig<P>, data?: LayerData<P>) {
+    this.el = new G().addClass('layer')
     this.parameters = data?.parameters ?? config.defaultParameters
     this.id = data?.id ?? nanoid()
     this.row = data?.row ?? 0
@@ -54,10 +59,10 @@ export class Layer<P extends LayerParameters = any> {
       return connector
     })
 
-    this.boundary = this.layer.rect().fill('transparent')
+    this.boundary = this.el.rect().fill('transparent')
     this.doConnectorLayout()
 
-    this.text = this.layer
+    this.text = this.el
       .text(this.config.displayName ?? this.config.name)
       .font({ size: 18 })
       .fill('#FFF')
@@ -70,7 +75,7 @@ export class Layer<P extends LayerParameters = any> {
     this.drag = this.drag.bind(this)
     this.endDrag = this.endDrag.bind(this)
 
-    this.layer.on('mousedown', this.startDrag)
+    this.el.on('mousedown', this.startDrag)
   }
 
   public toJSON(): LayerData<P> {
@@ -129,12 +134,12 @@ export class Layer<P extends LayerParameters = any> {
       this.shape.remove()
     }
     this.shape = this.config.renderer(this.boundary.bbox())
-    this.layer.add(this.shape)
+    this.el.add(this.shape)
     this.text.front()
   }
 
   move(x: number, y: number, animated = false) {
-    ;(animated ? this.layer.animate() : this.layer).transform({
+    ;(animated ? this.el.animate() : this.el).transform({
       translate: [x - this.x, y - this.y],
     })
     this.x = x
@@ -143,17 +148,17 @@ export class Layer<P extends LayerParameters = any> {
   }
 
   private startDrag = () => {
-    this.layer.addClass('dragging')
+    this.el.addClass('dragging')
     window.addEventListener('mousemove', this.drag)
     window.addEventListener('mouseup', this.endDrag)
   }
   private endDrag = () => {
-    this.layer.removeClass('dragging')
+    this.el.removeClass('dragging')
     window.removeEventListener('mousemove', this.drag)
     window.removeEventListener('mouseup', this.endDrag)
   }
   private drag = (e: MouseEvent) => {
-    this.layer.translate(e.movementX, e.movementY)
+    this.el.translate(e.movementX, e.movementY)
     this.x += e.movementX
     this.y += e.movementY
   }

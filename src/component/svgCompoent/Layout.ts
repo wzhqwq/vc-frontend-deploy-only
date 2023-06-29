@@ -5,17 +5,23 @@ import { Layer } from './Layer'
 const ITEM_GAP = 10
 
 export class Layout {
+  public readonly el: G
+
   private rows: LayoutRow[] = []
-  private container: G
+  private x: number = 0
 
   public animated: boolean = false
 
   constructor(layers: Layer[]) {
-    this.container = new G()
+    this.el = new G()
     let maxRow = layers.reduce((max, l) => Math.max(max, l.row), 0)
-    this.rows = new Array(maxRow + 1)
-      .fill(null)
-      .map((_, i) => new LayoutRow(layers.filter((l) => l.row == i)))
+    this.rows = new Array(maxRow + 1).fill(null).map(
+      (_, i) =>
+        new LayoutRow(
+          this,
+          layers.filter((l) => l.row == i),
+        ),
+    )
     this.rows.reduce((ends, row, i) => {
       // 为所有连出线的连接器创建端点布局
       let endsToLink = (row.items as LayoutLayer[])
@@ -48,7 +54,7 @@ export class Layout {
   removeLayer(layer: Layer) {
     let row = this.rows[layer.row]
     if (!row) return
-    row.removeLayer(layer)
+    row.detachLayer(layer)
 
     let lowestUnaffectedRow = layer.row
     // TODO: remove lines
@@ -58,7 +64,7 @@ export class Layout {
   attachLayer(layer: Layer, row: number) {
     if (row > this.rows.length) return
     if (row == this.rows.length) {
-      this.rows.push(new LayoutRow())
+      this.rows.push(new LayoutRow(this))
     }
     this.rows[row].attachLayer(layer)
 
@@ -69,23 +75,30 @@ export class Layout {
 
   private updateLayout(startRow: number) {
     let rowsToUpdate = this.rows.slice(startRow)
-    rowsToUpdate.reduce((y, r) => r.layout(y) + ITEM_GAP, 100)
+    rowsToUpdate.reduce((y, r) => r.layout(y) + ITEM_GAP, 0)
     // TODO: optimize the connections
   }
 }
 
 export class LayoutRow {
-  public items: LayoutItem[]
-  private row: Rect
+  public readonly items: LayoutItem[]
+  public readonly el: G
+
   public x: number = 0
   public y: number = 0
 
-  constructor(layers: Layer[] = []) {
-    this.row = new Rect().radius(5)
+  constructor(layout: Layout, layers: Layer[] = []) {
+    this.el = new G().addClass('layout-row')
+    this.el.rect().radius(5).addClass('indicator')
     this.items = layers.map((l) => new LayoutLayer(this, l))
+    layers.forEach((l) => {
+      l.layout = layout
+    })
+    layout.el.add(this.el)
   }
 
   layout(y: number) {
+    // this.el.translate(0, y - this.y)
     this.y = y
 
     let width = this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP
@@ -95,7 +108,7 @@ export class LayoutRow {
       return offset + i.width + ITEM_GAP
     }, -width / 2)
 
-    this.row.size(width, height).move(this.x, this.y)
+    this.el.size(width, height).move(this.x, this.y)
     return y + height
   }
 
@@ -114,16 +127,17 @@ export class LayoutRow {
       this.items.splice(index, 1)
     }
   }
-  removeLayer(layer: Layer) {
+  detachLayer(layer: Layer) {
     let index = this.items.findIndex((i) => i instanceof LayoutLayer && i.layer == layer)
     if (index >= 0) {
+      ;(this.items[index] as LayoutLayer).dispose()
       this.items.splice(index, 1)
     }
   }
 }
 
 export class LayoutItem {
-  public x: number = 0
+  protected x: number = 0
 
   constructor(public readonly row: LayoutRow, public width: number, public height = 0) {}
 
@@ -137,15 +151,21 @@ export class LayoutLayer extends LayoutItem {
   public outputs: LayoutEndPoint[]
 
   constructor(row: LayoutRow, public readonly layer: Layer) {
-    super(row, layer.layer.bbox().width)
+    const box = layer.el.bbox()
+    super(row, box.width, box.height)
+    row.el.add(layer.el)
     let endPoints = layer.connectors.map((c) => new LayoutEndPoint(row, c))
     this.inputs = endPoints.filter(({ c }) => c.type == 'input')
     this.outputs = endPoints.filter(({ c }) => c.type == 'output')
   }
   updateX(x: number) {
-    this.outputs.forEach((o) => o.updateX(x + o.offset))
-    this.layer.move(this.row.x + x, this.row.y)
+    this.outputs.forEach((o) => o.updateX(x))
+    this.layer.move(x, 0)
     this.x = x
+  }
+  dispose() {
+    this.layer.move(0, 0)
+    this.layer.el.remove()
   }
 }
 
@@ -153,7 +173,7 @@ export class LayoutLine extends LayoutItem {
   public previousLine: LayoutLine | null = null
   public nextLine: LayoutLine | null = null
 
-  constructor(row: LayoutRow, public endOffset: [number, number] | null = null) {
+  constructor(row: LayoutRow) {
     super(row, LINE_WIDTH)
   }
 
@@ -161,23 +181,39 @@ export class LayoutLine extends LayoutItem {
     this.nextLine = line
     line.previousLine = this
   }
+  get points(): [number, number][] {
+    return [
+      [this.x, this.row.y],
+      [this.x, this.row.y + this.height],
+    ]
+  }
 }
 
 export class LayoutEndPoint extends LayoutLine {
-  public offset: number
+  private offsetX: number = 0
   public targetRow: number
-  public farthestLine: LayoutLine
+  public farthestLine: LayoutLine | null = null
+  public end: [number, number]
 
   constructor(row: LayoutRow, public c: Connector) {
     let [end, vertex] = c.points
-    super(row, end)
-    this.offset = vertex[0]
+    super(row)
+    this.offsetX = vertex[0]
+    this.end = end
     this.targetRow = c.peer?.layer.row ?? -1
-    this.farthestLine = this
   }
 
   linkDown(line: LayoutLine) {
-    this.farthestLine.linkDown(line)
+    this.farthestLine?.linkDown(line)
     this.farthestLine = line
+  }
+  get points(): [number, number][] {
+    let basicPoints = [
+      [this.x + this.offsetX, this.row.y],
+      [this.x + this.offsetX, this.row.y + this.height],
+    ] as [number, number][]
+    let endPoint = [this.x + this.end[0], this.row.y + this.end[1]] as [number, number]
+
+    return this.c.type == 'input' ? [...basicPoints, endPoint] : [endPoint, ...basicPoints]
   }
 }

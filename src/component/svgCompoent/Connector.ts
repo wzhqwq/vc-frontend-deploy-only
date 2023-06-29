@@ -1,10 +1,10 @@
 import { joyTheme } from '@/theme'
 import { ConnectorSide, ConnectorType, DynamicShape } from '@/types/config/deepLearning'
 import { Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
-import { scene } from './scene'
 import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
 import { Layer } from './Layer'
+import { Scene } from './scene'
 
 export const LINE_WIDTH = 4
 const CONNECTOR_LENGTH = 40
@@ -22,10 +22,10 @@ const { palette } = joyTheme.vars
 const ISOLATED_COLOR = palette.neutral[500]
 const CONNECTED_COLOR = palette.primary[500]
 
-const connectors = new Map<string, Connector>()
-
 export class Connector<P extends LayerParameters = any> {
-  private connector: G
+  public static readonly connectors = new Map<string, Connector>()
+
+  private el: G
   private line: Line
   public readonly end: G
   public readonly label: Label<P>
@@ -40,14 +40,14 @@ export class Connector<P extends LayerParameters = any> {
   public readonly shapeDimension: number
 
   constructor(
-    public layer: Layer<P>,
+    public readonly layer: Layer<P>,
     public readonly id: string,
     public readonly side: ConnectorSide,
     public readonly type: ConnectorType,
     shape: ShapeParameter<P>,
   ) {
     this.shapeDimension = shape.placeholders.length
-    this.connector = layer.layer
+    this.el = layer.el
       .group()
       .addClass('connector')
       .addClass(`connector-${side}`)
@@ -55,15 +55,17 @@ export class Connector<P extends LayerParameters = any> {
       .addClass(`connector-${type}-${this.shapeDimension}d`)
 
     const endPos = connectorDirectionMap[side]
-    this.line = this.connector
+    this.line = this.el
       .line([[0, 0], endPos])
       .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR, linecap: 'round' })
-    this.end = this.connector.group().translate(...endPos)
+    this.end = this.el.group().translate(...endPos)
     this.pill = this.end.rect().fill(ISOLATED_COLOR)
     this.label = new Label(this.end, shape)
 
     this.end.on('mousedown', this.startDragging.bind(this))
     this.end.on('mouseup', this.dropped.bind(this))
+
+    Connector.connectors.set(id, this)
   }
 
   update(inputs: DynamicShape[], parameters: P) {
@@ -81,7 +83,7 @@ export class Connector<P extends LayerParameters = any> {
     return this
   }
   move(x: number, y: number) {
-    this.connector.translate(x - this.x, y - this.y)
+    this.el.translate(x - this.x, y - this.y)
     this.x = x
     this.y = y
     return this
@@ -95,12 +97,12 @@ export class Connector<P extends LayerParameters = any> {
 
   disable() {
     this.disabled = true
-    this.connector.addClass('disabled')
+    this.el.addClass('disabled')
     return this
   }
   enable() {
     this.disabled = false
-    this.connector.removeClass('disabled')
+    this.el.removeClass('disabled')
     return this
   }
 
@@ -109,7 +111,7 @@ export class Connector<P extends LayerParameters = any> {
     this.connectedConnector = peer
     this.line.stroke({ color: CONNECTED_COLOR })
     this.pill.fill(CONNECTED_COLOR)
-    this.connector.addClass('connected')
+    this.el.addClass('connected')
     return this
   }
   disconnect() {
@@ -117,14 +119,14 @@ export class Connector<P extends LayerParameters = any> {
     this.connectedConnector = null
     this.line.stroke({ color: ISOLATED_COLOR })
     this.pill.fill(ISOLATED_COLOR)
-    this.connector.removeClass('connected')
+    this.el.removeClass('connected')
     return this
   }
   get peer() {
     return this.connectedConnector
   }
   connectById(id: string) {
-    const peer = connectors.get(id)
+    const peer = Connector.connectors.get(id)
     if (!peer) return
     this.connect(peer)
     peer.connect(this)
@@ -132,17 +134,18 @@ export class Connector<P extends LayerParameters = any> {
   }
 
   startDragging(e: Event) {
-    if (this.connectedConnector) return
+    const scene = this.layer.scene
+    if (this.connectedConnector || !scene) return
     e.stopPropagation()
-    scene.addClass('connecting-within').addClass(`start-${this.type}-${this.shapeDimension}d`)
+    scene.el.addClass('connecting-within').addClass(`start-${this.type}-${this.shapeDimension}d`)
 
-    this.connector.addClass('connecting')
+    this.el.addClass('connecting')
     const { x, y, width, height } = this.end.rbox()
-    new ConnectorDraggingIndicator([x + width / 2, y + height / 2], this).startListen(() => {
-      scene
+    new ConnectorDraggingIndicator([x + width / 2, y + height / 2], this, scene).startListen(() => {
+      scene.el
         .removeClass('connecting-within')
         .removeClass(`start-${this.type}-${this.shapeDimension}d`)
-      this.connector.removeClass('connecting')
+      this.el.removeClass('connecting')
     })
   }
 
@@ -170,15 +173,19 @@ export class ConnectorDraggingIndicator {
   static currentIndicator: ConnectorDraggingIndicator | null = null
   dashedLine: Line
 
-  constructor(private readonly startPoint: [number, number], public readonly starter: Connector) {
-    this.dashedLine = scene
+  constructor(
+    private readonly startPoint: [number, number],
+    public readonly starter: Connector,
+    private readonly scene: Scene,
+  ) {
+    this.dashedLine = scene.el
       .line([startPoint, startPoint])
       .stroke({ width: LINE_WIDTH, dasharray: '2,8', color: '#888', linecap: 'round' })
   }
 
   startListen(restore: () => void) {
     ConnectorDraggingIndicator.currentIndicator = this
-    const { x: offsetX, y: offsetY } = scene.rbox()
+    const { x: offsetX, y: offsetY } = this.scene.el.rbox()
 
     const moveHandler = (e: MouseEvent) => {
       let [x0, y0] = this.startPoint
