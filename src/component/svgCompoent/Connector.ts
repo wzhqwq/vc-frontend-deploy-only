@@ -4,7 +4,7 @@ import { Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
 import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
 import { Layer } from './Layer'
-import { Scene } from './scene'
+import { Scene } from './Scene'
 
 export const LINE_WIDTH = 4
 const CONNECTOR_LENGTH = 40

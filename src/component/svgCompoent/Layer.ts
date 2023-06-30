@@ -4,7 +4,7 @@ import { Connector } from './Connector'
 import { LayerParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
 import { Layout } from './Layout'
-import { Scene } from './scene'
+import { Scene } from './Scene'
 
 const MIN_HEIGHT = 80
 const MIN_WIDTH = 140

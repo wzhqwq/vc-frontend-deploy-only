@@ -1,6 +1,6 @@
 import { SimpleErrorBoundary } from '@/component/basic/errorBoundaries'
 import { Layer } from '@/component/svgCompoent/Layer'
-import { Scene } from '@/component/svgCompoent/scene'
+import { Scene } from '@/component/svgCompoent/Scene'
 import { exampleLayer } from '@/config/layer'
 
 import { Box, Button } from '@mui/joy'
