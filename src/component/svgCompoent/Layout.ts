@@ -151,8 +151,7 @@ export class LayoutLayer extends LayoutItem {
   public outputs: LayoutEndPoint[]
 
   constructor(row: LayoutRow, public readonly layer: Layer) {
-    const box = layer.el.bbox()
-    super(row, box.width, box.height)
+    super(row, layer.width, layer.height)
     row.el.add(layer.el)
     let endPoints = layer.connectors.map((c) => new LayoutEndPoint(row, c))
     this.inputs = endPoints.filter(({ c }) => c.type == 'input')
@@ -160,7 +159,7 @@ export class LayoutLayer extends LayoutItem {
   }
   updateX(x: number) {
     this.outputs.forEach((o) => o.updateX(x))
-    this.layer.move(x, 0)
+    this.layer.move(x, ROW_PAD)
     this.x = x
   }
   dispose() {

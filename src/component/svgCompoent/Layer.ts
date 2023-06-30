@@ -1,6 +1,6 @@
-import { Container, G, Rect, Shape, Text } from '@svgdotjs/svg.js'
+import { G, Rect, Shape, Text } from '@svgdotjs/svg.js'
 import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearning'
-import { Connector } from './Connector'
+import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
 import { LayerParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
 import { Layout } from './Layout'
@@ -8,15 +8,28 @@ import { Scene } from './Scene'
 
 const MIN_HEIGHT = 80
 const MIN_WIDTH = 140
-const CONNECTOR_GAP_X = 100
-const CONNECTOR_GAP_Y = 40
+const CONNECTOR_GAP_X = 20
+const CONNECTOR_GAP_Y = 10
+
+const getWidthOfHorizontalConnectors = (connectors: Connector[]) =>
+  connectors.length
+    ? connectors.reduce((acc, c) => acc + c.pillWidth + CONNECTOR_GAP_X, 0) - CONNECTOR_GAP_X
+    : 0
+const getHeightOfHorizontalConnectors = (connectors: Connector[]) =>
+  connectors.length ? CONNECTOR_H_HEIGHT : 0
+const getWidthOfVerticalConnectors = (connectors: Connector[]) =>
+  connectors.length ? Math.max(...connectors.map((c) => c.pillWidth)) + CONNECTOR_LENGTH : 0
+const getHeightOfVerticalConnectors = (connectors: Connector[]) =>
+  connectors.length
+    ? connectors.length * CONNECTOR_PILL_HEIGHT + (connectors.length - 1) * CONNECTOR_GAP_Y
+    : 0
 
 export class Layer<P extends LayerParameters = any> {
   public readonly id: string
   public row: number
 
   public readonly el: G
-  private boundary: Rect
+  public readonly boundary: Rect
   private shape: Shape | null = null
   private text: Text
 
@@ -25,6 +38,10 @@ export class Layer<P extends LayerParameters = any> {
 
   private x = 0
   private y = 0
+  private offsetX = 0
+  private offsetY = 0
+  public width = 0
+  public height = 0
 
   public readonly connectors: Connector[]
 
@@ -60,15 +77,12 @@ export class Layer<P extends LayerParameters = any> {
     })
 
     this.boundary = this.el.rect().fill('transparent')
-    this.doConnectorLayout()
-
     this.text = this.el
       .text(this.config.displayName ?? this.config.name)
       .font({ size: 18 })
       .fill('#FFF')
-    this.text.center(0, 0)
-    this.boundary.center(0, 0)
 
+    this.updateLayout()
     this.renderShape()
 
     this.startDrag = this.startDrag.bind(this)
@@ -94,39 +108,43 @@ export class Layer<P extends LayerParameters = any> {
     return connector.id.startsWith(this.id)
   }
 
-  private doConnectorLayout() {
-    let topConnectors = this.connectors.filter((c) => c.side == 'top')
-    let bottomConnectors = this.connectors.filter((c) => c.side == 'bottom')
-    let leftConnectors = this.connectors.filter((c) => c.side == 'left')
-    let rightConnectors = this.connectors.filter((c) => c.side == 'right')
+  private updateLayout() {
+    const topConnectors = this.connectors.filter((c) => c.side == 'top')
+    const bottomConnectors = this.connectors.filter((c) => c.side == 'bottom')
+    const leftConnectors = this.connectors.filter((c) => c.side == 'left')
+    const rightConnectors = this.connectors.filter((c) => c.side == 'right')
 
-    let width = Math.max(
-      MIN_WIDTH,
-      Math.max(topConnectors.length, bottomConnectors.length) * CONNECTOR_GAP_X,
-    )
-    let height = Math.max(
-      MIN_HEIGHT,
-      Math.max(leftConnectors.length, rightConnectors.length) * CONNECTOR_GAP_Y,
-    )
+    const topWidth = getWidthOfHorizontalConnectors(topConnectors)
+    const bottomWidth = getWidthOfHorizontalConnectors(bottomConnectors)
+    const leftHeight = getHeightOfVerticalConnectors(leftConnectors)
+    const rightHeight = getHeightOfVerticalConnectors(rightConnectors)
+    const innerWidth = Math.max(MIN_WIDTH, Math.max(topWidth, bottomWidth))
+    const innerHeight = Math.max(MIN_HEIGHT, Math.max(leftHeight, rightHeight))
 
-    let topGap = width / topConnectors.length
-    topConnectors.forEach((c, i) => {
-      c.move(topGap * (i + 0.5) - width / 2, -height / 2)
-    })
-    let bottomGap = width / bottomConnectors.length
-    bottomConnectors.forEach((c, i) => {
-      c.move(bottomGap * (i + 0.5) - width / 2, height / 2)
-    })
-    let leftGap = height / leftConnectors.length
-    leftConnectors.forEach((c, i) => {
-      c.move(-width / 2, leftGap * (i + 0.5) - height / 2)
-    })
-    let rightGap = height / rightConnectors.length
-    rightConnectors.forEach((c, i) => {
-      c.move(width / 2, rightGap * (i + 0.5) - height / 2)
-    })
+    this.offsetX = getWidthOfVerticalConnectors(leftConnectors)
+    this.offsetY = getHeightOfHorizontalConnectors(topConnectors)
+    this.width = innerWidth + this.offsetX + getWidthOfVerticalConnectors(rightConnectors)
+    this.height = innerHeight + this.offsetY + getHeightOfHorizontalConnectors(bottomConnectors)
 
-    this.boundary.size(width, height)
+    topConnectors.reduce((x, c) => {
+      c.move(x, 0)
+      return x + c.pillWidth + CONNECTOR_GAP_X
+    }, (innerWidth - topWidth) / 2 + (topConnectors.at(0)?.pillWidth ?? 0) / 2)
+    bottomConnectors.reduce((x, c) => {
+      c.move(x, innerHeight)
+      return x + c.pillWidth + CONNECTOR_GAP_X
+    }, (innerWidth - bottomWidth) / 2 + (bottomConnectors.at(0)?.pillWidth ?? 0) / 2)
+    leftConnectors.reduce((y, c) => {
+      c.move(0, y)
+      return y + CONNECTOR_PILL_HEIGHT + CONNECTOR_GAP_Y
+    }, (innerHeight - leftHeight) / 2 + CONNECTOR_PILL_HEIGHT / 2)
+    rightConnectors.reduce((y, c) => {
+      c.move(innerWidth, y)
+      return y + CONNECTOR_PILL_HEIGHT + CONNECTOR_GAP_Y
+    }, (innerHeight - rightHeight) / 2 + CONNECTOR_PILL_HEIGHT / 2)
+
+    this.boundary.size(innerWidth, innerHeight)
+    this.text.center(innerWidth / 2, innerHeight / 2)
   }
 
   private renderShape() {
@@ -139,8 +157,10 @@ export class Layer<P extends LayerParameters = any> {
   }
 
   move(x: number, y: number, animated = false) {
+    x += this.offsetX
+    y += this.offsetY
     ;(animated ? this.el.animate() : this.el).transform({
-      translate: [x - this.x, y - this.y],
+      relative: [x, y],
     })
     this.x = x
     this.y = y

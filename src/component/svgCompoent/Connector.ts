@@ -1,14 +1,16 @@
 import { joyTheme } from '@/theme'
 import { ConnectorSide, ConnectorType, DynamicShape } from '@/types/config/deepLearning'
-import { Container, G, Line, Rect, Text } from '@svgdotjs/svg.js'
+import { G, Line, Rect } from '@svgdotjs/svg.js'
 import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
 import { Layer } from './Layer'
 import { Scene } from './Scene'
 
 export const LINE_WIDTH = 4
-const CONNECTOR_LENGTH = 40
-const CONNECTOR_PADDING = [10, 4]
+export const CONNECTOR_LENGTH = 40
+const CONNECTOR_PILL_PAD_X = 10
+export const CONNECTOR_PILL_HEIGHT = 30
+export const CONNECTOR_H_HEIGHT = CONNECTOR_LENGTH + CONNECTOR_PILL_HEIGHT / 2
 
 const connectorDirectionMap: Record<ConnectorSide, [number, number]> = {
   left: [-CONNECTOR_LENGTH, 0],
@@ -33,6 +35,8 @@ export class Connector<P extends LayerParameters = any> {
 
   private x = 0
   private y = 0
+  private endPos: [number, number]
+  public pillWidth = 0
 
   private disabled = false
   private connectedConnector: Connector | null = null
@@ -54,12 +58,15 @@ export class Connector<P extends LayerParameters = any> {
       .addClass(`connector-${type}`)
       .addClass(`connector-${type}-${this.shapeDimension}d`)
 
-    const endPos = connectorDirectionMap[side]
+    this.endPos = connectorDirectionMap[side]
     this.line = this.el
-      .line([[0, 0], endPos])
+      .line([[0, 0], this.endPos])
       .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR, linecap: 'round' })
-    this.end = this.el.group().translate(...endPos)
-    this.pill = this.end.rect().fill(ISOLATED_COLOR)
+    this.end = this.el.group()
+    this.pill = this.end
+      .rect()
+      .fill(ISOLATED_COLOR)
+      .radius(CONNECTOR_PILL_HEIGHT / 2)
     this.label = new Label(this.end, shape)
 
     this.end.on('mousedown', this.startDragging.bind(this))
@@ -69,21 +76,22 @@ export class Connector<P extends LayerParameters = any> {
   }
 
   update(inputs: DynamicShape[], parameters: P) {
-    const textBBox = this.label.update(inputs, parameters).center(0, 0).bbox()
-    const { width: textWidth, height: textHeight } = textBBox
-    const width = textWidth + CONNECTOR_PADDING[0] * 2,
-      height = textHeight + CONNECTOR_PADDING[1] * 2
+    const textBBox = this.label
+      .update(inputs, parameters)
+      .center(...this.endPos)
+      .bbox()
+    const { width: textWidth } = textBBox
+    this.pillWidth = textWidth + CONNECTOR_PILL_PAD_X * 2
 
     this.pill
-      .width(width)
-      .height(height)
-      .radius(height / 2)
-      .center(0, 0)
+      .width(this.pillWidth)
+      .height(CONNECTOR_PILL_HEIGHT)
+      .center(...this.endPos)
 
     return this
   }
   move(x: number, y: number) {
-    this.el.translate(x - this.x, y - this.y)
+    this.el.attr({ transform: `translate(${x}, ${y})` })
     this.x = x
     this.y = y
     return this
@@ -91,7 +99,7 @@ export class Connector<P extends LayerParameters = any> {
   get points() {
     return [
       [this.x, this.y],
-      [this.x + connectorDirectionMap[this.side][0], this.y + connectorDirectionMap[this.side][1]],
+      [this.x + this.endPos[0], this.y + this.endPos[1]],
     ] as [number, number][]
   }
 
