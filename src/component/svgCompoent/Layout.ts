@@ -2,6 +2,8 @@ import { G, Rect } from '@svgdotjs/svg.js'
 import { Connector, LINE_WIDTH } from './Connector'
 import { Layer } from './Layer'
 import { joyTheme } from '@/theme'
+import { ConnectionPath } from './ConnectionPath'
+import { nanoid } from 'nanoid'
 
 const ITEM_GAP = 10
 const ROW_PAD = 10
@@ -14,6 +16,7 @@ export class Layout {
 
   private rows: LayoutRow[] = []
   private x: number = 0
+  private dirtyPaths = new Set<string>()
 
   public animated: boolean = false
 
@@ -28,10 +31,15 @@ export class Layout {
         ),
     )
     this.rows.reduce((ends, row, i) => {
-      // 为所有连出线的连接器创建端点布局
+      // 从所有连出线的连接器获得端点布局
       let endsToLink = (row.items as LayoutLayer[])
         .map((layer) => layer.outputs.filter(({ targetRow }) => targetRow > i))
         .flat()
+      endsToLink.forEach((l) => {
+        l.path = new ConnectionPath(l)
+        this.dirtyPaths.add(l.path.id)
+        this.el.add(l.path.el)
+      })
       // 从未连接的连线中寻找连接到本行的层的连线，与对应连接器的连线布局进行连接
       ends
         .filter(({ targetRow }) => targetRow == i)
@@ -42,7 +50,7 @@ export class Layout {
           if (!targetLayer) return
           const targetInput = (targetLayer as LayoutLayer).inputs.find((i) => i.c == target)
           if (!targetInput) return
-          line.linkDown(line)
+          line.linkDown(targetInput)
         })
       // 为剩下未连接的连线创建中间连线布局，并进行连接
       let linesToHold = ends.filter(({ targetRow }) => targetRow != i)
@@ -82,6 +90,7 @@ export class Layout {
     let rowsToUpdate = this.rows.slice(startRow)
     rowsToUpdate.reduce((y, r) => r.layout(y) + ITEM_GAP, 0)
     // TODO: optimize the connections
+    this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
   }
 }
 
@@ -174,8 +183,10 @@ export class LayoutLayer extends LayoutItem {
 }
 
 export class LayoutLine extends LayoutItem {
-  public previousLine: LayoutLine | null = null
+  // public previousLine: LayoutLine | null = null
   public nextLine: LayoutLine | null = null
+  public path: ConnectionPath | null = null
+  public id = nanoid()
 
   constructor(row: LayoutRow) {
     super(row, LINE_WIDTH)
@@ -183,7 +194,8 @@ export class LayoutLine extends LayoutItem {
 
   linkDown(line: LayoutLine) {
     this.nextLine = line
-    line.previousLine = this
+    // line.previousLine = this
+    line.path = this.path
   }
   get points(): [number, number][] {
     return [
@@ -208,10 +220,14 @@ export class LayoutEndPoint extends LayoutLine {
   }
 
   linkDown(line: LayoutLine) {
+    if (!this.nextLine) {
+      super.linkDown(line)
+    }
     this.farthestLine?.linkDown(line)
     this.farthestLine = line
   }
   get points(): [number, number][] {
+    console.log(this.id, this.offsetX, this.end)
     let basicPoints = [
       [this.x + this.offsetX, this.row.offsetY],
       [this.x + this.offsetX, this.row.offsetY + this.height],
