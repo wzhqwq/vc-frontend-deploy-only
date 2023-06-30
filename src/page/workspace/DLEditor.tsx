@@ -4,11 +4,11 @@ import { Scene } from '@/component/svgCompoent/Scene'
 import { exampleLayer } from '@/config/layer'
 
 import { Box, Button } from '@mui/joy'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export function Component() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const sceneRef = useRef<Scene>()
+  const [scene, setScene] = useState<Scene>()
 
   useEffect(() => {
     const test1 = new Layer(exampleLayer, {
@@ -66,10 +66,13 @@ export function Component() {
       row: 2,
     })
 
-    sceneRef.current = new Scene([test1, test2, test3], containerRef.current!)
+    setScene(new Scene([test1, test2, test3], containerRef.current!))
 
     return () => {
-      sceneRef.current?.dispose()
+      setScene(s => {
+        s?.dispose()
+        return undefined
+      })
     }
   }, [])
 
@@ -81,9 +84,16 @@ export function Component() {
           height: '100%',
           overflow: 'hidden',
         }}
-        ref={containerRef}
-      />
-      <Button onClick={() => console.log(JSON.stringify(sceneRef.current?.toJSON()))}>
+      >
+        <div
+          ref={containerRef}
+          draggable
+          onDragStart={scene?.dragStart}
+          onDragOver={scene?.dragOver}
+          onDragEnd={scene?.dragEnd}
+        />
+      </Box>
+      <Button onClick={() => console.log(JSON.stringify(scene?.toJSON()))}>
         保存至控制台
       </Button>
     </Box>

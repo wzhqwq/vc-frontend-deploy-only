@@ -1,8 +1,13 @@
 import { G, Rect } from '@svgdotjs/svg.js'
 import { Connector, LINE_WIDTH } from './Connector'
 import { Layer } from './Layer'
+import { joyTheme } from '@/theme'
 
 const ITEM_GAP = 10
+const ROW_PAD = 10
+const ROW_RADIUS = 20
+
+const DROP_ZONE_COLOR = joyTheme.vars.palette.primary[100]
 
 export class Layout {
   public readonly el: G
@@ -83,13 +88,13 @@ export class Layout {
 export class LayoutRow {
   public readonly items: LayoutItem[]
   public readonly el: G
+  private dropZone: Rect
 
-  public x: number = 0
-  public y: number = 0
+  public offsetY: number = 0
 
   constructor(layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
-    this.el.rect().radius(5).addClass('indicator')
+    this.dropZone = this.el.rect().radius(ROW_RADIUS).fill(DROP_ZONE_COLOR).addClass('drop-zone')
     this.items = layers.map((l) => new LayoutLayer(this, l))
     layers.forEach((l) => {
       l.layout = layout
@@ -98,8 +103,7 @@ export class LayoutRow {
   }
 
   layout(y: number) {
-    // this.el.translate(0, y - this.y)
-    this.y = y
+    this.offsetY = y + ROW_PAD
 
     let width = this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP
     let height = this.items.reduce((a, b) => Math.max(a, b.height), 0)
@@ -108,8 +112,9 @@ export class LayoutRow {
       return offset + i.width + ITEM_GAP
     }, -width / 2)
 
-    this.el.size(width, height).move(this.x, this.y)
-    return y + height
+    this.el.transform({ relativeY: y })
+    this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).x(-width / 2 - ROW_PAD)
+    return y + height + ROW_PAD * 2
   }
 
   attachItem(item: LayoutItem) {
@@ -182,8 +187,8 @@ export class LayoutLine extends LayoutItem {
   }
   get points(): [number, number][] {
     return [
-      [this.x, this.row.y],
-      [this.x, this.row.y + this.height],
+      [this.x, this.row.offsetY],
+      [this.x, this.row.offsetY + this.height],
     ]
   }
 }
@@ -208,10 +213,10 @@ export class LayoutEndPoint extends LayoutLine {
   }
   get points(): [number, number][] {
     let basicPoints = [
-      [this.x + this.offsetX, this.row.y],
-      [this.x + this.offsetX, this.row.y + this.height],
+      [this.x + this.offsetX, this.row.offsetY],
+      [this.x + this.offsetX, this.row.offsetY + this.height],
     ] as [number, number][]
-    let endPoint = [this.x + this.end[0], this.row.y + this.end[1]] as [number, number]
+    let endPoint = [this.x + this.end[0], this.row.offsetY + this.end[1]] as [number, number]
 
     return this.c.type == 'input' ? [...basicPoints, endPoint] : [endPoint, ...basicPoints]
   }

@@ -1,4 +1,4 @@
-import { G, Rect, Shape, Text } from '@svgdotjs/svg.js'
+import { Element, G, Rect, Shape, Text } from '@svgdotjs/svg.js'
 import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearning'
 import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
 import { LayerParameters } from '@/types/config/parameter'
@@ -30,7 +30,7 @@ export class Layer<P extends LayerParameters = any> {
 
   public readonly el: G
   public readonly boundary: Rect
-  private shape: Shape | null = null
+  private shape: Element | null = null
   private text: Text
 
   public layout: Layout | null = null
@@ -80,16 +80,11 @@ export class Layer<P extends LayerParameters = any> {
     this.text = this.el
       .text(this.config.displayName ?? this.config.name)
       .font({ size: 18 })
-      .fill('#FFF')
+      .fill(this.config.color == 'dark' ? '#FFF' : '#000')
 
     this.updateLayout()
-    this.renderShape()
 
-    this.startDrag = this.startDrag.bind(this)
-    this.drag = this.drag.bind(this)
-    this.endDrag = this.endDrag.bind(this)
-
-    this.el.on('mousedown', this.startDrag)
+    this.el.on('mousedown', this.mouseDown.bind(this))
   }
 
   public toJSON(): LayerData<P> {
@@ -145,6 +140,7 @@ export class Layer<P extends LayerParameters = any> {
 
     this.boundary.size(innerWidth, innerHeight)
     this.text.center(innerWidth / 2, innerHeight / 2)
+    this.renderShape()
   }
 
   private renderShape() {
@@ -167,19 +163,8 @@ export class Layer<P extends LayerParameters = any> {
     return this
   }
 
-  private startDrag = () => {
+  private mouseDown() {
     this.el.addClass('dragging')
-    window.addEventListener('mousemove', this.drag)
-    window.addEventListener('mouseup', this.endDrag)
-  }
-  private endDrag = () => {
-    this.el.removeClass('dragging')
-    window.removeEventListener('mousemove', this.drag)
-    window.removeEventListener('mouseup', this.endDrag)
-  }
-  private drag = (e: MouseEvent) => {
-    this.el.translate(e.movementX, e.movementY)
-    this.x += e.movementX
-    this.y += e.movementY
+    this.scene?.setPossibleDraggingLayer(this)
   }
 }

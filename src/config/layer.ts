@@ -60,15 +60,15 @@ const generate2DKernelOutputShapeFn =
 const renderSimpleRect = (box: Box) => {
   return new Rect()
     .size(box.w, box.h)
-    .translate(box.x, box.y)
+    .move(box.x, box.y)
     .radius(10)
     .fill(joyTheme.vars.palette.primary[700])
 }
 
 export const exampleLayer: LayerConfig<Conv2DParameters> = {
   name: 'Conv2D',
-  displayName: 'Conv2D',
   renderer: renderSimpleRect,
+  color: 'dark',
   inputs: [
     {
       type: 'input',

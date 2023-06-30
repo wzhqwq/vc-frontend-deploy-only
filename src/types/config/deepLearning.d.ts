@@ -18,6 +18,7 @@ export interface LayerConfig<P extends LayerParameters> {
   outputs: ConnectorConfig<P>[]
   defaultParameters: P
   shapeChecker: (inputShapes: DynamicShape[], parameters: P) => string | null
+  color: 'dark' | 'light'
 }
 
 export interface VirtualValue {
