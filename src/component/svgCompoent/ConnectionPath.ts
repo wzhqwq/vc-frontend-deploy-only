@@ -4,7 +4,7 @@ import { Path } from '@svgdotjs/svg.js'
 import { joyTheme } from '@/theme'
 import { LINE_WIDTH } from './Connector'
 
-const STROKE_ATTR = { color: joyTheme.vars.palette.primary[50], width: LINE_WIDTH, linejoin: 'round' }
+const STROKE_ATTR = { color: joyTheme.vars.palette.primary[400], width: LINE_WIDTH, linejoin: 'round' }
 
 export class ConnectionPath {
   public static readonly paths = new Map<string, ConnectionPath>()

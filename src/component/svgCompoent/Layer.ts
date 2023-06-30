@@ -36,10 +36,10 @@ export class Layer<P extends LayerParameters = any> {
   public layout: Layout | null = null
   public scene: Scene | null = null
 
-  private x = 0
-  private y = 0
   private offsetX = 0
   private offsetY = 0
+  public x = 0
+  public y = 0
   public width = 0
   public height = 0
 

@@ -1,9 +1,8 @@
 import { G, Rect } from '@svgdotjs/svg.js'
-import { Connector, LINE_WIDTH } from './Connector'
+import { Connector, ConnectorPoints, LINE_WIDTH } from './Connector'
 import { Layer } from './Layer'
 import { joyTheme } from '@/theme'
 import { ConnectionPath } from './ConnectionPath'
-import { nanoid } from 'nanoid'
 
 const ITEM_GAP = 10
 const ROW_PAD = 10
@@ -39,6 +38,7 @@ export class Layout {
         l.path = new ConnectionPath(l)
         this.dirtyPaths.add(l.path.id)
         this.el.add(l.path.el)
+        l.path.el.back()
       })
       // 从未连接的连线中寻找连接到本行的层的连线，与对应连接器的连线布局进行连接
       ends
@@ -98,13 +98,13 @@ export class LayoutRow {
   public readonly items: LayoutItem[]
   public readonly el: G
   private dropZone: Rect
-
-  public offsetY: number = 0
+  private lines: LayoutLine[]
 
   constructor(layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
     this.dropZone = this.el.rect().radius(ROW_RADIUS).fill(DROP_ZONE_COLOR).addClass('drop-zone')
     this.items = layers.map((l) => new LayoutLayer(this, l))
+    this.lines = this.items.flatMap((i) => i.lines)
     layers.forEach((l) => {
       l.layout = layout
     })
@@ -112,33 +112,43 @@ export class LayoutRow {
   }
 
   layout(y: number) {
-    this.offsetY = y + ROW_PAD
-
-    let width = this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP
-    let height = this.items.reduce((a, b) => Math.max(a, b.height), 0)
+    let width = Math.max(
+      100,
+      this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP,
+    )
+    let height = Math.max(
+      100,
+      this.items.reduce((a, b) => Math.max(a, b.height), 0),
+    )
     this.items.reduce((offset, i) => {
-      i.updateX(offset)
+      i.update(offset, y + ROW_PAD)
       return offset + i.width + ITEM_GAP
     }, -width / 2)
+    this.lines.forEach(l => l.horizontalY = y + height + ITEM_GAP)
 
-    this.el.transform({ relativeY: y })
     this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).x(-width / 2 - ROW_PAD)
     return y + height + ROW_PAD * 2
   }
 
   attachItem(item: LayoutItem) {
     this.items.push(item)
+    this.lines.push(...item.lines)
   }
   attachItems(items: LayoutItem[]) {
     this.items.push(...items)
+    this.lines.push(...items.flatMap((i) => i.lines))
   }
   attachLayer(layer: Layer) {
-    this.items.push(new LayoutLayer(this, layer))
+    this.attachItem(new LayoutLayer(this, layer))
   }
-  removeItem(item: LayoutItem) {
-    let index = this.items.indexOf(item)
-    if (index >= 0) {
-      this.items.splice(index, 1)
+  removeLine(item: LayoutLine) {
+    let itemIndex = this.items.indexOf(item)
+    if (itemIndex >= 0) {
+      this.items.splice(itemIndex, 1)
+    }
+    let lineIndex = this.lines.indexOf(item)
+    if (lineIndex >= 0) {
+      this.lines.splice(lineIndex, 1)
     }
   }
   detachLayer(layer: Layer) {
@@ -151,12 +161,20 @@ export class LayoutRow {
 }
 
 export class LayoutItem {
-  protected x: number = 0
+  protected _x: number = 0
+  protected _y: number = 0
 
   constructor(public readonly row: LayoutRow, public width: number, public height = 0) {}
 
-  updateX(x: number) {
-    this.x = x
+  update(x: number, y: number) {
+    this._x = x
+    this._y = y
+  }
+  get x() {
+    return this._x
+  }
+  get lines() {
+    return [] as LayoutLine[]
   }
 }
 
@@ -171,14 +189,18 @@ export class LayoutLayer extends LayoutItem {
     this.inputs = endPoints.filter(({ c }) => c.type == 'input')
     this.outputs = endPoints.filter(({ c }) => c.type == 'output')
   }
-  updateX(x: number) {
-    this.outputs.forEach((o) => o.updateX(x))
-    this.layer.move(x, ROW_PAD)
-    this.x = x
+  update(x: number, y: number) {
+    super.update(x, y)
+    this.layer.move(x, y)
+    this.inputs.forEach((o) => o.update(this.layer.x, this.layer.y))
+    this.outputs.forEach((o) => o.update(this.layer.x, this.layer.y))
   }
   dispose() {
     this.layer.move(0, 0)
     this.layer.el.remove()
+  }
+  get lines() {
+    return this.outputs
   }
 }
 
@@ -186,7 +208,8 @@ export class LayoutLine extends LayoutItem {
   // public previousLine: LayoutLine | null = null
   public nextLine: LayoutLine | null = null
   public path: ConnectionPath | null = null
-  public id = nanoid()
+  // public id = nanoid()
+  public horizontalY: number = 0
 
   constructor(row: LayoutRow) {
     super(row, LINE_WIDTH)
@@ -198,24 +221,26 @@ export class LayoutLine extends LayoutItem {
     line.path = this.path
   }
   get points(): [number, number][] {
-    return [
-      [this.x, this.row.offsetY],
-      [this.x, this.row.offsetY + this.height],
-    ]
+    if (this.nextLine) {
+      return [
+        [this._x, this.horizontalY],
+        [this.nextLine.x, this.horizontalY],
+      ]
+    } else {
+      return [[this._x, this.horizontalY]]
+    }
+  }
+  get lines() {
+    return [this]
   }
 }
 
 export class LayoutEndPoint extends LayoutLine {
-  private offsetX: number = 0
   public targetRow: number
   public farthestLine: LayoutLine | null = null
-  public end: [number, number]
 
   constructor(row: LayoutRow, public c: Connector) {
-    let [end, vertex] = c.points
     super(row)
-    this.offsetX = vertex[0]
-    this.end = end
     this.targetRow = c.peer?.layer.row ?? -1
   }
 
@@ -227,13 +252,23 @@ export class LayoutEndPoint extends LayoutLine {
     this.farthestLine = line
   }
   get points(): [number, number][] {
-    console.log(this.id, this.offsetX, this.end)
-    let basicPoints = [
-      [this.x + this.offsetX, this.row.offsetY],
-      [this.x + this.offsetX, this.row.offsetY + this.height],
-    ] as [number, number][]
-    let endPoint = [this.x + this.end[0], this.row.offsetY + this.end[1]] as [number, number]
-
-    return this.c.type == 'input' ? [...basicPoints, endPoint] : [endPoint, ...basicPoints]
+    let connectorPoints = this.c.points.map<[number, number]>(([x, y]) => [
+      this._x + x,
+      this._y + y,
+    ])
+    if (this.nextLine) {
+      // is output
+      return [
+        ...connectorPoints,
+        [connectorPoints[1][0], this.horizontalY],
+        [this.nextLine.x, this.horizontalY],
+      ]
+    } else {
+      // is input
+      return connectorPoints.reverse()
+    }
+  }
+  get x() {
+    return this._x + this.c.points[1][0]
   }
 }

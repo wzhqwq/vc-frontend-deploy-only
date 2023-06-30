@@ -2,13 +2,15 @@
   .drop-zone {
     filter: opacity(0);
   }
+  &.drag-over {
+    .drop-zone {
+      filter: opacity(1);
+    }
+  }
 }
 
 .layer-dragging {
   .drop-zone {
     filter: opacity(0.5);
-    &.drag-over {
-      filter: opacity(1);
-    }
   }
 }

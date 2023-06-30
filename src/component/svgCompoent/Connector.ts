@@ -6,6 +6,8 @@ import { Label } from './Label'
 import { Layer } from './Layer'
 import { Scene } from './Scene'
 
+export type ConnectorPoints = [endPos: [number, number], cornerPos: [number, number]]
+
 export const LINE_WIDTH = 4
 export const CONNECTOR_LENGTH = 40
 const CONNECTOR_PILL_PAD_X = 10
@@ -100,7 +102,7 @@ export class Connector<P extends LayerParameters = any> {
     return [
       [this.x, this.y],
       [this.x + this.endPos[0], this.y + this.endPos[1]],
-    ] as [number, number][]
+    ] as ConnectorPoints
   }
 
   disable() {
