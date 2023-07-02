@@ -103,10 +103,6 @@ export class Layout {
     if (row == this.rows.length) {
       this.rows.push(new LayoutRow(row, this))
     }
-    if (insert) {
-      this.rows.splice(row, 0, new LayoutRow(row, this))
-      this.rows.slice(row + 1).forEach((r) => r.index++)
-    }
     const oldRow = this.rows.at(layer.row)
     if (!oldRow) return
     const layout = oldRow.detachLayer(layer)
@@ -115,6 +111,10 @@ export class Layout {
       this.rows.splice(layer.row, 1)
       this.rows.slice(layer.row).forEach((r) => r.index--)
       if (layer.row < row) row--
+    }
+    if (insert) {
+      this.rows.splice(row, 0, new LayoutRow(row, this))
+      this.rows.slice(row + 1).forEach((r) => r.index++)
     }
 
     layer.row = row
@@ -172,7 +172,7 @@ export class LayoutRow {
   private dropZone: Rect
   private insertLine: Rect
 
-  constructor(public index: number, public layout: Layout, layers: Layer[] = []) {
+  constructor(public _index: number, public layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
     this.dropZone = this.el
       .rect()
@@ -248,6 +248,15 @@ export class LayoutRow {
       let layout = this.items.splice(index, 1)[0] as LayoutLayer
       return layout.reset()
     }
+  }
+  public set index(index: number) {
+    this.items
+      .filter((i): i is LayoutLayer => i instanceof LayoutLayer)
+      .forEach((i) => (i.layer.row = index))
+    this._index = index
+  }
+  public get index() {
+    return this._index
   }
 }
 
