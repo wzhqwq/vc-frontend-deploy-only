@@ -8,12 +8,12 @@ const ITEM_GAP = 10
 const ROW_PAD = 10
 const ROW_RADIUS = 20
 
-const DROP_ZONE_COLOR = joyTheme.vars.palette.primary[100]
+const DROP_ZONE_COLOR = joyTheme.vars.palette.primary[500]
 
 export class Layout {
   public readonly el: G
 
-  private rows: LayoutRow[] = []
+  public readonly rows: LayoutRow[] = []
   private x: number = 0
   private dirtyPaths = new Set<string>()
 
@@ -74,10 +74,13 @@ export class Layout {
     this.updateLayout(lowestUnaffectedRow)
   }
 
-  attachLayer(layer: Layer, row: number) {
+  attachLayer(layer: Layer, row: number, insert: boolean) {
     if (row > this.rows.length) return
     if (row == this.rows.length) {
       this.rows.push(new LayoutRow(this))
+    }
+    if (insert) {
+      this.rows.splice(row, 0, new LayoutRow(this))
     }
     this.rows[row].attachLayer(layer)
 
@@ -94,21 +97,73 @@ export class Layout {
   }
 }
 
+const getRowDragEnterHandler = (self: Rect, className: string) => (e: Event) => {
+  if (
+    (e as DragEvent).dataTransfer?.types.includes('layer') &&
+    (e.target as SVGElement).classList.contains(className)
+  )
+    self.front().addClass('drag-over')
+}
+const getRowDragLeaveHandler = (self: Rect, className: string) => (e: Event) => {
+  if (
+    (e as DragEvent).dataTransfer?.types.includes('layer') &&
+    (e.target as SVGElement).classList.contains(className)
+  )
+    self.back().removeClass('drag-over')
+}
+const rowDragOverHandler = (e: Event) => {
+  if ((e as DragEvent).dataTransfer?.types.includes('layer')) e.preventDefault()
+}
+const getRowDropHandler =
+  (self: Rect, layout: Layout, row: LayoutRow, insert: boolean) => (e: Event) => {
+    if (!(e as DragEvent).dataTransfer?.types.includes('layer')) return
+    self.back().removeClass('drag-over')
+    let rowIndex = layout.rows.indexOf(row)
+    let layerId = (e as DragEvent).dataTransfer?.getData('layer')
+    if (!layerId) return
+    let layer = Layer.layers.get(layerId)
+    if (!layer) return
+    if (layer.row == rowIndex) return
+    layout.removeLayer(layer)
+    layout.attachLayer(layer, rowIndex, insert)
+  }
 export class LayoutRow {
   public readonly items: LayoutItem[]
   public readonly el: G
   private dropZone: Rect
+  private insertLine: Rect
   private lines: LayoutLine[]
 
   constructor(layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
-    this.dropZone = this.el.rect().radius(ROW_RADIUS).fill(DROP_ZONE_COLOR).addClass('drop-zone')
+    this.dropZone = this.el
+      .rect()
+      .radius(ROW_RADIUS)
+      .stroke({ color: DROP_ZONE_COLOR, width: 2, dasharray: '5,5' })
+      .fill('transparent')
+      .addClass('drop-zone')
+    this.insertLine = this.el
+      .rect()
+      .radius(ITEM_GAP / 6)
+      .fill(DROP_ZONE_COLOR)
+      .stroke({ color: 'transparent', width: ITEM_GAP / 3 })
+      .addClass('insert-line')
+
     this.items = layers.map((l) => new LayoutLayer(this, l))
     this.lines = this.items.flatMap((i) => i.lines)
     layers.forEach((l) => {
       l.layout = layout
     })
     layout.el.add(this.el)
+
+    this.dropZone.on('dragenter', getRowDragEnterHandler(this.dropZone, 'drop-zone'))
+    this.dropZone.on('dragleave', getRowDragLeaveHandler(this.dropZone, 'drop-zone'))
+    this.dropZone.on('dragover', rowDragOverHandler)
+    this.dropZone.on('drop', getRowDropHandler(this.dropZone, layout, this, false))
+    this.insertLine.on('dragenter', getRowDragEnterHandler(this.insertLine, 'insert-line'))
+    this.insertLine.on('dragleave', getRowDragLeaveHandler(this.insertLine, 'insert-line'))
+    this.insertLine.on('dragover', rowDragOverHandler)
+    this.insertLine.on('drop', getRowDropHandler(this.insertLine, layout, this, true))
   }
 
   layout(y: number) {
@@ -124,9 +179,12 @@ export class LayoutRow {
       i.update(offset, y + ROW_PAD)
       return offset + i.width + ITEM_GAP
     }, -width / 2)
-    this.lines.forEach(l => l.horizontalY = y + height + ITEM_GAP)
+    this.lines.forEach((l) => (l.horizontalY = y + height + ITEM_GAP))
 
-    this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).x(-width / 2 - ROW_PAD)
+    this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).move(-width / 2 - ROW_PAD, y)
+    this.insertLine
+      .size(width + ROW_PAD * 2, ITEM_GAP / 3)
+      .move(-width / 2 - ROW_PAD, y + height + ROW_PAD * 2 + ITEM_GAP / 3)
     return y + height + ROW_PAD * 2
   }
 

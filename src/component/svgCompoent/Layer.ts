@@ -1,4 +1,4 @@
-import { Element, G, Rect, Shape, Text } from '@svgdotjs/svg.js'
+import { Element, G, Rect, SVG, Shape, Text } from '@svgdotjs/svg.js'
 import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearning'
 import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
 import { LayerParameters } from '@/types/config/parameter'
@@ -10,6 +10,8 @@ const MIN_HEIGHT = 80
 const MIN_WIDTH = 140
 const CONNECTOR_GAP_X = 20
 const CONNECTOR_GAP_Y = 10
+const SMALL_LAYER_WIDTH = 100
+const SMALL_LAYER_HEIGHT = 60
 
 const getWidthOfHorizontalConnectors = (connectors: Connector[]) =>
   connectors.length
@@ -25,8 +27,10 @@ const getHeightOfVerticalConnectors = (connectors: Connector[]) =>
     : 0
 
 export class Layer<P extends LayerParameters = any> {
+  public static readonly layers = new Map<string, Layer>()
   public readonly id: string
   public row: number
+  public readonly src: string
 
   public readonly el: G
   public readonly boundary: Rect
@@ -62,6 +66,19 @@ export class Layer<P extends LayerParameters = any> {
       connected: false,
     }))
 
+    this.boundary = this.el.rect().fill('transparent')
+    this.text = this.el
+      .text(this.config.displayName ?? this.config.name)
+      .font({ size: 18 })
+      .fill(this.config.color == 'dark' ? '#FFF' : '#000')
+    // 先生成一个小型预览图，用于拖拽
+    this.boundary.size(SMALL_LAYER_WIDTH, SMALL_LAYER_HEIGHT)
+    this.text.center(SMALL_LAYER_WIDTH / 2, SMALL_LAYER_HEIGHT / 2)
+    this.renderShape()
+    this.src =
+      'data:image/svg+xml;base64,' +
+      btoa(SVG().size(SMALL_LAYER_WIDTH, SMALL_LAYER_HEIGHT).add(this.el.clone()).svg())
+
     let ids = data
       ? [...data.inputs, ...data.outputs].map((c) => c.id)
       : new Array(config.inputs.length + config.outputs.length)
@@ -76,15 +93,14 @@ export class Layer<P extends LayerParameters = any> {
       return connector
     })
 
-    this.boundary = this.el.rect().fill('transparent')
-    this.text = this.el
-      .text(this.config.displayName ?? this.config.name)
-      .font({ size: 18 })
-      .fill(this.config.color == 'dark' ? '#FFF' : '#000')
-
     this.updateLayout()
 
-    this.el.on('mousedown', this.mouseDown.bind(this))
+    this.el.on('mousedown', () => {
+      this.el.addClass('dragging')
+      this.scene?.setPossibleDraggingLayer(this)
+    })
+
+    Layer.layers.set(this.id, this)
   }
 
   public toJSON(): LayerData<P> {
@@ -163,8 +179,9 @@ export class Layer<P extends LayerParameters = any> {
     return this
   }
 
-  private mouseDown() {
-    this.el.addClass('dragging')
-    this.scene?.setPossibleDraggingLayer(this)
+  public dispose() {
+    this.el.remove()
+    // this.connectors.forEach((c) => c.dispose())
+    Layer.layers.delete(this.id)
   }
 }

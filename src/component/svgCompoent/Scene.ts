@@ -6,7 +6,7 @@ import { Layout } from './Layout'
 export class Scene {
   public readonly el = SVG().size(1000, 1000).addClass('scene')
   public readonly layout: Layout
-  private possibleDraggingLayer: Layer | null = null
+  private activeLayer: Layer | null = null
 
   constructor(private layers: Layer[], parent: HTMLElement) {
     this.layout = new Layout(layers)
@@ -18,7 +18,7 @@ export class Scene {
     this.el.addTo(parent)
 
     this.dragStart = this.dragStart.bind(this)
-    this.dragOver = this.dragOver.bind(this)
+    this.dragEnter = this.dragEnter.bind(this)
     this.dragEnd = this.dragEnd.bind(this)
     this.dragLeave = this.dragLeave.bind(this)
   }
@@ -33,26 +33,30 @@ export class Scene {
   }
 
   public setPossibleDraggingLayer(layer: Layer | null) {
-    this.possibleDraggingLayer = layer
+    this.activeLayer = layer
   }
 
   public dragStart(e: React.DragEvent<HTMLDivElement>) {
-    if (this.possibleDraggingLayer) {
-      // this.layout.removeLayer(this.possibleDraggingLayer)
-        
-      // e.dataTransfer!.setDragImage(img, 0, 0)
+    if (this.activeLayer) {
+      let img = new Image()
+      img.src = this.activeLayer.src
+      e.dataTransfer!.setDragImage(img, 0, 0)
+      e.dataTransfer!.setData('layer', this.activeLayer.id)
+      e.dataTransfer!.effectAllowed = 'move'
     } else {
       e.preventDefault()
     }
   }
-  public dragOver(e: React.DragEvent<HTMLDivElement>) {
+  public dragEnter(e: React.DragEvent<HTMLDivElement>) {
+    if (!e.dataTransfer?.types.includes('layer')) return
     this.el.addClass('layer-dragging')
   }
   public dragEnd(e: React.DragEvent<HTMLDivElement>) {
     this.el.removeClass('layer-dragging')
+    this.activeLayer = null
   }
   public dragLeave(e: React.DragEvent<HTMLDivElement>) {
-    this.el.removeClass('layer-dragging')
+    // this.el.removeClass('layer-dragging')
+    // console.log('leave--')
   }
-  public drop(e: DragEvent) {}
 }

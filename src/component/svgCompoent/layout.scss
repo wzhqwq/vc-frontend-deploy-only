@@ -1,9 +1,13 @@
 .layout-row {
   .drop-zone {
     filter: opacity(0);
+    &.drag-over {
+      filter: opacity(1);
+    }
   }
-  &.drag-over {
-    .drop-zone {
+  .insert-line {
+    filter: opacity(0);
+    &.drag-over {
       filter: opacity(1);
     }
   }
@@ -11,6 +15,6 @@
 
 .layer-dragging {
   .drop-zone {
-    filter: opacity(0.5);
+    filter: opacity(0.3);
   }
 }

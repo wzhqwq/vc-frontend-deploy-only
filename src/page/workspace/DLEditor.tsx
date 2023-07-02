@@ -89,8 +89,9 @@ export function Component() {
           ref={containerRef}
           draggable
           onDragStart={scene?.dragStart}
-          onDragOver={scene?.dragOver}
           onDragEnd={scene?.dragEnd}
+          onDragEnter={scene?.dragEnter}
+          onDragLeave={scene?.dragLeave}
         />
       </Box>
       <Button onClick={() => console.log(JSON.stringify(scene?.toJSON()))}>
