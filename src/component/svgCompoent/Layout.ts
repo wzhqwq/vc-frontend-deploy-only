@@ -37,12 +37,7 @@ export class Layout {
       let endsToLink = (row.items as LayoutLayer[])
         .map((layer) => layer.outputs.filter(({ targetRow }) => targetRow > i))
         .flat()
-      endsToLink.forEach((l) => {
-        l.path = new ConnectionPath(l)
-        this.dirtyPaths.add(l.path.id)
-        this.el.add(l.path.el)
-        l.path.el.back()
-      })
+      endsToLink.forEach((l) => this.addPath((l.path = new ConnectionPath(l))))
       // 从未连接的连线中寻找连接到本行的层的连线，与对应连接器的连线布局进行连接
       ends
         .filter(({ targetRow }) => targetRow == i)
@@ -90,10 +85,9 @@ export class Layout {
       this.rows.splice(row, 0, new LayoutRow(row, this))
       this.rows.slice(row + 1).forEach((r) => r.index++)
     }
+
     layer.row = row
     let layout = this.rows[row].attachLayer(layer)
-
-    // TODO: add lines
     this.updateLayout(layout.upperRow)
   }
 
@@ -120,11 +114,7 @@ export class Layout {
     layer.row = row
     layout.row = this.rows[row]
     this.rows[row].attachItem(layout)
-    layout.resume().forEach((p) => {
-      this.dirtyPaths.add(p.id)
-      this.el.add(p.el)
-      p.el.back()
-    })
+    layout.resume().forEach((p) => this.addPath(p))
 
     this.updateLayout(layout.upperRow)
   }
@@ -135,6 +125,11 @@ export class Layout {
     // TODO: optimize the connections
     this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
     this.dirtyPaths.clear()
+  }
+  private addPath(path: ConnectionPath) {
+    this.dirtyPaths.add(path.id)
+    this.el.add(path.el)
+    path.el.back()
   }
 }
 
