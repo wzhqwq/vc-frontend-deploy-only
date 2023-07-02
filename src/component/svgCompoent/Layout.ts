@@ -25,6 +25,7 @@ export class Layout {
     this.rows = new Array(maxRow + 1).fill(null).map(
       (_, i) =>
         new LayoutRow(
+          i,
           this,
           layers.filter((l) => l.row == i),
         ),
@@ -64,36 +65,74 @@ export class Layout {
     this.updateLayout(0)
   }
 
-  removeLayer(layer: Layer) {
-    let row = this.rows[layer.row]
+  public removeLayer(layer: Layer) {
+    const row = this.rows.at(layer.row)
     if (!row) return
-    row.detachLayer(layer)
+    const layout = row.detachLayer(layer)
+    if (!layout) return
+    if (row.items.length == 0) {
+      this.rows.splice(layer.row, 1)
+      this.rows.slice(layer.row).forEach((r) => r.index--)
+    }
 
-    let lowestUnaffectedRow = layer.row
-    // TODO: remove lines
-    this.updateLayout(lowestUnaffectedRow)
+    layout.dispose()
+    this.updateLayout(layout.upperRow)
   }
 
-  attachLayer(layer: Layer, row: number, insert: boolean) {
+  public attachLayer(layer: Layer, row: number, insert: boolean) {
     if (row > this.rows.length) return
     if (row == this.rows.length) {
-      this.rows.push(new LayoutRow(this))
+      this.rows.push(new LayoutRow(row, this))
     }
     if (insert) {
-      this.rows.splice(row, 0, new LayoutRow(this))
+      this.rows.splice(row, 0, new LayoutRow(row, this))
+      this.rows.slice(row + 1).forEach((r) => r.index++)
     }
-    this.rows[row].attachLayer(layer)
+    layer.row = row
+    let layout = this.rows[row].attachLayer(layer)
 
-    let lowestUnaffectedRow = row
     // TODO: add lines
-    this.updateLayout(lowestUnaffectedRow)
+    this.updateLayout(layout.upperRow)
+  }
+
+  public moveLayer(layer: Layer, row: number, insert: boolean) {
+    if (row > this.rows.length) return
+    if (!insert && row == layer.row) return
+    if (row == this.rows.length) {
+      this.rows.push(new LayoutRow(row, this))
+    }
+    if (insert) {
+      this.rows.splice(row, 0, new LayoutRow(row, this))
+      this.rows.slice(row + 1).forEach((r) => r.index++)
+    }
+    const oldRow = this.rows.at(layer.row)
+    if (!oldRow) return
+    const layout = oldRow.detachLayer(layer)
+    if (!layout) return
+    if (oldRow.items.length == 0) {
+      this.rows.splice(layer.row, 1)
+      this.rows.slice(layer.row).forEach((r) => r.index--)
+      if (layer.row < row) row--
+    }
+
+    layer.row = row
+    layout.row = this.rows[row]
+    this.rows[row].attachItem(layout)
+    layout.resume().forEach((p) => {
+      this.dirtyPaths.add(p.id)
+      this.el.add(p.el)
+      p.el.back()
+    })
+
+    this.updateLayout(layout.upperRow)
   }
 
   private updateLayout(startRow: number) {
     let rowsToUpdate = this.rows.slice(startRow)
-    rowsToUpdate.reduce((y, r) => r.layout(y) + ITEM_GAP, 0)
+    rowsToUpdate.reduce((y, r) => r.doLayout(y) + ITEM_GAP, ITEM_GAP)
     // TODO: optimize the connections
     this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
+    this.dirtyPaths.clear()
   }
 }
 
@@ -114,27 +153,23 @@ const getRowDragLeaveHandler = (self: Rect, className: string) => (e: Event) => 
 const rowDragOverHandler = (e: Event) => {
   if ((e as DragEvent).dataTransfer?.types.includes('layer')) e.preventDefault()
 }
-const getRowDropHandler =
-  (self: Rect, layout: Layout, row: LayoutRow, insert: boolean) => (e: Event) => {
-    if (!(e as DragEvent).dataTransfer?.types.includes('layer')) return
-    self.back().removeClass('drag-over')
-    let rowIndex = layout.rows.indexOf(row)
-    let layerId = (e as DragEvent).dataTransfer?.getData('layer')
-    if (!layerId) return
-    let layer = Layer.layers.get(layerId)
-    if (!layer) return
-    if (layer.row == rowIndex) return
-    layout.removeLayer(layer)
-    layout.attachLayer(layer, rowIndex, insert)
-  }
+const getRowDropHandler = (self: Rect, row: LayoutRow, insert: boolean) => (e: Event) => {
+  if (!(e as DragEvent).dataTransfer?.types.includes('layer')) return
+  self.back().removeClass('drag-over')
+  let rowIndex = row.layout.rows.indexOf(row)
+  let layerId = (e as DragEvent).dataTransfer?.getData('layer')
+  if (!layerId) return
+  let layer = Layer.layers.get(layerId)
+  if (!layer) return
+  row.layout.moveLayer(layer, rowIndex, insert)
+}
 export class LayoutRow {
   public readonly items: LayoutItem[]
   public readonly el: G
   private dropZone: Rect
   private insertLine: Rect
-  private lines: LayoutLine[]
 
-  constructor(layout: Layout, layers: Layer[] = []) {
+  constructor(public index: number, public layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
     this.dropZone = this.el
       .rect()
@@ -150,7 +185,6 @@ export class LayoutRow {
       .addClass('insert-line')
 
     this.items = layers.map((l) => new LayoutLayer(this, l))
-    this.lines = this.items.flatMap((i) => i.lines)
     layers.forEach((l) => {
       l.layout = layout
     })
@@ -159,14 +193,14 @@ export class LayoutRow {
     this.dropZone.on('dragenter', getRowDragEnterHandler(this.dropZone, 'drop-zone'))
     this.dropZone.on('dragleave', getRowDragLeaveHandler(this.dropZone, 'drop-zone'))
     this.dropZone.on('dragover', rowDragOverHandler)
-    this.dropZone.on('drop', getRowDropHandler(this.dropZone, layout, this, false))
+    this.dropZone.on('drop', getRowDropHandler(this.dropZone, this, false))
     this.insertLine.on('dragenter', getRowDragEnterHandler(this.insertLine, 'insert-line'))
     this.insertLine.on('dragleave', getRowDragLeaveHandler(this.insertLine, 'insert-line'))
     this.insertLine.on('dragover', rowDragOverHandler)
-    this.insertLine.on('drop', getRowDropHandler(this.insertLine, layout, this, true))
+    this.insertLine.on('drop', getRowDropHandler(this.insertLine, this, true))
   }
 
-  layout(y: number) {
+  public doLayout(y: number) {
     let width = Math.max(
       100,
       this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP,
@@ -179,41 +213,37 @@ export class LayoutRow {
       i.update(offset, y + ROW_PAD)
       return offset + i.width + ITEM_GAP
     }, -width / 2)
-    this.lines.forEach((l) => (l.horizontalY = y + height + ITEM_GAP))
+    this.items.flatMap((i) => i.lines).forEach((l) => (l.horizontalY = y + height + ITEM_GAP))
 
     this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).move(-width / 2 - ROW_PAD, y)
     this.insertLine
       .size(width + ROW_PAD * 2, ITEM_GAP / 3)
-      .move(-width / 2 - ROW_PAD, y + height + ROW_PAD * 2 + ITEM_GAP / 3)
+      .move(-width / 2 - ROW_PAD, y - (ITEM_GAP * 2) / 3)
     return y + height + ROW_PAD * 2
   }
 
-  attachItem(item: LayoutItem) {
+  public attachItem(item: LayoutItem) {
     this.items.push(item)
-    this.lines.push(...item.lines)
   }
-  attachItems(items: LayoutItem[]) {
+  public attachItems(items: LayoutItem[]) {
     this.items.push(...items)
-    this.lines.push(...items.flatMap((i) => i.lines))
   }
-  attachLayer(layer: Layer) {
-    this.attachItem(new LayoutLayer(this, layer))
+  public attachLayer(layer: Layer) {
+    let layout = new LayoutLayer(this, layer)
+    this.attachItem(layout)
+    return layout
   }
-  removeLine(item: LayoutLine) {
+  public removeLine(item: LayoutLine) {
     let itemIndex = this.items.indexOf(item)
     if (itemIndex >= 0) {
       this.items.splice(itemIndex, 1)
     }
-    let lineIndex = this.lines.indexOf(item)
-    if (lineIndex >= 0) {
-      this.lines.splice(lineIndex, 1)
-    }
   }
-  detachLayer(layer: Layer) {
+  public detachLayer(layer: Layer) {
     let index = this.items.findIndex((i) => i instanceof LayoutLayer && i.layer == layer)
     if (index >= 0) {
-      ;(this.items[index] as LayoutLayer).dispose()
-      this.items.splice(index, 1)
+      let layout = this.items.splice(index, 1)[0] as LayoutLayer
+      return layout.reset()
     }
   }
 }
@@ -222,16 +252,16 @@ export class LayoutItem {
   protected _x: number = 0
   protected _y: number = 0
 
-  constructor(public readonly row: LayoutRow, public width: number, public height = 0) {}
+  constructor(public row: LayoutRow, public width: number, public height = 0) {}
 
-  update(x: number, y: number) {
+  public update(x: number, y: number) {
     this._x = x
     this._y = y
   }
-  get x() {
+  public get x() {
     return this._x
   }
-  get lines() {
+  public get lines() {
     return [] as LayoutLine[]
   }
 }
@@ -247,23 +277,41 @@ export class LayoutLayer extends LayoutItem {
     this.inputs = endPoints.filter(({ c }) => c.type == 'input')
     this.outputs = endPoints.filter(({ c }) => c.type == 'output')
   }
-  update(x: number, y: number) {
+  public update(x: number, y: number) {
     super.update(x, y)
     this.layer.move(x, y)
     this.inputs.forEach((o) => o.update(this.layer.x, this.layer.y))
     this.outputs.forEach((o) => o.update(this.layer.x, this.layer.y))
+    return this
   }
-  dispose() {
+  public reset() {
     this.layer.move(0, 0)
     this.layer.el.remove()
+    this.inputs.forEach((o) => o.detach())
+    this.outputs.forEach((o) => o.detach())
+    return this
   }
-  get lines() {
+  public resume() {
+    this.row.el.add(this.layer.el)
+    this.inputs.forEach((i) => i.resumePath())
+    this.outputs.forEach((o) => o.resumePath())
+    return [...this.inputs.map((i) => i.path), ...this.outputs.map((o) => o.path)].filter(
+      (p) => p != null,
+    ) as ConnectionPath[]
+  }
+  public dispose() {
+    this.inputs.forEach((i) => i.disconnect())
+    this.outputs.forEach((o) => o.disconnect())
+  }
+  public get upperRow() {
+    return this.inputs.reduce((row, i) => Math.min(row, i.c.peer?.layer.row ?? row), this.row.index)
+  }
+  public get lines() {
     return this.outputs
   }
 }
 
 export class LayoutLine extends LayoutItem {
-  // public previousLine: LayoutLine | null = null
   public nextLine: LayoutLine | null = null
   public path: ConnectionPath | null = null
   // public id = nanoid()
@@ -273,12 +321,11 @@ export class LayoutLine extends LayoutItem {
     super(row, LINE_WIDTH)
   }
 
-  linkDown(line: LayoutLine) {
+  public linkDown(line: LayoutLine) {
     this.nextLine = line
-    // line.previousLine = this
     line.path = this.path
   }
-  get points(): [number, number][] {
+  public get points(): [number, number][] {
     if (this.nextLine) {
       return [
         [this._x, this.horizontalY],
@@ -288,7 +335,7 @@ export class LayoutLine extends LayoutItem {
       return [[this._x, this.horizontalY]]
     }
   }
-  get lines() {
+  public get lines() {
     return [this]
   }
 }
@@ -296,20 +343,25 @@ export class LayoutLine extends LayoutItem {
 export class LayoutEndPoint extends LayoutLine {
   public targetRow: number
   public farthestLine: LayoutLine | null = null
+  public anotherEnd: LayoutEndPoint | null = null
 
   constructor(row: LayoutRow, public c: Connector) {
     super(row)
     this.targetRow = c.peer?.layer.row ?? -1
   }
 
-  linkDown(line: LayoutLine) {
+  public linkDown(line: LayoutLine) {
     if (!this.nextLine) {
       super.linkDown(line)
     }
     this.farthestLine?.linkDown(line)
     this.farthestLine = line
+    if (line instanceof LayoutEndPoint) {
+      this.anotherEnd = line
+      line.anotherEnd = this
+    }
   }
-  get points(): [number, number][] {
+  public get points(): [number, number][] {
     let connectorPoints = this.c.points.map<[number, number]>(([x, y]) => [
       this._x + x,
       this._y + y,
@@ -326,7 +378,40 @@ export class LayoutEndPoint extends LayoutLine {
       return connectorPoints.reverse()
     }
   }
-  get x() {
+  public get x() {
     return this._x + this.c.points[1][0]
+  }
+  public detach() {
+    if (!this.farthestLine) {
+      this.anotherEnd?.detach()
+      this.path = null
+      return
+    }
+    let currentLine: LayoutLine | null = this
+    while (currentLine) {
+      currentLine.row.removeLine(currentLine)
+      currentLine = currentLine.nextLine
+    }
+    this.path?.dispose()
+    this.path = this.farthestLine = this.nextLine = null
+  }
+  public resumePath() {
+    if (this.c.type == 'input') {
+      this.anotherEnd?.resumePath()
+      return
+    }
+    if (!this.anotherEnd) return
+    this.path = new ConnectionPath(this)
+    for (let i = this.row.index + 1; i < this.anotherEnd.row.index; i++) {
+      let row = this.row.layout.rows[i]
+      let newLine = new LayoutLine(row)
+      this.linkDown(newLine)
+      row.attachItem(newLine)
+    }
+    this.linkDown(this.anotherEnd)
+  }
+  public disconnect() {
+    this.detach()
+    this.anotherEnd = null
   }
 }
