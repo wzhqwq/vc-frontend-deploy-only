@@ -64,7 +64,7 @@ export class Connector<P extends LayerParameters = any> {
     this.line = this.el
       .line([[0, 0], this.endPos])
       .stroke({ width: LINE_WIDTH, color: ISOLATED_COLOR, linecap: 'round' })
-    this.end = this.el.group()
+    this.end = this.el.group().translate(...this.endPos)
     this.pill = this.end
       .rect()
       .fill(ISOLATED_COLOR)
@@ -80,7 +80,7 @@ export class Connector<P extends LayerParameters = any> {
   update(inputs: DynamicShape[], parameters: P) {
     const textBBox = this.label
       .update(inputs, parameters)
-      .center(...this.endPos)
+      .center(0, 0)
       .bbox()
     const { width: textWidth } = textBBox
     this.pillWidth = textWidth + CONNECTOR_PILL_PAD_X * 2
@@ -88,7 +88,7 @@ export class Connector<P extends LayerParameters = any> {
     this.pill
       .width(this.pillWidth)
       .height(CONNECTOR_PILL_HEIGHT)
-      .center(...this.endPos)
+      .center(0, 0)
 
     return this
   }

@@ -33,18 +33,6 @@
       transform: scaleX(0);
     }
   }
-  &-top {
-    transform-origin: center bottom;
-  }
-  &-bottom {
-    transform-origin: center top;
-  }
-  &-left {
-    transform-origin: right center;
-  }
-  &-right {
-    transform-origin: left center;
-  }
 }
 
 .connecting-within {
@@ -62,11 +50,13 @@
   &.start-output-3d .connector.connector-input-3d,
   &.start-output-4d .connector.connector-input-4d,
   &.start-output-5d .connector.connector-input-5d {
-    cursor: copy;
-    opacity: 1;
-    &:hover {
-      rect {
-        transform: scale(1.2);
+    &:not(.connected) {
+      cursor: copy;
+      opacity: 1;
+      &:hover {
+        rect {
+          transform: scale(1.2);
+        }
       }
     }
   }
