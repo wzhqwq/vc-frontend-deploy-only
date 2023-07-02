@@ -7,8 +7,10 @@ import { ConnectionPath } from './ConnectionPath'
 const ITEM_GAP = 10
 const ROW_PAD = 10
 const ROW_RADIUS = 20
+const INSERT_LINE_WIDTH = 3
 
 const DROP_ZONE_COLOR = joyTheme.vars.palette.primary[500]
+const INSERT_LINE_COLOR = joyTheme.vars.palette.primary[600]
 
 export class Layout {
   public readonly el: G
@@ -162,6 +164,7 @@ const getRowDropHandler = (self: Rect, row: LayoutRow, insert: boolean) => (e: E
   let layer = Layer.layers.get(layerId)
   if (!layer) return
   row.layout.moveLayer(layer, rowIndex, insert)
+  layer.el.removeClass('dragging')
 }
 export class LayoutRow {
   public readonly items: LayoutItem[]
@@ -179,9 +182,9 @@ export class LayoutRow {
       .addClass('drop-zone')
     this.insertLine = this.el
       .rect()
-      .radius(ITEM_GAP / 6)
-      .fill(DROP_ZONE_COLOR)
-      .stroke({ color: 'transparent', width: ITEM_GAP / 3 })
+      .radius(INSERT_LINE_WIDTH / 2)
+      .fill(INSERT_LINE_COLOR)
+      .stroke({ color: 'transparent', width: INSERT_LINE_WIDTH * 2 })
       .addClass('insert-line')
 
     this.items = layers.map((l) => new LayoutLayer(this, l))
@@ -217,8 +220,8 @@ export class LayoutRow {
 
     this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).move(-width / 2 - ROW_PAD, y)
     this.insertLine
-      .size(width + ROW_PAD * 2, ITEM_GAP / 3)
-      .move(-width / 2 - ROW_PAD, y - (ITEM_GAP * 2) / 3)
+      .size(width + ROW_PAD * 2, INSERT_LINE_WIDTH)
+      .move(-width / 2 - ROW_PAD, y - (ITEM_GAP + INSERT_LINE_WIDTH) / 2)
     return y + height + ROW_PAD * 2
   }
 

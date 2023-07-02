@@ -53,7 +53,10 @@ export class Scene {
   }
   public dragEnd(e: React.DragEvent<HTMLDivElement>) {
     this.el.removeClass('layer-dragging')
-    this.activeLayer = null
+    if (this.activeLayer) {
+      this.activeLayer.el.removeClass('dragging')
+      this.activeLayer = null
+    }
   }
   public dragLeave(e: React.DragEvent<HTMLDivElement>) {
     // this.el.removeClass('layer-dragging')

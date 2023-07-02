@@ -1,3 +1,6 @@
 .layer {
   user-select: none;
+  &.dragging {
+    filter: opacity(0.3);
+  }
 }
