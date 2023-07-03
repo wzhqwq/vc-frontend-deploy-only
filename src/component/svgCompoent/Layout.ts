@@ -135,7 +135,7 @@ export class Layout {
         .map((l) => {
           if (!l.nextLine) return null
           const newLine = new LayoutLine(newRow)
-          l.insertLine(newLine)
+          l.insertLineNext(newLine)
           return newLine
         })
         .filter((l): l is LayoutLine => l != null),
@@ -144,17 +144,12 @@ export class Layout {
   private removeRow(row: number) {
     const oldRow = this.rows.splice(row, 1)[0]
     oldRow.dispose()
+    oldRow.items
+      .flatMap((i) => i.lines)
+      .forEach((l) => {
+        l.removeSelf()
+      })
     this.rows.slice(row).forEach((r) => r.index--)
-    if (!row) return
-    this.rows[row - 1].attachItems(
-      oldRow.items
-        .flatMap((i) => i.lines)
-        .map((l) => {
-          const newLine = new LayoutLine(this.rows[row - 1])
-          l.insertLine(newLine)
-          return newLine
-        }),
-    )
   }
 }
 
@@ -283,7 +278,7 @@ export class LayoutRow {
   }
   public dispose() {
     this.el.remove()
-    this.items.flatMap((i) => i.lines).forEach((l) => l.path?.removeLine(l))
+    this.items.flatMap((i) => i.lines).forEach((l) => l.removeSelf())
   }
 }
 
@@ -351,6 +346,7 @@ export class LayoutLayer extends LayoutItem {
 }
 
 export class LayoutLine extends LayoutItem {
+  public prevLine: LayoutLine | null = null
   public nextLine: LayoutLine | null = null
   public path: ConnectionPath | null = null
   public horizontalY: number = 0
@@ -360,6 +356,7 @@ export class LayoutLine extends LayoutItem {
   }
 
   public linkDown(line: LayoutLine) {
+    line.prevLine = this
     this.nextLine = line
     line.path = this.path
   }
@@ -381,14 +378,16 @@ export class LayoutLine extends LayoutItem {
     if (!this.path) return
     this.row.layout.addDirtyPath(this.path)
   }
-  public insertLine(line: LayoutLine) {
+  public insertLineNext(line: LayoutLine) {
     line.path = this.path
+    if (this.nextLine) this.nextLine.prevLine = line
     line.nextLine = this.nextLine
+    line.prevLine = this
     this.nextLine = line
   }
-  public removeNextLine() {
-    if (!this.nextLine) return
-    this.nextLine = this.nextLine.nextLine
+  public removeSelf() {
+    if (this.prevLine) this.prevLine.nextLine = this.nextLine
+    if (this.nextLine) this.nextLine.prevLine = this.prevLine
   }
 }
 
@@ -467,19 +466,5 @@ export class LayoutEndPoint extends LayoutLine {
       this.row.layout.updateLayout(this.row.index + 1)
     }
     return this
-  }
-  public removeLine(line: LayoutLine) {
-    if (this.c.type == 'input') {
-      this.c.peer?.endPoint?.removeLine(line)
-      return
-    }
-    let currentLine: LayoutLine | null = this
-    while (currentLine) {
-      if (currentLine.nextLine == line) {
-        currentLine.removeNextLine()
-        return
-      }
-      currentLine = currentLine.nextLine
-    }
   }
 }

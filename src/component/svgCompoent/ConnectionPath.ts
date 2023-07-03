@@ -26,10 +26,6 @@ export class ConnectionPath {
     this.el.plot('M' + points.map(([x, y]) => ` ${x} ${y}`).join(' L'))
   }
 
-  public removeLine(line: LayoutLine) {
-    this.startingEnd.removeLine(line)
-  }
-
   public dispose() {
     this.el.remove()
     ConnectionPath.paths.delete(this.id)
