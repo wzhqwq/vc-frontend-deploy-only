@@ -63,10 +63,7 @@ export class Layout {
     if (!row) return
     const layout = row.detachLayer(layer)
     if (!layout) return
-    if (row.items.length == 0) {
-      this.rows.splice(row.index, 1)[0].dispose()
-      this.rows.slice(row.index).forEach((r) => r.index--)
-    }
+    if (!row.items.some(i => i instanceof LayoutLayer)) this.removeRow(row.index)
 
     layout.reset()
     this.updateLayout(Math.min(row.index, layout.upperRow + 1))
@@ -78,10 +75,7 @@ export class Layout {
     if (row == this.rows.length) {
       this.rows.push(new LayoutRow(row, this))
     }
-    if (insert) {
-      this.rows.splice(row, 0, new LayoutRow(row, this))
-      this.rows.slice(row + 1).forEach((r) => r.index++)
-    }
+    if (insert) this.insertRow(row)
 
     layer.row = row
     let layout = this.rows[row].attachLayer(layer)
@@ -98,15 +92,11 @@ export class Layout {
     if (!oldRow) return
     const layout = oldRow.detachLayer(layer)
     if (!layout) return
-    if (oldRow.items.length == 0) {
-      this.rows.splice(layer.row, 1)[0].dispose()
-      this.rows.slice(layer.row).forEach((r) => r.index--)
+    if (!oldRow.items.some(i => i instanceof LayoutLayer)) {
+      this.removeRow(oldRow.index)
       if (layer.row < row) row--
     }
-    if (insert) {
-      this.rows.splice(row, 0, new LayoutRow(row, this))
-      this.rows.slice(row + 1).forEach((r) => r.index++)
-    }
+    if (insert) this.insertRow(row)
 
     layer.row = row
     layout.updateRow(this.rows[row])
@@ -133,6 +123,38 @@ export class Layout {
   }
   public addDirtyPath(path: ConnectionPath) {
     this.dirtyPaths.add(path.id)
+  }
+  private insertRow(row: number) {
+    const newRow = new LayoutRow(row, this)
+    this.rows.splice(row, 0, newRow)
+    this.rows.slice(row + 1).forEach((r) => r.index++)
+    if (!row) return
+    newRow.attachItems(
+      this.rows[row - 1].items
+        .flatMap((i) => i.lines)
+        .map((l) => {
+          if (!l.nextLine) return null
+          const newLine = new LayoutLine(newRow)
+          l.insertLine(newLine)
+          return newLine
+        })
+        .filter((l): l is LayoutLine => l != null),
+    )
+  }
+  private removeRow(row: number) {
+    const oldRow = this.rows.splice(row, 1)[0]
+    oldRow.dispose()
+    this.rows.slice(row).forEach((r) => r.index--)
+    if (!row) return
+    this.rows[row - 1].attachItems(
+      oldRow.items
+        .flatMap((i) => i.lines)
+        .map((l) => {
+          const newLine = new LayoutLine(this.rows[row - 1])
+          l.insertLine(newLine)
+          return newLine
+        }),
+    )
   }
 }
 
@@ -261,6 +283,7 @@ export class LayoutRow {
   }
   public dispose() {
     this.el.remove()
+    this.items.flatMap((i) => i.lines).forEach((l) => l.path?.removeLine(l))
   }
 }
 
@@ -330,7 +353,6 @@ export class LayoutLayer extends LayoutItem {
 export class LayoutLine extends LayoutItem {
   public nextLine: LayoutLine | null = null
   public path: ConnectionPath | null = null
-  // public id = nanoid()
   public horizontalY: number = 0
 
   constructor(row: LayoutRow) {
@@ -358,6 +380,15 @@ export class LayoutLine extends LayoutItem {
     super.update(x, y)
     if (!this.path) return
     this.row.layout.addDirtyPath(this.path)
+  }
+  public insertLine(line: LayoutLine) {
+    line.path = this.path
+    line.nextLine = this.nextLine
+    this.nextLine = line
+  }
+  public removeNextLine() {
+    if (!this.nextLine) return
+    this.nextLine = this.nextLine.nextLine
   }
 }
 
@@ -399,7 +430,7 @@ export class LayoutEndPoint extends LayoutLine {
     return this._x + this.c.points[1][0]
   }
   public detach(updateImmediately = false) {
-    if (!this.farthestLine) {
+    if (this.c.type == 'input') {
       this.c.peer?.endPoint?.detach(updateImmediately)
       this.path = null
       return
@@ -436,5 +467,19 @@ export class LayoutEndPoint extends LayoutLine {
       this.row.layout.updateLayout(this.row.index + 1)
     }
     return this
+  }
+  public removeLine(line: LayoutLine) {
+    if (this.c.type == 'input') {
+      this.c.peer?.endPoint?.removeLine(line)
+      return
+    }
+    let currentLine: LayoutLine | null = this
+    while (currentLine) {
+      if (currentLine.nextLine == line) {
+        currentLine.removeNextLine()
+        return
+      }
+      currentLine = currentLine.nextLine
+    }
   }
 }
