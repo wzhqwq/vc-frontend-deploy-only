@@ -3,7 +3,7 @@ import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearnin
 import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
 import { LayerParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
-import { Layout } from './Layout'
+import { LayoutLayer } from './Layout'
 import { Scene } from './Scene'
 
 const MIN_HEIGHT = 80
@@ -37,7 +37,7 @@ export class Layer<P extends LayerParameters = any> {
   private shape: Element | null = null
   private text: Text
 
-  public layout: Layout | null = null
+  public layout: LayoutLayer | null = null
   public scene: Scene | null = null
 
   private offsetX = 0

@@ -63,7 +63,7 @@ export class Layout {
     if (!row) return
     const layout = row.detachLayer(layer)
     if (!layout) return
-    if (!row.items.some(i => i instanceof LayoutLayer)) this.removeRow(row.index)
+    if (!row.items.some((i) => i instanceof LayoutLayer)) this.removeRow(row.index)
 
     layout.reset()
     this.updateLayout(Math.min(row.index, layout.upperRow + 1))
@@ -92,7 +92,7 @@ export class Layout {
     if (!oldRow) return
     const layout = oldRow.detachLayer(layer)
     if (!layout) return
-    if (!oldRow.items.some(i => i instanceof LayoutLayer)) {
+    if (!oldRow.items.some((i) => i instanceof LayoutLayer)) {
       this.removeRow(oldRow.index)
       if (layer.row < row) row--
     }
@@ -107,12 +107,14 @@ export class Layout {
   }
 
   public updateLayout(startRow: number) {
-    let rowsToUpdate = this.rows.slice(startRow)
-    rowsToUpdate.reduce(
+    // 完成startRow及之后的连线优化
+    this.rows.slice(startRow).forEach(r => r.optimize())
+    // 连线优化可能会调整布局元素的位置，从而影响折线渲染，因此要从startRow-1开始重新布局
+    startRow = Math.max(0, startRow - 1)
+    this.rows.slice(startRow).reduce(
       (y, r) => r.doLayout(y) + ITEM_GAP,
       (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
     )
-    // TODO: optimize the connections
     this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
     this.dirtyPaths.clear()
   }
@@ -188,6 +190,8 @@ export class LayoutRow {
   private insertLine: Rect
   public startY: number = 0
   public endY: number = 0
+  private itemsDirty: boolean = true
+  private lines: LayoutLine[] = []
 
   constructor(public _index: number, public layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
@@ -205,9 +209,6 @@ export class LayoutRow {
       .addClass('insert-line')
 
     this.items = layers.map((l) => new LayoutLayer(this, l))
-    layers.forEach((l) => {
-      l.layout = layout
-    })
     layout.el.add(this.el)
 
     this.dropZone.on('dragenter', getRowDragEnterHandler(this.dropZone, 'drop-zone'))
@@ -234,20 +235,34 @@ export class LayoutRow {
       i.update(offset, y + ROW_PAD)
       return offset + i.width + ITEM_GAP
     }, -width / 2)
-    this.items.flatMap((i) => i.lines).forEach((l) => (l.horizontalY = y + height + ITEM_GAP))
+
+    if (this.itemsDirty) this.lines = this.items.flatMap((i) => i.lines)
+    this.lines.forEach((l) => (l.horizontalY = y + height + ITEM_GAP))
+    // this.items.for
 
     this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).move(-width / 2 - ROW_PAD, y)
     this.insertLine
       .size(width + ROW_PAD * 2, INSERT_LINE_WIDTH)
       .move(-width / 2 - ROW_PAD, y - (ITEM_GAP + INSERT_LINE_WIDTH) / 2)
+
+    this.itemsDirty = false
+
     return (this.endY = y + height + ROW_PAD * 2)
+  }
+
+  public optimize() {
+    this.items.sort((a, b) => a.peerOrder - b.peerOrder)
+    this.items.forEach((i, index) => (i.order = index))
+    this.itemsDirty = true
   }
 
   public attachItem(item: LayoutItem) {
     this.items.push(item)
+    this.itemsDirty = true
   }
   public attachItems(items: LayoutItem[]) {
     this.items.push(...items)
+    this.itemsDirty = true
   }
   public attachLayer(layer: Layer) {
     let layout = new LayoutLayer(this, layer)
@@ -258,12 +273,14 @@ export class LayoutRow {
     let itemIndex = this.items.indexOf(item)
     if (itemIndex >= 0) {
       this.items.splice(itemIndex, 1)
+      this.itemsDirty = true
     }
   }
   public detachLayer(layer: Layer) {
     let index = this.items.findIndex((i) => i instanceof LayoutLayer && i.layer == layer)
     if (index >= 0) {
       let layout = this.items.splice(index, 1)[0] as LayoutLayer
+      this.itemsDirty = true
       return layout.reset()
     }
   }
@@ -285,6 +302,7 @@ export class LayoutRow {
 export class LayoutItem {
   protected _x: number = 0
   protected _y: number = 0
+  protected _order: number = 0
 
   constructor(public row: LayoutRow, public width: number, public height = 0) {}
 
@@ -298,6 +316,15 @@ export class LayoutItem {
   public get lines() {
     return [] as LayoutLine[]
   }
+  public get order() {
+    return this._order
+  }
+  public set order(order: number) {
+    this._order = order
+  }
+  public get peerOrder() {
+    return this._order
+  }
 }
 
 export class LayoutLayer extends LayoutItem {
@@ -307,6 +334,7 @@ export class LayoutLayer extends LayoutItem {
   constructor(row: LayoutRow, public readonly layer: Layer) {
     super(row, layer.width, layer.height)
     row.el.add(layer.el)
+    layer.layout = this
     let endPoints = layer.connectors.map((c) => new LayoutEndPoint(row, c))
     this.inputs = endPoints.filter(({ c }) => c.type == 'input')
     this.outputs = endPoints.filter(({ c }) => c.type == 'output')
@@ -342,6 +370,10 @@ export class LayoutLayer extends LayoutItem {
     this.inputs.forEach((i) => (i.row = row))
     this.outputs.forEach((o) => (o.row = row))
     return this
+  }
+  public get peerOrder() {
+    let orders = this.inputs.filter((i) => i.prevLine).map(i => i.prevLine!.order)
+    return orders.sort((a, b) => a - b)[Math.floor(orders.length / 2)]
   }
 }
 
@@ -388,6 +420,9 @@ export class LayoutLine extends LayoutItem {
   public removeSelf() {
     if (this.prevLine) this.prevLine.nextLine = this.nextLine
     if (this.nextLine) this.nextLine.prevLine = this.prevLine
+  }
+  public get peerOrder() {
+    return this.prevLine?.order ?? this.order
   }
 }
 
@@ -466,5 +501,8 @@ export class LayoutEndPoint extends LayoutLine {
       this.row.layout.updateLayout(this.row.index + 1)
     }
     return this
+  }
+  public get order() {
+    return this.c.layer.layout!.order ?? 0
   }
 }
