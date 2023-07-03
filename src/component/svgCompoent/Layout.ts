@@ -1,5 +1,5 @@
 import { G, Rect } from '@svgdotjs/svg.js'
-import { Connector, ConnectorPoints, LINE_WIDTH } from './Connector'
+import { Connector, LINE_WIDTH } from './Connector'
 import { Layer } from './Layer'
 import { joyTheme } from '@/theme'
 import { ConnectionPath } from './ConnectionPath'
@@ -42,11 +42,7 @@ export class Layout {
       ends
         .filter(({ targetRow }) => targetRow == i)
         .forEach((line) => {
-          const target = line.c.peer
-          if (!target) return
-          const targetLayer = row.items.find((l) => l instanceof LayoutLayer && l.layer.has(target))
-          if (!targetLayer) return
-          const targetInput = (targetLayer as LayoutLayer).inputs.find((i) => i.c == target)
+          const targetInput = line.c.peer?.endPoint
           if (!targetInput) return
           line.linkDown(targetInput)
         })
@@ -72,8 +68,9 @@ export class Layout {
       this.rows.slice(layer.row).forEach((r) => r.index--)
     }
 
-    layout.dispose()
-    this.updateLayout(layout.upperRow)
+    layout.reset()
+    this.updateLayout(layout.upperRow + 1)
+    layer.connectors.forEach((c) => c.disconnect())
   }
 
   public attachLayer(layer: Layer, row: number, insert: boolean) {
@@ -88,7 +85,7 @@ export class Layout {
 
     layer.row = row
     let layout = this.rows[row].attachLayer(layer)
-    this.updateLayout(layout.upperRow)
+    this.updateLayout(layout.upperRow + 1)
   }
 
   public moveLayer(layer: Layer, row: number, insert: boolean) {
@@ -114,19 +111,19 @@ export class Layout {
     layer.row = row
     layout.row = this.rows[row]
     this.rows[row].attachItem(layout)
-    layout.resume().forEach((p) => this.addPath(p))
+    layout.resume()
 
-    this.updateLayout(layout.upperRow)
+    this.updateLayout(layout.upperRow + 1)
   }
 
-  private updateLayout(startRow: number) {
+  public updateLayout(startRow: number) {
     let rowsToUpdate = this.rows.slice(startRow)
     rowsToUpdate.reduce((y, r) => r.doLayout(y) + ITEM_GAP, ITEM_GAP)
     // TODO: optimize the connections
     this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
     this.dirtyPaths.clear()
   }
-  private addPath(path: ConnectionPath) {
+  public addPath(path: ConnectionPath) {
     this.dirtyPaths.add(path.id)
     this.el.add(path.el)
     path.el.back()
@@ -201,7 +198,7 @@ export class LayoutRow {
   public doLayout(y: number) {
     let width = Math.max(
       100,
-      this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP,
+      this.items.reduce((a, b) => a + b.width, 0) + (this.items.length + 1) * ITEM_GAP,
     )
     let height = Math.max(
       100,
@@ -302,13 +299,7 @@ export class LayoutLayer extends LayoutItem {
     this.row.el.add(this.layer.el)
     this.inputs.forEach((i) => i.resumePath())
     this.outputs.forEach((o) => o.resumePath())
-    return [...this.inputs.map((i) => i.path), ...this.outputs.map((o) => o.path)].filter(
-      (p) => p != null,
-    ) as ConnectionPath[]
-  }
-  public dispose() {
-    this.inputs.forEach((i) => i.disconnect())
-    this.outputs.forEach((o) => o.disconnect())
+    return this
   }
   public get upperRow() {
     return this.inputs.reduce((row, i) => Math.min(row, i.c.peer?.layer.row ?? row), this.row.index)
@@ -350,11 +341,11 @@ export class LayoutLine extends LayoutItem {
 export class LayoutEndPoint extends LayoutLine {
   public targetRow: number
   public farthestLine: LayoutLine | null = null
-  public anotherEnd: LayoutEndPoint | null = null
 
   constructor(row: LayoutRow, public c: Connector) {
     super(row)
     this.targetRow = c.peer?.layer.row ?? -1
+    c.endPoint = this
   }
 
   public linkDown(line: LayoutLine) {
@@ -363,10 +354,6 @@ export class LayoutEndPoint extends LayoutLine {
     }
     this.farthestLine?.linkDown(line)
     this.farthestLine = line
-    if (line instanceof LayoutEndPoint) {
-      this.anotherEnd = line
-      line.anotherEnd = this
-    }
   }
   public get points(): [number, number][] {
     let connectorPoints = this.c.points.map<[number, number]>(([x, y]) => [
@@ -388,9 +375,9 @@ export class LayoutEndPoint extends LayoutLine {
   public get x() {
     return this._x + this.c.points[1][0]
   }
-  public detach() {
+  public detach(updateImmediately = false) {
     if (!this.farthestLine) {
-      this.anotherEnd?.detach()
+      this.c.peer?.endPoint?.detach(updateImmediately)
       this.path = null
       return
     }
@@ -401,24 +388,30 @@ export class LayoutEndPoint extends LayoutLine {
     }
     this.path?.dispose()
     this.path = this.farthestLine = this.nextLine = null
+    if (updateImmediately) {
+      this.row.layout.updateLayout(this.row.index + 1)
+    }
+    return this
   }
-  public resumePath() {
+  public resumePath(updateImmediately = false) {
+    const anotherEnd = this.c.peer?.endPoint
+    if (!anotherEnd) return
     if (this.c.type == 'input') {
-      this.anotherEnd?.resumePath()
+      anotherEnd.resumePath(updateImmediately)
       return
     }
-    if (!this.anotherEnd) return
-    this.path = new ConnectionPath(this)
-    for (let i = this.row.index + 1; i < this.anotherEnd.row.index; i++) {
+    this.row.layout.addPath(this.path = new ConnectionPath(this))
+    const endRow = anotherEnd.row.index
+    for (let i = this.row.index + 1; i < endRow; i++) {
       let row = this.row.layout.rows[i]
       let newLine = new LayoutLine(row)
       this.linkDown(newLine)
       row.attachItem(newLine)
     }
-    this.linkDown(this.anotherEnd)
-  }
-  public disconnect() {
-    this.detach()
-    this.anotherEnd = null
+    this.linkDown(anotherEnd)
+    if (updateImmediately) {
+      this.row.layout.updateLayout(this.row.index + 1)
+    }
+    return this
   }
 }

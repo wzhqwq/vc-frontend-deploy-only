@@ -65,8 +65,12 @@ export function Component() {
       outputs: [{ id: '5KpmQ4IvuVRVOzfQ35rTR-1' }],
       row: 2,
     })
+    const test4 = new Layer(exampleLayer)
+    test4.row = 1
+    const test5 = new Layer(exampleLayer)
+    test5.row = 2
 
-    setScene(new Scene([test1, test2, test3], containerRef.current!))
+    setScene(new Scene([test1, test4, test2, test3, test5], containerRef.current!))
 
     return () => {
       setScene(s => {

@@ -5,6 +5,7 @@ import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
 import { Layer } from './Layer'
 import { Scene } from './Scene'
+import { LayoutEndPoint } from './Layout'
 
 export type ConnectorPoints = [endPos: [number, number], cornerPos: [number, number]]
 
@@ -42,6 +43,7 @@ export class Connector<P extends LayerParameters = any> {
 
   private disabled = false
   private connectedConnector: Connector | null = null
+  public endPoint: LayoutEndPoint | null = null
 
   public readonly shapeDimension: number
 
@@ -176,6 +178,7 @@ export class Connector<P extends LayerParameters = any> {
 
     this.connect(peer)
     peer.connect(this)
+    this.endPoint?.resumePath(true)
   }
 }
 
