@@ -64,12 +64,12 @@ export class Layout {
     const layout = row.detachLayer(layer)
     if (!layout) return
     if (row.items.length == 0) {
-      this.rows.splice(layer.row, 1)
-      this.rows.slice(layer.row).forEach((r) => r.index--)
+      this.rows.splice(row.index, 1)[0].dispose()
+      this.rows.slice(row.index).forEach((r) => r.index--)
     }
 
     layout.reset()
-    this.updateLayout(layout.upperRow + 1)
+    this.updateLayout(Math.min(row.index, layout.upperRow + 1))
     layer.connectors.forEach((c) => c.disconnect())
   }
 
@@ -85,7 +85,7 @@ export class Layout {
 
     layer.row = row
     let layout = this.rows[row].attachLayer(layer)
-    this.updateLayout(layout.upperRow + 1)
+    this.updateLayout(Math.min(row, layout.upperRow + 1))
   }
 
   public moveLayer(layer: Layer, row: number, insert: boolean) {
@@ -99,7 +99,7 @@ export class Layout {
     const layout = oldRow.detachLayer(layer)
     if (!layout) return
     if (oldRow.items.length == 0) {
-      this.rows.splice(layer.row, 1)
+      this.rows.splice(layer.row, 1)[0].dispose()
       this.rows.slice(layer.row).forEach((r) => r.index--)
       if (layer.row < row) row--
     }
@@ -109,16 +109,19 @@ export class Layout {
     }
 
     layer.row = row
-    layout.row = this.rows[row]
+    layout.updateRow(this.rows[row])
     this.rows[row].attachItem(layout)
     layout.resume()
 
-    this.updateLayout(layout.upperRow + 1)
+    this.updateLayout(Math.min(row, oldRow.index, layout.upperRow + 1))
   }
 
   public updateLayout(startRow: number) {
     let rowsToUpdate = this.rows.slice(startRow)
-    rowsToUpdate.reduce((y, r) => r.doLayout(y) + ITEM_GAP, ITEM_GAP)
+    rowsToUpdate.reduce(
+      (y, r) => r.doLayout(y) + ITEM_GAP,
+      (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
+    )
     // TODO: optimize the connections
     this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
     this.dirtyPaths.clear()
@@ -127,6 +130,9 @@ export class Layout {
     this.dirtyPaths.add(path.id)
     this.el.add(path.el)
     path.el.back()
+  }
+  public addDirtyPath(path: ConnectionPath) {
+    this.dirtyPaths.add(path.id)
   }
 }
 
@@ -163,6 +169,8 @@ export class LayoutRow {
   public readonly el: G
   private dropZone: Rect
   private insertLine: Rect
+  public startY: number = 0
+  public endY: number = 0
 
   constructor(public _index: number, public layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
@@ -196,6 +204,7 @@ export class LayoutRow {
   }
 
   public doLayout(y: number) {
+    this.startY = y
     let width = Math.max(
       100,
       this.items.reduce((a, b) => a + b.width, 0) + (this.items.length + 1) * ITEM_GAP,
@@ -214,7 +223,7 @@ export class LayoutRow {
     this.insertLine
       .size(width + ROW_PAD * 2, INSERT_LINE_WIDTH)
       .move(-width / 2 - ROW_PAD, y - (ITEM_GAP + INSERT_LINE_WIDTH) / 2)
-    return y + height + ROW_PAD * 2
+    return (this.endY = y + height + ROW_PAD * 2)
   }
 
   public attachItem(item: LayoutItem) {
@@ -249,6 +258,9 @@ export class LayoutRow {
   }
   public get index() {
     return this._index
+  }
+  public dispose() {
+    this.el.remove()
   }
 }
 
@@ -307,6 +319,12 @@ export class LayoutLayer extends LayoutItem {
   public get lines() {
     return this.outputs
   }
+  public updateRow(row: LayoutRow) {
+    this.row = row
+    this.inputs.forEach((i) => (i.row = row))
+    this.outputs.forEach((o) => (o.row = row))
+    return this
+  }
 }
 
 export class LayoutLine extends LayoutItem {
@@ -335,6 +353,11 @@ export class LayoutLine extends LayoutItem {
   }
   public get lines() {
     return [this]
+  }
+  public update(x: number, y: number) {
+    super.update(x, y)
+    if (!this.path) return
+    this.row.layout.addDirtyPath(this.path)
   }
 }
 
@@ -400,7 +423,7 @@ export class LayoutEndPoint extends LayoutLine {
       anotherEnd.resumePath(updateImmediately)
       return
     }
-    this.row.layout.addPath(this.path = new ConnectionPath(this))
+    this.row.layout.addPath((this.path = new ConnectionPath(this)))
     const endRow = anotherEnd.row.index
     for (let i = this.row.index + 1; i < endRow; i++) {
       let row = this.row.layout.rows[i]
