@@ -108,13 +108,15 @@ export class Layout {
 
   public updateLayout(startRow: number) {
     // 完成startRow及之后的连线优化
-    this.rows.slice(startRow).forEach(r => r.optimize())
+    this.rows.slice(startRow).forEach((r) => r.optimize())
     // 连线优化可能会调整布局元素的位置，从而影响折线渲染，因此要从startRow-1开始重新布局
     startRow = Math.max(0, startRow - 1)
-    this.rows.slice(startRow).reduce(
-      (y, r) => r.doLayout(y) + ITEM_GAP,
-      (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
-    )
+    this.rows
+      .slice(startRow)
+      .reduce(
+        (y, r) => r.doLayout(y) + ITEM_GAP,
+        (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
+      )
     this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
     this.dirtyPaths.clear()
   }
@@ -146,11 +148,6 @@ export class Layout {
   private removeRow(row: number) {
     const oldRow = this.rows.splice(row, 1)[0]
     oldRow.dispose()
-    oldRow.items
-      .flatMap((i) => i.lines)
-      .forEach((l) => {
-        l.removeSelf()
-      })
     this.rows.slice(row).forEach((r) => r.index--)
   }
 }
@@ -237,8 +234,27 @@ export class LayoutRow {
     }, -width / 2)
 
     if (this.itemsDirty) this.lines = this.items.flatMap((i) => i.lines)
-    this.lines.forEach((l) => (l.horizontalY = y + height + ITEM_GAP))
-    // this.items.for
+    // 使用扫描线算法，使所有的横线段不重叠
+    const ranges = this.lines
+      .filter((l) => l.nextLine != null)
+      .flatMap((l) => [
+        { x: Math.min(l.x, l.nextLine!.x), l, start: true },
+        { x: Math.min(l.x, l.nextLine!.x), l, start: false },
+      ])
+    console.log('row ', this._index, ranges)
+    ranges.sort((a, b) => (a.x == b.x ? Number(a.start) - Number(b.start) : a.x - b.x))
+    console.log('sorted', ranges)
+    let maxLevel = 0
+    ranges.reduce((level, { l, start }) => {
+      maxLevel = Math.max(maxLevel, level)
+      console.log(level, start)
+      if (start) {
+        l.horizontalY = y + height + ITEM_GAP * (level + 1)
+        return level + 1
+      }
+      return level - 1
+    }, 1)
+    height += (maxLevel - 1) * ITEM_GAP
 
     this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).move(-width / 2 - ROW_PAD, y)
     this.insertLine
@@ -295,7 +311,9 @@ export class LayoutRow {
   }
   public dispose() {
     this.el.remove()
-    this.items.flatMap((i) => i.lines).forEach((l) => l.removeSelf())
+    this.items
+      .filter((i): i is LayoutLine => i instanceof LayoutLine)
+      .forEach((l) => l.removeSelf())
   }
 }
 
@@ -372,8 +390,8 @@ export class LayoutLayer extends LayoutItem {
     return this
   }
   public get peerOrder() {
-    let orders = this.inputs.filter((i) => i.prevLine).map(i => i.prevLine!.order)
-    return orders.sort((a, b) => a - b)[Math.floor(orders.length / 2)]
+    let orders = this.inputs.filter((i) => i.prevLine).map((i) => i.prevLine!.order)
+    return orders.sort((a, b) => a - b)[Math.floor(orders.length / 2)] ?? 0
   }
 }
 
