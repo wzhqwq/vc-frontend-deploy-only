@@ -16,6 +16,7 @@ export class Layout {
   public readonly el: G
 
   public readonly rows: LayoutRow[] = []
+  public width: number = 0
   private x: number = 0
   private dirtyPaths = new Set<string>()
 
@@ -108,13 +109,14 @@ export class Layout {
 
   public updateLayout(startRow: number) {
     // 完成startRow及之后的连线优化
-    this.rows.slice(startRow).forEach((r) => r.optimize())
+    this.rows.slice(startRow).forEach((r) => r.optimize().doLayoutX())
+    this.width = this.rows.reduce((max, r) => Math.max(max, r.width), 0)
     // 连线优化可能会调整布局元素的位置，从而影响折线渲染，因此要从startRow-1开始重新布局
     startRow = Math.max(0, startRow - 1)
     this.rows
       .slice(startRow)
       .reduce(
-        (y, r) => r.doLayout(y) + ITEM_GAP,
+        (y, r) => r.doLayoutY(y) + ITEM_GAP,
         (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
       )
     this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
@@ -125,7 +127,7 @@ export class Layout {
     this.el.add(path.el)
     path.el.back()
   }
-  public addDirtyPath(path: ConnectionPath) {
+  public markDirty(path: ConnectionPath) {
     this.dirtyPaths.add(path.id)
   }
   private insertRow(row: number) {
@@ -185,8 +187,9 @@ export class LayoutRow {
   public readonly el: G
   private dropZone: Rect
   private insertLine: Rect
-  public startY: number = 0
+  public startY: number = -1
   public endY: number = 0
+  public width: number = 0
   private itemsDirty: boolean = true
   private lines: LayoutLine[] = []
 
@@ -218,20 +221,31 @@ export class LayoutRow {
     this.insertLine.on('drop', getRowDropHandler(this.insertLine, this, true))
   }
 
-  public doLayout(y: number) {
-    this.startY = y
-    let width = Math.max(
+  public doLayoutX() {
+    this.width = Math.max(
       100,
       this.items.reduce((a, b) => a + b.width, 0) + (this.items.length + 1) * ITEM_GAP,
-    )
+    ) + ROW_PAD * 2
+
+    this.items.reduce((offset, i) => {
+      i.updateX(offset)
+      return offset + i.width + ITEM_GAP
+    }, -this.width / 2 + ROW_PAD)
+
+    this.dropZone.width(this.width).x(-this.width / 2)
+
+    return this
+  }
+  public doLayoutY(y: number) {
     let height = Math.max(
       100,
       this.items.reduce((a, b) => Math.max(a, b.height), 0),
     )
-    this.items.reduce((offset, i) => {
-      i.update(offset, y + ROW_PAD)
-      return offset + i.width + ITEM_GAP
-    }, -width / 2)
+
+    if (this.startY != y || this.itemsDirty) {
+      this.items.forEach((i) => i.updateY(y + ROW_PAD))
+    }
+    this.startY = y
 
     if (this.itemsDirty) this.lines = this.items.flatMap((i) => i.lines)
     // 使用扫描线算法，使所有的横线段不重叠
@@ -239,37 +253,35 @@ export class LayoutRow {
       .filter((l) => l.nextLine != null)
       .flatMap((l) => [
         { x: Math.min(l.x, l.nextLine!.x), l, start: true },
-        { x: Math.min(l.x, l.nextLine!.x), l, start: false },
+        { x: Math.max(l.x, l.nextLine!.x), l, start: false },
       ])
-    console.log('row ', this._index, ranges)
     ranges.sort((a, b) => (a.x == b.x ? Number(a.start) - Number(b.start) : a.x - b.x))
-    console.log('sorted', ranges)
     let maxLevel = 0
     ranges.reduce((level, { l, start }) => {
       maxLevel = Math.max(maxLevel, level)
-      console.log(level, start)
       if (start) {
         l.horizontalY = y + height + ITEM_GAP * (level + 1)
         return level + 1
       }
       return level - 1
     }, 1)
-    height += (maxLevel - 1) * ITEM_GAP
+    height += (maxLevel - 1) * ITEM_GAP + ROW_PAD * 2
 
-    this.dropZone.size(width + ROW_PAD * 2, height + ROW_PAD * 2).move(-width / 2 - ROW_PAD, y)
+    this.dropZone.height(height).y(y)
     this.insertLine
-      .size(width + ROW_PAD * 2, INSERT_LINE_WIDTH)
-      .move(-width / 2 - ROW_PAD, y - (ITEM_GAP + INSERT_LINE_WIDTH) / 2)
+      .size(this.layout.width, INSERT_LINE_WIDTH)
+      .move(-this.layout.width / 2, y - (ITEM_GAP + INSERT_LINE_WIDTH) / 2)
 
     this.itemsDirty = false
 
-    return (this.endY = y + height + ROW_PAD * 2)
+    return (this.endY = y + height)
   }
 
   public optimize() {
     this.items.sort((a, b) => a.peerOrder - b.peerOrder)
     this.items.forEach((i, index) => (i.order = index))
     this.itemsDirty = true
+    return this
   }
 
   public attachItem(item: LayoutItem) {
@@ -318,14 +330,16 @@ export class LayoutRow {
 }
 
 export class LayoutItem {
-  protected _x: number = 0
-  protected _y: number = 0
+  protected _x: number = NaN
+  protected _y: number = NaN
   protected _order: number = 0
 
   constructor(public row: LayoutRow, public width: number, public height = 0) {}
 
-  public update(x: number, y: number) {
+  public updateX(x: number) {
     this._x = x
+  }
+  public updateY(y: number) {
     this._y = y
   }
   public get x() {
@@ -357,17 +371,26 @@ export class LayoutLayer extends LayoutItem {
     this.inputs = endPoints.filter(({ c }) => c.type == 'input')
     this.outputs = endPoints.filter(({ c }) => c.type == 'output')
   }
-  public update(x: number, y: number) {
-    super.update(x, y)
-    this.layer.move(x, y)
-    this.inputs.forEach((o) => o.update(this.layer.x, this.layer.y))
-    this.outputs.forEach((o) => o.update(this.layer.x, this.layer.y))
+  public updateX(x: number) {
+    if (this._x == x) return
+    super.updateX(x)
+    this.layer.move(this._x, this._y)
+    this.inputs.forEach((i) => i.updateX(this.layer.x))
+    this.outputs.forEach((o) => o.updateX(this.layer.x))
+    return this
+  }
+  public updateY(y: number) {
+    if (this._y == y) return
+    super.updateY(y)
+    this.layer.move(this._x, this._y)
+    this.inputs.forEach((i) => i.updateY(this.layer.y))
+    this.outputs.forEach((o) => o.updateY(this.layer.y))
     return this
   }
   public reset() {
     this.layer.move(0, 0)
     this.layer.el.remove()
-    this.inputs.forEach((o) => o.detach())
+    this.inputs.forEach((i) => i.detach())
     this.outputs.forEach((o) => o.detach())
     return this
   }
@@ -423,10 +446,17 @@ export class LayoutLine extends LayoutItem {
   public get lines() {
     return [this]
   }
-  public update(x: number, y: number) {
-    super.update(x, y)
+  public updateX(x: number) {
+    if (this._x == x) return
+    super.updateX(x)
     if (!this.path) return
-    this.row.layout.addDirtyPath(this.path)
+    this.row.layout.markDirty(this.path)
+  }
+  public updateY(y: number) {
+    if (this._y == y) return
+    super.updateY(y)
+    if (!this.path) return
+    this.row.layout.markDirty(this.path)
   }
   public insertLineNext(line: LayoutLine) {
     line.path = this.path
