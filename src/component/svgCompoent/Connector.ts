@@ -54,7 +54,7 @@ export class Connector<P extends LayerParameters = any> {
     public readonly type: ConnectorType,
     shape: ShapeParameter<P>,
   ) {
-    this.shapeDimension = shape.placeholders.length
+    this.shapeDimension = shape.anyDimension ? 0 : shape.placeholders.length
     this.el = layer.el
       .group()
       .addClass('connector')

@@ -1,59 +1,73 @@
+import { placeholderToShortName } from '@/config/deepLearning/connectorHelper'
 import { joyTheme } from '@/theme'
 import { DynamicShape } from '@/types/config/deepLearning'
-import { ShapeParameter, LayerParameters } from '@/types/config/parameter'
+import { ShapeParameter, LayerParameters, AnyDimPlaceholders } from '@/types/config/parameter'
 import { Container, Text } from '@svgdotjs/svg.js'
 
 const shortNameAttr = { fill: joyTheme.vars.palette.primary[500], 'font-weight': 'bold' }
 const placeholderAttr = { fill: joyTheme.vars.palette.neutral[100], 'font-size': 12 }
 const valueAttr = { fill: joyTheme.vars.palette.primary[50] }
 
-// {"w": {"13" => "w1", "45" => "w2", "3" => "w3"}}
-const virtualValueMap: Record<string, Map<string, string>> = {}
-
 export class Label<P extends LayerParameters> {
+  // {"w": {"13" => "w1", "45" => "w2", "3" => "w3"}}
+  public static virtualValueMap: Record<string, Map<string, string>> = {}
+
   public readonly label: Text
   constructor(container: Container, private readonly shapeParameter: ShapeParameter<P>) {
-    this.label = container
-      .text((add) => {
-        add.plain('(')
+    this.label = container.text('').font({ size: 18 }).fill('#FFF')
+}
 
-        shapeParameter.placeholders.forEach((v, i) => {
-          if (i != 0) add.plain(',')
-          add.tspan(v).attr(placeholderAttr)
-        })
-
-        add.plain(')')
-      })
-      .font({ size: 18 })
-      .fill('#FFF')
-  }
-
-  update(inputs: DynamicShape[], parameters: P) {
+  public renderFullyUnknown() {
     return this.label.clear().text((add) => {
       add.plain('(')
 
-      this.shapeParameter.getShape(inputs, parameters).forEach((v, i) => {
+      if (this.shapeParameter.anyDimension) {
+        add.tspan('any dimension').attr(placeholderAttr)
+      } else {
+        this.shapeParameter.placeholders.forEach((v, i) => {
+          if (i != 0) add.plain(',')
+          add.tspan(v).attr(placeholderAttr)
+        })
+      }
+
+      add.plain(')')
+    })
+  }
+
+  update(inputs: DynamicShape[], parameters: P) {
+    const shape = this.shapeParameter.getShape(inputs, parameters)
+    if (!shape) return this.renderFullyUnknown()
+    return this.label.clear().text((add) => {
+      add.plain('(')
+
+      shape.forEach((v, i) => {
+        const placeholder = this.shapeParameter.anyDimension
+          ? (`d${i + 1}` as AnyDimPlaceholders)
+          : this.shapeParameter.placeholders[i]
         if (i != 0) add.plain(',')
         if (v.available) {
-          let str = v.value.toFixed(0)
+          let valueStr = v.value.toFixed(0)
           if (v.virtual) {
-            let map = virtualValueMap[this.shapeParameter.shortNames[i]]
+            const shortName = this.shapeParameter.anyDimension
+              ? String.fromCharCode(97 + i)
+              : placeholderToShortName[placeholder]
+            let map = Label.virtualValueMap[shortName]
             if (!map) {
               map = new Map()
-              virtualValueMap[this.shapeParameter.shortNames[i]] = map
+              Label.virtualValueMap[shortName] = map
             }
-            let shortName = map.get(str)
-            if (!shortName) {
-              shortName = this.shapeParameter.shortNames[i] + map.size
-              map.set(str, shortName)
+            let name = map.get(valueStr)
+            if (!name) {
+              name = shortName + map.size
+              map.set(valueStr, shortName)
             }
-            add.tspan(shortName).attr(shortNameAttr)
+            add.tspan(name).attr(shortNameAttr)
             return
           }
-          add.tspan(str).attr(valueAttr)
+          add.tspan(valueStr).attr(valueAttr)
           return
         }
-        add.tspan(this.shapeParameter.placeholders[i]).attr(placeholderAttr)
+        add.tspan(placeholder).attr(placeholderAttr)
       })
 
       add.plain(')')

@@ -49,7 +49,7 @@ export class Layer<P extends LayerParameters = any> {
 
   public readonly connectors: Connector[]
 
-  private inputShapes: DynamicShape[] = []
+  private inputShapes: DynamicShape[]
   private parameters: P
 
   constructor(private config: LayerConfig<P>, data?: LayerData<P>) {
@@ -57,20 +57,13 @@ export class Layer<P extends LayerParameters = any> {
     this.parameters = data?.parameters ?? config.defaultParameters
     this.id = data?.id ?? nanoid()
     this.row = data?.row ?? 0
-    this.inputShapes = config.inputs.map((c) => ({
-      shapeValue: new Array(c.shape.placeholders.length).fill({
-        value: 0,
-        virtual: false,
-        available: false,
-      }),
-      connected: false,
-    }))
+    this.inputShapes = config.inputs.map(() => ({ connected: false }))
 
     this.boundary = this.el.rect().fill('transparent')
     this.text = this.el
       .text(this.config.displayName ?? this.config.name)
       .font({ size: 18 })
-      .fill(this.config.color == 'dark' ? '#FFF' : '#000')
+      .fill(this.config.renderer.color == 'dark' ? '#FFF' : '#000')
     // 先生成一个小型预览图，用于拖拽
     this.boundary.size(SMALL_LAYER_WIDTH, SMALL_LAYER_HEIGHT)
     this.text.center(SMALL_LAYER_WIDTH / 2, SMALL_LAYER_HEIGHT / 2)
@@ -167,7 +160,7 @@ export class Layer<P extends LayerParameters = any> {
     if (this.shape) {
       this.shape.remove()
     }
-    this.shape = this.config.renderer(this.boundary.bbox())
+    this.shape = this.config.renderer.getElement(this.boundary.bbox())
     this.el.add(this.shape)
     this.text.front()
   }
