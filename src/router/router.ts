@@ -1,4 +1,4 @@
-import { Outlet, createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 
 import MainFrame from '@/page/MainFrame'
 import Welcome from '@/page/Welcome'
@@ -13,11 +13,9 @@ export const router = createBrowserRouter([
       { index: true, Component: Welcome },
       { path: 'login', Component: Login },
       { path: 'register', Component: Register },
+      { path: 'workspace', children: [
+        { path: 'dl-editor', lazy: () => import('@/page/workspace/DLEditor') },
+      ]}
     ],
-  },
-  {
-    path: '/workspace',
-    Component: MainFrame,
-    children: [{ path: 'dl-editor', lazy: () => import('@/page/workspace/DLEditor') }],
   },
 ])

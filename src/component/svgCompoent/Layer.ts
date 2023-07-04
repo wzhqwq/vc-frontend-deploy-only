@@ -1,4 +1,4 @@
-import { Element, G, Rect, SVG, Shape, Text } from '@svgdotjs/svg.js'
+import { Element, G, Rect, SVG, Text } from '@svgdotjs/svg.js'
 import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearning'
 import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
 import { LayerParameters } from '@/types/config/parameter'

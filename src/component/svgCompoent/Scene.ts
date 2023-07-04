@@ -2,7 +2,6 @@ import { SVG } from '@svgdotjs/svg.js'
 import { Layer } from './Layer'
 import { LayerData } from '@/types/config/deepLearning'
 import { Layout } from './Layout'
-import { Connector } from './Connector'
 
 export class Scene {
   public readonly el = SVG().addClass('scene')
