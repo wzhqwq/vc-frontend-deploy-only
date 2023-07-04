@@ -99,6 +99,10 @@ export class Layer<P extends LayerParameters = any> {
       this.el.addClass('dragging')
       this.scene?.setPossibleDraggingLayer(this)
     })
+    this.el.on('mouseup', () => {
+      this.el.removeClass('dragging')
+      this.scene?.setPossibleDraggingLayer(null)
+    })
 
     Layer.layers.set(this.id, this)
   }

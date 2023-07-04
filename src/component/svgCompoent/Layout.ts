@@ -162,28 +162,27 @@ const getRowDragEnterHandler = (self: Rect, className: string) => (e: Event) => 
     (e as DragEvent).dataTransfer?.types.includes('layer') &&
     (e.target as SVGElement).classList.contains(className)
   )
-    self.front().addClass('drag-over')
+    self.addClass('drag-over')
 }
 const getRowDragLeaveHandler = (self: Rect, className: string) => (e: Event) => {
   if (
     (e as DragEvent).dataTransfer?.types.includes('layer') &&
     (e.target as SVGElement).classList.contains(className)
   )
-    self.back().removeClass('drag-over')
+    self.removeClass('drag-over')
 }
 const rowDragOverHandler = (e: Event) => {
   if ((e as DragEvent).dataTransfer?.types.includes('layer')) e.preventDefault()
 }
 const getRowDropHandler = (self: Rect, row: LayoutRow, insert: boolean) => (e: Event) => {
   if (!(e as DragEvent).dataTransfer?.types.includes('layer')) return
-  self.back().removeClass('drag-over')
+  self.removeClass('drag-over')
   let rowIndex = row.layout.rows.indexOf(row)
   let layerId = (e as DragEvent).dataTransfer?.getData('layer')
   if (!layerId) return
   let layer = Layer.layers.get(layerId)
   if (!layer) return
   row.layout.moveLayer(layer, rowIndex, insert)
-  layer.el.removeClass('dragging')
 }
 export class LayoutRow {
   public readonly items: LayoutItem[]

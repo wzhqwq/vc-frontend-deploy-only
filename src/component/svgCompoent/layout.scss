@@ -17,4 +17,11 @@
   .drop-zone {
     filter: opacity(0.3);
   }
+  * {
+    pointer-events: none;
+  }
+  .drop-zone,
+  .insert-line {
+    pointer-events: all;
+  }
 }
