@@ -153,7 +153,7 @@ export class Layout {
   }
   public dispose() {
     this.el.remove()
-    ConnectionPath.paths.clear()
+    // ConnectionPath.paths.clear()
   }
 }
 
