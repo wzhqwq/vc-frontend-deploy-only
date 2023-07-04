@@ -17,7 +17,7 @@ export class Layout {
 
   public readonly rows: LayoutRow[] = []
   public width: number = 0
-  private dirtyPaths = new Set<string>()
+  private dirtyPaths = new Set<ConnectionPath>()
 
   public animated: boolean = false
 
@@ -118,16 +118,16 @@ export class Layout {
         (y, r) => r.doLayoutY(y) + ITEM_GAP,
         (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
       )
-    this.dirtyPaths.forEach((id) => ConnectionPath.paths.get(id)?.render())
+    this.dirtyPaths.forEach(p => p.render())
     this.dirtyPaths.clear()
   }
   public addPath(path: ConnectionPath) {
-    this.dirtyPaths.add(path.id)
+    this.dirtyPaths.add(path)
     this.el.add(path.el)
     path.el.back()
   }
   public markDirty(path: ConnectionPath) {
-    this.dirtyPaths.add(path.id)
+    this.dirtyPaths.add(path)
   }
   private insertRow(row: number) {
     const newRow = new LayoutRow(row, this)

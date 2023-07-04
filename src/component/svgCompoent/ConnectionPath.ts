@@ -7,15 +7,12 @@ import { LINE_WIDTH } from './Connector'
 const STROKE_ATTR = { color: joyTheme.vars.palette.primary[400], width: LINE_WIDTH, linejoin: 'round' }
 
 export class ConnectionPath {
-  public static readonly paths = new Map<string, ConnectionPath>()
-
   public readonly id: string
   public readonly el: Path
 
   constructor(private startingEnd: LayoutEndPoint) {
     this.id = nanoid()
     this.el = new Path().stroke(STROKE_ATTR).fill('none')
-    ConnectionPath.paths.set(this.id, this)
   }
 
   public render() {
@@ -28,6 +25,5 @@ export class ConnectionPath {
 
   public dispose() {
     this.el.remove()
-    ConnectionPath.paths.delete(this.id)
   }
 }
