@@ -152,8 +152,8 @@ export class Connector<P extends LayerParameters = any> {
     scene.el.addClass('connecting-within').addClass(`start-${this.type}-${this.shapeDimension}d`)
 
     this.el.addClass('connecting')
-    const { x, y, width, height } = this.end.rbox()
-    new ConnectorDraggingIndicator([x + width / 2, y + height / 2], this, scene).startListen(() => {
+    const { cx, cy } = this.end.rbox(scene.el)
+    new ConnectorDraggingIndicator([cx, cy], this, scene).startListen(() => {
       scene.el
         .removeClass('connecting-within')
         .removeClass(`start-${this.type}-${this.shapeDimension}d`)
@@ -179,6 +179,18 @@ export class Connector<P extends LayerParameters = any> {
     this.connect(peer)
     peer.connect(this)
     this.endPoint?.resumePath(true)
+  }
+
+  public dispose() {
+    this.el.remove()
+    this.peer?.disconnect()
+    this.disconnect()
+    this.endPoint?.detach()
+    this.endPoint = null
+    Connector.connectors.delete(this.id)
+  }
+  public cleanup() {
+    this.endPoint = null
   }
 }
 

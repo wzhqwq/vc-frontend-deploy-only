@@ -17,7 +17,6 @@ export class Layout {
 
   public readonly rows: LayoutRow[] = []
   public width: number = 0
-  private x: number = 0
   private dirtyPaths = new Set<string>()
 
   public animated: boolean = false
@@ -152,6 +151,10 @@ export class Layout {
     oldRow.dispose()
     this.rows.slice(row).forEach((r) => r.index--)
   }
+  public dispose() {
+    this.el.remove()
+    ConnectionPath.paths.clear()
+  }
 }
 
 const getRowDragEnterHandler = (self: Rect, className: string) => (e: Event) => {
@@ -219,12 +222,15 @@ export class LayoutRow {
     this.insertLine.on('dragleave', getRowDragLeaveHandler(this.insertLine, 'insert-line'))
     this.insertLine.on('dragover', rowDragOverHandler)
     this.insertLine.on('drop', getRowDropHandler(this.insertLine, this, true))
+    this.el.on('mousedown', (e) => {
+      e.stopPropagation()
+    })
   }
 
   public doLayoutX() {
     this.width = Math.max(
       100,
-      this.items.reduce((a, b) => a + b.width, 0) + (this.items.length + 1) * ITEM_GAP,
+      this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP,
     ) + ROW_PAD * 2
 
     this.items.reduce((offset, i) => {
@@ -256,7 +262,7 @@ export class LayoutRow {
         { x: Math.max(l.x, l.nextLine!.x), l, start: false },
       ])
     ranges.sort((a, b) => (a.x == b.x ? Number(a.start) - Number(b.start) : a.x - b.x))
-    let maxLevel = 0
+    let maxLevel = 1
     ranges.reduce((level, { l, start }) => {
       maxLevel = Math.max(maxLevel, level)
       if (start) {

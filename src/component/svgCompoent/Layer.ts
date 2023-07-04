@@ -181,7 +181,12 @@ export class Layer<P extends LayerParameters = any> {
 
   public dispose() {
     this.el.remove()
-    // this.connectors.forEach((c) => c.dispose())
+    this.connectors.forEach((c) => c.dispose())
+    this.layout = this.scene = null
     Layer.layers.delete(this.id)
+  }
+  public cleanup() {
+    this.connectors.forEach((c) => c.cleanup())
+    this.layout = this.scene = null
   }
 }

@@ -27,13 +27,16 @@ import {
 } from '@mui/joy'
 import { AppBar, Toolbar } from '@mui/material'
 import { memo, useCallback, useState } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import logo from '@/logo.svg'
 
 export default function MainFrame() {
   const { loggedIn } = useSession()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  const inWorkspace = pathname.startsWith('/workspace')
 
   return (
     <Box
@@ -43,7 +46,13 @@ export default function MainFrame() {
         height: '100vh',
       }}
     >
-      <AppBar position="static">
+      <AppBar
+        position={inWorkspace ? 'absolute' : 'static'}
+        sx={{
+          transition: 'transform 0.3s',
+          transform: inWorkspace ? 'translateY(-100%)' : 'translateY(0)',
+        }}
+      >
         <Toolbar sx={{ gap: 1 }}>
           <Typography
             level="h6"
@@ -98,7 +107,7 @@ export default function MainFrame() {
         </Toolbar>
       </AppBar>
       <Container
-        maxWidth="lg"
+        maxWidth={inWorkspace ? false : 'lg'}
         sx={{
           flexGrow: 1,
           overflow: 'auto',

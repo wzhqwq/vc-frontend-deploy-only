@@ -17,7 +17,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/workspace',
-    Component: Outlet,
+    Component: MainFrame,
     children: [{ path: 'dl-editor', lazy: () => import('@/page/workspace/DLEditor') }],
   },
 ])

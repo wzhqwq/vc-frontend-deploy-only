@@ -81,26 +81,29 @@ export function Component() {
   }, [])
 
   return (
-    <Box>
-      <Box
-        sx={{
-          width: '100%',
-          height: '100%',
+    <Box
+      sx={{
+        height: '100vh',
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        '.svg-container': {
           overflow: 'hidden',
-        }}
-      >
-        <div
-          ref={containerRef}
-          draggable
-          onDragStart={scene?.dragStart}
-          onDragEnd={scene?.dragEnd}
-          onDragEnter={scene?.dragEnter}
-          onDragLeave={scene?.dragLeave}
-        />
-      </Box>
-      <Button onClick={() => console.log(JSON.stringify(scene?.toJSON()))}>
-        保存至控制台
-      </Button>
+          svg: {
+            display: 'block',
+          }
+        }
+      }}
+    >
+      <div
+        ref={containerRef}
+        draggable
+        onDragStart={scene?.dragStart}
+        onDragEnd={scene?.dragEnd}
+        onDragEnter={scene?.dragEnter}
+        onDragLeave={scene?.dragLeave}
+        onDrop={scene?.drop}
+        className='svg-container'
+      />
     </Box>
   )
 }
