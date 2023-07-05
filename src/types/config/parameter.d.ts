@@ -1,7 +1,9 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
-export type LayerParameterType = 'int' | 'tuple' | 'str' | 'bool' | 'tuple2'
-export type LayerParameterValue<T extends 'int' | 'tuple' | 'str' | 'bool' | 'tuple2'> = T extends 'int'
+export type LayerParameterType = 'int' | 'float' | 'tuple' | 'str' | 'bool' | 'tuple2'
+export type LayerParameterValue<T extends 'int' | 'tuple' | 'str' | 'bool' | 'tuple2'> = T extends
+  | 'int'
+  | 'float'
   ? number
   : T extends 'tuple'
   ? number[]
@@ -18,12 +20,14 @@ export interface LayerParameter<T extends LayerParameterType, K extends string =
   key: K
   type: T
   description: string
-  inShape: boolean
+  inShape?: boolean
+  nullable?: boolean
   default: LayerParameterValue<T>
   selections?: LayerParameterValue<T>[]
 }
 export type EachTypeLayerParameter<K extends string = string> =
   | LayerParameter<'int', K>
+  | LayerParameter<'float', K>
   | LayerParameter<'tuple', K>
   | LayerParameter<'str', K>
   | LayerParameter<'bool', K>
@@ -33,7 +37,7 @@ export type AnyDimPlaceholders = `d${number}`
 export type AllShapePlaceholders =
   | AnyDimPlaceholders
   | 'batch_size'
-  | 'channel'
+  | 'channels'
   | 'height'
   | 'width'
   | 'length'
@@ -60,17 +64,17 @@ export type ShapeParameter<P extends LayerParameters> =
   | FixedDimensionShapeParameter<P>
   | AnyDimensionShapeParameter<P>
 
-export type Base1DKernelParameters = {
+export type BaseChannelParameters = {
   in_channels: number
   out_channels: number
+}
+export type Base1DKernelParameters = BaseChannelParameters & {
   kernel_size: number
   stride: number
   padding: number
   dilation: number
 }
-export type Base2DKernelParameters = {
-  in_channels: number
-  out_channels: number
+export type Base2DKernelParameters = BaseChannelParameters & {
   kernel_size: [number, number]
   stride: [number, number]
   padding: [number, number]

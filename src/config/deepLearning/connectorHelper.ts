@@ -2,6 +2,8 @@ import { ConnectorConfig, DynamicShape, VirtualValue } from '@/types/config/deep
 import {
   AllShapePlaceholders,
   Base1DKernelParameters,
+  Base2DKernelParameters,
+  Conv1DParameters,
   Conv2DParameters,
   LayerParameters,
   ShapeGetter,
@@ -9,7 +11,7 @@ import {
 
 export const placeholderToShortName: Record<AllShapePlaceholders, string> = {
   batch_size: 'b',
-  channel: 'ch',
+  channels: 'ch',
   height: 'h',
   width: 'w',
   length: 'l',
@@ -20,12 +22,15 @@ export const placeholderToShortName: Record<AllShapePlaceholders, string> = {
   embed_dim: 'em',
 }
 
-const generateInputShapeFn = (index: number) =>
+export const generateInputShapeFn = (index: number) =>
   function (inputShapes: DynamicShape[]) {
     const shape = inputShapes[index]
     return shape.connected ? shape.shapeValue : undefined
   }
-export function topInput<P extends LayerParameters>(index: number, placeholders?: string[]) {
+export function topInput<P extends LayerParameters>(
+  index: number,
+  placeholders?: AllShapePlaceholders[],
+) {
   return {
     type: 'input',
     side: 'top',
@@ -44,7 +49,7 @@ export function topInput<P extends LayerParameters>(index: number, placeholders?
 
 export function bottomOutput<P extends LayerParameters>(
   getShape: ShapeGetter<P>,
-  placeholders?: string[],
+  placeholders?: AllShapePlaceholders[],
 ) {
   return {
     type: 'output',
@@ -97,9 +102,25 @@ export function getKernelOutputShapeFn(
   )
   return [batchSize, toVirtualValue(parameters.out_channels), newLength]
 }
+export function get1DKernelOutputShapeFn(
+  inputShapes: DynamicShape[],
+  parameters: Base1DKernelParameters,
+) {
+  if (!inputShapes[0].connected)
+    return [UNAVAILABLE, toVirtualValue(parameters.out_channels), UNAVAILABLE]
+
+  const [batchSize, , inLength] = inputShapes[0].shapeValue
+  let newLength = getKernelOutSize(
+    inLength,
+    parameters.kernel_size,
+    parameters.stride,
+    parameters.padding,
+  )
+  return [batchSize, toVirtualValue(parameters.out_channels), newLength]
+}
 export function get2DKernelOutputShapeFn(
   inputShapes: DynamicShape[],
-  parameters: Conv2DParameters,
+  parameters: Base2DKernelParameters,
 ) {
   if (!inputShapes[0].connected)
     return [UNAVAILABLE, toVirtualValue(parameters.out_channels), UNAVAILABLE, UNAVAILABLE]

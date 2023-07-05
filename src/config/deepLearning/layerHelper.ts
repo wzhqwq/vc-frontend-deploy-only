@@ -16,14 +16,14 @@ export function createLayerConfig<P extends LayerParameters>(options: CreateLaye
 const darkPrimary = joyTheme.vars.palette.primary[700]
 const lightPrimary = joyTheme.vars.palette.primary[300]
 
-export const rectRenderer1 = {
+export const rectRenderer1: LayerRenderer = {
   color: 'dark',
   getElement: (box: Box) => {
     return new Rect().size(box.w, box.h).move(box.x, box.y).radius(10).fill(darkPrimary)
   },
-} as LayerRenderer
+}
 
-export const rectRenderer2 = {
+export const rectRenderer2: LayerRenderer = {
   color: 'light',
   getElement: (box: Box) => {
     return new Rect().size(box.w, box.h).move(box.x, box.y).fill(lightPrimary)

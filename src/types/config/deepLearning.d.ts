@@ -1,5 +1,10 @@
-import { Box, Element } from "@svgdotjs/svg.js"
-import { EachTypeLayerParameter, LayerParameter, LayerParameters, ShapeParameter } from "./parameter"
+import { Box, Element } from '@svgdotjs/svg.js'
+import {
+  EachTypeLayerParameter,
+  LayerParameter,
+  LayerParameters,
+  ShapeParameter,
+} from './parameter'
 
 export type ConnectorSide = 'top' | 'bottom' | 'left' | 'right'
 export type ConnectorStatus = 'isolated' | 'connected' | 'dragging'
@@ -10,6 +15,10 @@ export interface ConnectorConfig<P extends LayerParameters> {
   side: ConnectorSide
   shape: ShapeParameter<P>
 }
+export type LayerChecker<P extends LayerParameters> = (
+  inputShapes: DynamicShapeConnected[],
+  parameters: P,
+) => string | null
 export interface LayerConfig<P extends LayerParameters> {
   name: string
   displayName?: string
@@ -18,13 +27,16 @@ export interface LayerConfig<P extends LayerParameters> {
   outputs: ConnectorConfig<P>[]
   defaultParameters: P
   parameters: EachTypeLayerParameter<keyof P>[]
-  shapeChecker: (inputShapes: DynamicShapeConnected[], parameters: P) => string | null
+  checkers?: LayerChecker<P>[]
 }
 export interface LayerRenderer {
   getElement: (box: Box) => Element
   color: 'dark' | 'light'
 }
-export type CreateLayerConfigOptions<P extends LayerParameters> = Omit<LayerConfig<P>, 'defaultParameters'>
+export type CreateLayerConfigOptions<P extends LayerParameters> = Omit<
+  LayerConfig<P>,
+  'defaultParameters'
+>
 
 export interface VirtualValue {
   value: number
