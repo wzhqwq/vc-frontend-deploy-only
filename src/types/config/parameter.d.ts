@@ -1,7 +1,7 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
 export type LayerParameterType = 'int' | 'tuple' | 'str' | 'bool' | 'tuple2'
-export type LayerParameterValue<T extends LayerParameterType> = T extends 'int'
+export type LayerParameterValue<T extends 'int' | 'tuple' | 'str' | 'bool' | 'tuple2'> = T extends 'int'
   ? number
   : T extends 'tuple'
   ? number[]
@@ -12,16 +12,22 @@ export type LayerParameterValue<T extends LayerParameterType> = T extends 'int'
   : T extends 'tuple2'
   ? [number, number]
   : never
-export type LayerParameters = Record<string, LayerParameterValue>
+export type LayerParameters = Record<string, LayerParameterValue<LayerParameterType>>
 
-export interface LayerParameter<K extends string = string> {
+export interface LayerParameter<T extends LayerParameterType, K extends string = string> {
   key: K
-  type: LayerParameterType
+  type: T
   description: string
   inShape: boolean
-  default: LayerParameterValue<LayerParameterType>
-  selections?: LayerParameterValue<LayerParameterType>[]
+  default: LayerParameterValue<T>
+  selections?: LayerParameterValue<T>[]
 }
+export type EachTypeLayerParameter<K extends string = string> =
+  | LayerParameter<'int', K>
+  | LayerParameter<'tuple', K>
+  | LayerParameter<'str', K>
+  | LayerParameter<'bool', K>
+  | LayerParameter<'tuple2', K>
 
 export type AnyDimPlaceholders = `d${number}`
 export type AllShapePlaceholders =

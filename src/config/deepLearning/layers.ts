@@ -1,15 +1,15 @@
-import { DynamicShapeConnected, LayerConfig } from '@/types/config/deepLearning'
+import { DynamicShapeConnected } from '@/types/config/deepLearning'
 import {
+  EachTypeLayerParameter,
   Base1DKernelParameters,
   Base2DKernelParameters,
   Conv2DParameters,
   ConvCommonParameters,
-  LayerParameter,
 } from '@/types/config/parameter'
 import { bottomOutput, get2DKernelOutputShapeFn, topInput } from './connectorHelper'
 import { createLayerConfig, rectRenderer1 } from './layerHelper'
 
-const base1DKernelParameters: LayerParameter<keyof Base1DKernelParameters>[] = [
+const base1DKernelParameters: EachTypeLayerParameter<keyof Base1DKernelParameters>[] = [
   { key: 'in_channels', type: 'int', description: '输入通道数', inShape: true, default: 1 },
   { key: 'out_channels', type: 'int', description: '输出通道数', inShape: false, default: 1 },
   { key: 'kernel_size', type: 'int', description: '卷积核大小', inShape: false, default: 1 },
@@ -17,7 +17,7 @@ const base1DKernelParameters: LayerParameter<keyof Base1DKernelParameters>[] = [
   { key: 'padding', type: 'int', description: '填充大小', inShape: false, default: 0 },
   { key: 'dilation', type: 'int', description: '扩张率', inShape: false, default: 1 },
 ]
-const base2DKernelParameters: LayerParameter<keyof Base2DKernelParameters>[] = [
+const base2DKernelParameters: EachTypeLayerParameter<keyof Base2DKernelParameters>[] = [
   { key: 'in_channels', type: 'int', description: '输入通道数', inShape: true, default: 1 },
   { key: 'out_channels', type: 'int', description: '输出通道数', inShape: false, default: 1 },
   {
@@ -31,7 +31,7 @@ const base2DKernelParameters: LayerParameter<keyof Base2DKernelParameters>[] = [
   { key: 'padding', type: 'tuple2', description: '填充大小', inShape: false, default: [0, 0] },
   { key: 'dilation', type: 'tuple2', description: '扩张率', inShape: false, default: [1, 1] },
 ]
-const convCommonParameters: LayerParameter<keyof ConvCommonParameters>[] = [
+const convCommonParameters: EachTypeLayerParameter<keyof ConvCommonParameters>[] = [
   { key: 'groups', type: 'int', description: '分组数', inShape: false, default: 1 },
   { key: 'bias', type: 'bool', description: '是否使用偏置', inShape: false, default: true },
   {
