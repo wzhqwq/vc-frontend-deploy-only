@@ -62,7 +62,7 @@ export class Layer<P extends LayerParameters = any> {
     this.boundary = this.el.rect().fill('transparent')
     this.text = this.el
       .text(this.config.displayName ?? this.config.name)
-      .font({ size: 18 })
+      .font({ size: 14 })
       .fill(this.config.renderer.color == 'dark' ? '#FFF' : '#000')
     // 先生成一个小型预览图，用于拖拽
     this.boundary.size(SMALL_LAYER_WIDTH, SMALL_LAYER_HEIGHT)
@@ -111,6 +111,17 @@ export class Layer<P extends LayerParameters = any> {
       outputs: outputConnectors.map((c) => ({ id: c.id, peer: c.peer?.id })),
       row: this.row,
     }
+  }
+  public toImageSrc() {
+    return (
+      'data:image/svg+xml;base64,' +
+      btoa(
+        SVG()
+          .size(this.width, this.height)
+          .add(this.el.clone().translate(this.offsetX, this.offsetY))
+          .svg(),
+      )
+    )
   }
   public has(connector: Connector) {
     return connector.id.startsWith(this.id)

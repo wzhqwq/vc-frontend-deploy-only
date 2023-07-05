@@ -86,11 +86,16 @@ export class Scene {
   }
   public drop(e: React.DragEvent<HTMLDivElement>) {
     if (!e.dataTransfer?.types.includes('layer')) return
+    this.el.removeClass('layer-dragging')
     const id = e.dataTransfer.getData('layer')
-    if (!this.layers.some((l) => l.id === id)) this.layers.push(Layer.layers.get(id)!)
+    const layer = Layer.layers.get(id)!
+    if (!layer.scene) {
+      layer.scene = this
+      this.layers.push(layer)
+    }
   }
   public dragLeave(e: React.DragEvent<HTMLDivElement>) {
-    // this.el.removeClass('layer-dragging')
-    // console.log('leave--')
+    if (!(e.target as HTMLElement).classList.contains('scene')) return
+    this.el.removeClass('layer-dragging')
   }
 }

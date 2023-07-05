@@ -71,14 +71,15 @@ export class Layout {
   }
 
   public attachLayer(layer: Layer, row: number, insert: boolean) {
-    if (row > this.rows.length) return
-    if (row == this.rows.length) {
-      this.rows.push(new LayoutRow(row, this))
-    }
+    if (row >= this.rows.length) return
     if (insert) this.insertRow(row)
 
     layer.row = row
     let layout = this.rows[row].attachLayer(layer)
+    if (this.rows.at(-1)?.items.length) {
+      this.rows.push(new LayoutRow(this.rows.length, this))
+    }
+    
     this.updateLayout(Math.min(row, layout.upperRow + 1))
   }
 
@@ -102,6 +103,9 @@ export class Layout {
     layout.updateRow(this.rows[row])
     this.rows[row].attachItem(layout)
     layout.resume()
+    if (this.rows.at(-1)?.items.length) {
+      this.rows.push(new LayoutRow(this.rows.length, this))
+    }
 
     this.updateLayout(Math.min(row, oldRow.index, layout.upperRow + 1))
   }
@@ -182,7 +186,10 @@ const getRowDropHandler = (self: Rect, row: LayoutRow, insert: boolean) => (e: E
   if (!layerId) return
   let layer = Layer.layers.get(layerId)
   if (!layer) return
-  row.layout.moveLayer(layer, rowIndex, insert)
+  if (layer.layout)
+    row.layout.moveLayer(layer, rowIndex, insert)
+  else
+    row.layout.attachLayer(layer, rowIndex, insert)
 }
 export class LayoutRow {
   public readonly items: LayoutItem[]

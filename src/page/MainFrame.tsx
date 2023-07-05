@@ -108,6 +108,7 @@ export default function MainFrame() {
       </AppBar>
       <Container
         maxWidth={inWorkspace ? false : 'lg'}
+        disableGutters={inWorkspace}
         sx={{
           flexGrow: 1,
           overflow: 'auto',
