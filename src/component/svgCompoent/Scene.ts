@@ -68,6 +68,8 @@ export class Scene {
       img.src = this.activeLayer.src
       e.dataTransfer!.setDragImage(img, 0, 0)
       e.dataTransfer!.setData('layer', this.activeLayer.id)
+      if (this.activeLayer.layout)
+        e.dataTransfer!.setData(`available:${this.activeLayer.layout.availableRow.join(',')}`, '')
       e.dataTransfer!.effectAllowed = 'move'
     } else {
       e.preventDefault()

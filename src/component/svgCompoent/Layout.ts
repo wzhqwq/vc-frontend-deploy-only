@@ -79,16 +79,13 @@ export class Layout {
     if (this.rows.at(-1)?.items.length) {
       this.rows.push(new LayoutRow(this.rows.length, this))
     }
-    
+
     this.updateLayout(Math.min(row, layout.upperRow + 1))
   }
 
   public moveLayer(layer: Layer, row: number, insert: boolean) {
     if (row > this.rows.length) return
     if (!insert && row == layer.row) return
-    if (row == this.rows.length) {
-      this.rows.push(new LayoutRow(row, this))
-    }
     const oldRow = this.rows.at(layer.row)
     if (!oldRow) return
     const layout = oldRow.detachLayer(layer)
@@ -122,7 +119,7 @@ export class Layout {
         (y, r) => r.doLayoutY(y) + ITEM_GAP,
         (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
       )
-    this.dirtyPaths.forEach(p => p.render())
+    this.dirtyPaths.forEach((p) => p.render())
     this.dirtyPaths.clear()
   }
   public addPath(path: ConnectionPath) {
@@ -157,7 +154,8 @@ export class Layout {
   }
   public dispose() {
     this.el.remove()
-    // ConnectionPath.paths.clear()
+    this.dirtyPaths.forEach((p) => p.dispose())
+    this.dirtyPaths.clear()
   }
 }
 
@@ -175,8 +173,17 @@ const getRowDragLeaveHandler = (self: Rect, className: string) => (e: Event) => 
   )
     self.removeClass('drag-over')
 }
-const rowDragOverHandler = (e: Event) => {
-  if ((e as DragEvent).dataTransfer?.types.includes('layer')) e.preventDefault()
+const getRowDragOverHandler = (getPosition: () => number) => (e: Event) => {
+  const dataTransfer = (e as DragEvent).dataTransfer
+  const availableRow = dataTransfer?.types.find((t) => t.startsWith('available:'))
+  if (availableRow) {
+    const [top, bottom] = availableRow
+      .split(':')[1]
+      .split(',')
+      .map((i) => parseInt(i))
+    if (getPosition() <= top || bottom <= getPosition()) return
+  }
+  if (dataTransfer?.types.includes('layer')) e.preventDefault()
 }
 const getRowDropHandler = (self: Rect, row: LayoutRow, insert: boolean) => (e: Event) => {
   if (!(e as DragEvent).dataTransfer?.types.includes('layer')) return
@@ -186,10 +193,8 @@ const getRowDropHandler = (self: Rect, row: LayoutRow, insert: boolean) => (e: E
   if (!layerId) return
   let layer = Layer.layers.get(layerId)
   if (!layer) return
-  if (layer.layout)
-    row.layout.moveLayer(layer, rowIndex, insert)
-  else
-    row.layout.attachLayer(layer, rowIndex, insert)
+  if (layer.layout) row.layout.moveLayer(layer, rowIndex, insert)
+  else row.layout.attachLayer(layer, rowIndex, insert)
 }
 export class LayoutRow {
   public readonly items: LayoutItem[]
@@ -222,11 +227,17 @@ export class LayoutRow {
 
     this.dropZone.on('dragenter', getRowDragEnterHandler(this.dropZone, 'drop-zone'))
     this.dropZone.on('dragleave', getRowDragLeaveHandler(this.dropZone, 'drop-zone'))
-    this.dropZone.on('dragover', rowDragOverHandler)
+    this.dropZone.on(
+      'dragover',
+      getRowDragOverHandler(() => this._index),
+    )
     this.dropZone.on('drop', getRowDropHandler(this.dropZone, this, false))
     this.insertLine.on('dragenter', getRowDragEnterHandler(this.insertLine, 'insert-line'))
     this.insertLine.on('dragleave', getRowDragLeaveHandler(this.insertLine, 'insert-line'))
-    this.insertLine.on('dragover', rowDragOverHandler)
+    this.insertLine.on(
+      'dragover',
+      getRowDragOverHandler(() => this._index - 0.5),
+    )
     this.insertLine.on('drop', getRowDropHandler(this.insertLine, this, true))
     this.el.on('mousedown', (e) => {
       e.stopPropagation()
@@ -234,10 +245,12 @@ export class LayoutRow {
   }
 
   public doLayoutX() {
-    this.width = Math.max(
-      100,
-      this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP,
-    ) + ROW_PAD * 2
+    this.width =
+      Math.max(
+        100,
+        this.items.reduce((a, b) => a + b.width, 0) + (this.items.length - 1) * ITEM_GAP,
+      ) +
+      ROW_PAD * 2
 
     this.items.reduce((offset, i) => {
       i.updateX(offset)
@@ -400,7 +413,6 @@ export class LayoutLayer extends LayoutItem {
     return this
   }
   public reset() {
-    this.layer.move(0, 0)
     this.layer.el.remove()
     this.inputs.forEach((i) => i.detach())
     this.outputs.forEach((o) => o.detach())
@@ -414,6 +426,15 @@ export class LayoutLayer extends LayoutItem {
   }
   public get upperRow() {
     return this.inputs.reduce((row, i) => Math.min(row, i.c.peer?.layer.row ?? row), this.row.index)
+  }
+  public get availableRow() {
+    let nearestTop = this.inputs
+      .filter((i) => i.c.peer?.layer.row != undefined)
+      .reduce((row, i) => Math.max(row, i.c.peer!.layer.row!), -Infinity)
+    let nearestBottom = this.outputs
+      .filter((o) => o.c.peer?.layer.row != undefined)
+      .reduce((row, o) => Math.min(row, o.c.peer!.layer.row!), Infinity)
+    return [nearestTop, nearestBottom] as [top: number, bottom: number]
   }
   public get lines() {
     return this.outputs
