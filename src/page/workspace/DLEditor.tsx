@@ -7,7 +7,7 @@ import { Box, Button } from '@mui/joy'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 
 export function Component() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -61,16 +61,7 @@ export function Component() {
         }}
       >
         <Box sx={{ overflow: 'auto' }}>
-          <Box
-            sx={{
-              p: 2,
-              display: 'grid',
-              gap: 2,
-              gridTemplateColumns: '1fr 1fr',
-            }}
-          >
-            <LayerListMemo />
-          </Box>
+          <LayerListMemo />
         </Box>
         <Box
           sx={{
@@ -86,7 +77,12 @@ export function Component() {
           <Button variant="soft" color="neutral" startDecorator={<ChevronLeftIcon />}>
             返回
           </Button>
-          <Button variant="solid" color="primary" startDecorator={<SaveIcon />} onClick={handleSave}>
+          <Button
+            variant="solid"
+            color="primary"
+            startDecorator={<SaveIcon />}
+            onClick={handleSave}
+          >
             保存
           </Button>
         </Box>
@@ -97,7 +93,20 @@ export function Component() {
 Component.displayName = 'DLEditor'
 
 function LayerList() {
-  return layers.map((layer) => <LayerItem config={layer} key={layer.name} />)
+  return (
+    <Box
+      sx={{
+        p: 2,
+        display: 'grid',
+        gap: 2,
+        gridTemplateColumns: '1fr 1fr',
+      }}
+    >
+      {layers.map((layer) => (
+        <LayerItem config={layer} key={layer.name} />
+      ))}
+    </Box>
+  )
 }
 const LayerListMemo = memo(LayerList)
 
