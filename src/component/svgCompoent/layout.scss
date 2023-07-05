@@ -1,11 +1,7 @@
 .layout-row {
-  .drop-zone {
-    filter: opacity(0);
-    &.drag-over {
-      filter: opacity(1);
-    }
-  }
+  .drop-zone,
   .insert-line {
+    pointer-events: none;
     filter: opacity(0);
     &.drag-over {
       filter: opacity(1);

@@ -548,7 +548,7 @@ export class LayoutEndPoint extends LayoutLine {
     if (this.c.type == 'input') {
       this.c.peer?.endPoint?.detach(updateImmediately)
       this.path = null
-      return
+      return this
     }
     let currentLine: LayoutLine | null = this
     while (currentLine) {

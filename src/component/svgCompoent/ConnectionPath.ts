@@ -4,7 +4,11 @@ import { Path } from '@svgdotjs/svg.js'
 import { joyTheme } from '@/theme'
 import { LINE_WIDTH } from './Connector'
 
-const STROKE_ATTR = { color: joyTheme.vars.palette.primary[400], width: LINE_WIDTH, linejoin: 'round' }
+const STROKE_ATTR = {
+  color: joyTheme.vars.palette.primary[400],
+  width: LINE_WIDTH,
+  linejoin: 'round',
+}
 
 export class ConnectionPath {
   public readonly id: string
@@ -13,6 +17,14 @@ export class ConnectionPath {
   constructor(private startingEnd: LayoutEndPoint) {
     this.id = nanoid()
     this.el = new Path().stroke(STROKE_ATTR).fill('none')
+    this.el.on('mousedown', (e) => {
+      if ((e as MouseEvent).buttons !== 2) return
+      e.preventDefault()
+
+      this.startingEnd.detach()
+      this.startingEnd.c.peer?.disconnect()
+      this.startingEnd.c.disconnect()
+    })
   }
 
   public render() {

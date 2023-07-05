@@ -97,7 +97,7 @@ export class Scene {
     }
   }
   public dragLeave(e: React.DragEvent<HTMLDivElement>) {
-    if (!(e.target as HTMLElement).classList.contains('scene')) return
-    this.el.removeClass('layer-dragging')
+    // if (!(e.target as HTMLElement).classList.contains('scene')) return
+    // this.el.removeClass('layer-dragging')
   }
 }
