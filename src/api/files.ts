@@ -2,6 +2,7 @@ import { LayerData } from '@/types/config/deepLearning'
 import { QueryFunction, useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { baseUrl } from './network'
+import { useErrorlessQuery } from './common'
 
 const fetchPlainFile: QueryFunction<string, string[]> = async ({ queryKey }) => {
   const filename = queryKey[3]
@@ -15,7 +16,7 @@ export function usePlainTextFile(filename: string) {
     data: text,
     isFetching: fetchingFile,
     isError: fetchFileError,
-  } = useQuery<string, Error, string, string[]>({
+  } = useErrorlessQuery<string>({
     queryKey: ['public', 'file', 'files', filename],
     enabled: filename != 'new',
     queryFn: fetchPlainFile,

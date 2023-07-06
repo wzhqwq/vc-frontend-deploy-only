@@ -1,8 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
-import { usePatch, usePost } from './common'
+import { useErrorlessQuery, usePost } from './common'
 import { queryClient } from './queryClient'
 import { useCallback } from 'react'
 import { User } from '@/types/entity/user'
+import { useQuery } from '@tanstack/react-query'
 
 export interface UserCreatingForm {
   email: string
@@ -14,7 +14,8 @@ export type LoginForm = Omit<UserCreatingForm, 'confirmPassword'>
 
 export function useUser() {
   const { loggedIn } = useSession()
-  const { data: user, isFetching: fetchingUser } = useQuery<User>(['private', 'user', 'me'], {
+  const { data: user, isFetching: fetchingUser } = useErrorlessQuery<User>({
+    queryKey: ['private', 'user', 'me'],
     enabled: loggedIn,
   })
   // const { isLoading: updatingUser, mutate: updateUser } = usePatch<User, UserForm>(

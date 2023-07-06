@@ -1,6 +1,8 @@
-import { MutationOptions, useMutation } from '@tanstack/react-query'
+import { MutationOptions, UseQueryOptions, useMutation, useQuery } from '@tanstack/react-query'
 import { request } from './network'
 import qs from 'qs'
+import { useEffect } from 'react'
+import { useSnackbar } from 'notistack'
 
 export interface StandardResponse {
   code: number
@@ -25,6 +27,7 @@ export function usePathMutation<TData = any, TVariables = any>(
   method: string,
   options: MutationOptions<TData, Error, TVariables> = {},
 ) {
+  const { enqueueSnackbar } = useSnackbar()
   return useMutation<TData, Error, TVariables, any>({
     ...options,
     mutationFn: async (variables) => {
@@ -47,6 +50,10 @@ export function usePathMutation<TData = any, TVariables = any>(
 
       return await request(path, method, useAuth, variables)
     },
+    onError: (e, v, c) => {
+      enqueueSnackbar(e.message, { variant: 'error' })
+      options.onError?.(e, v, c)
+    }
   })
 }
 
@@ -73,4 +80,17 @@ export function usePatch<TData = any, TVariables = any>(
   options?: MutationOptions<TData, Error, TVariables>,
 ) {
   return usePathMutation<TData, TVariables>(mutationKey, 'PATCH', options)
+}
+
+export function useErrorlessQuery<TData = unknown>(
+  options: UseQueryOptions<TData, Error, TData, any[]>,
+) {
+  const result = useQuery(options)
+  const { enqueueSnackbar } = useSnackbar()
+  useEffect(() => {
+    if (result.error) {
+      enqueueSnackbar(result.error.message, { variant: 'error' })
+    }
+  }, [result.error, enqueueSnackbar])
+  return result
 }
