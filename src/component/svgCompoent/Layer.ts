@@ -10,6 +10,7 @@ import { FlatConfigParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
 import { LayoutLayer } from './Layout'
 import { Scene } from './Scene'
+import { joyTheme } from '@/theme'
 
 const MIN_HEIGHT = 80
 const MIN_WIDTH = 140
@@ -17,6 +18,8 @@ const CONNECTOR_GAP_X = 20
 const CONNECTOR_GAP_Y = 10
 const SMALL_LAYER_WIDTH = 100
 const SMALL_LAYER_HEIGHT = 60
+
+const ERROR_COLOR = joyTheme.vars.palette.danger[500]
 
 const getWidthOfHorizontalConnectors = (connectors: Connector[]) =>
   connectors.length
@@ -41,6 +44,8 @@ export class Layer<P extends FlatConfigParameters = any> {
   public readonly boundary: Rect
   private shape: Element | null = null
   private text: Text
+  private readonly errorBubble: Rect
+  private readonly errorText: Text
 
   public layout: LayoutLayer | null = null
   public scene: Scene | null = null
@@ -76,6 +81,9 @@ export class Layer<P extends FlatConfigParameters = any> {
     this.src =
       'data:image/svg+xml;base64,' +
       btoa(SVG().size(SMALL_LAYER_WIDTH, SMALL_LAYER_HEIGHT).add(this.el.clone()).svg())
+
+    this.errorBubble = this.el.rect().fill(ERROR_COLOR).radius(5)
+    this.errorText = this.el.text('').font({ size: 12 }).fill('#FFF')
 
     let ids = data
       ? [...data.inputs, ...data.outputs].map((c) => c.id)
@@ -154,16 +162,32 @@ export class Layer<P extends FlatConfigParameters = any> {
   }
   private checkAndUpdate() {
     const inputShapes = this.inputShapes
-    if (
-      inputShapes.every((s): s is DynamicShapeConnected => s.connected) &&
-      this.config.checkers
-    ) {
-      const error = this.config.checkers.find((c) => !c(inputShapes, this.parameters))
-      if (error) console.error(error)
-    }
     this.connectors.forEach((c) => c.update(inputShapes, this.parameters))
     this.updateLayout()
     this.layout?.updateLayout()
+    if (inputShapes.every((s): s is DynamicShapeConnected => s.connected) && this.config.checkers) {
+      const error = this.config.checkers.map((c) => c(inputShapes, this.parameters)).find((e) => e)
+      const center = [this.width / 2 - this.offsetX, this.height / 2 - this.offsetY] as [number, number]
+      if (error) {
+        this.errorText
+          .text(error)
+          .show()
+          .center(...center)
+        this.errorBubble
+          .size(this.errorText.bbox().width + 10, this.errorText.bbox().height + 10)
+          .show()
+          .center(...center)
+          .front()
+        this.errorText.front()
+      } else {
+        this.errorBubble.hide()
+        this.errorText.hide()
+      }
+    }
+    else {
+      this.errorBubble.hide()
+      this.errorText.hide()
+    }
   }
   public remove() {
     this.scene?.layout.removeLayer(this)
