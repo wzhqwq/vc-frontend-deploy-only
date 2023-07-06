@@ -90,16 +90,13 @@ export class Layer<P extends FlatConfigParameters = any> {
       : new Array(config.inputs.length + config.outputs.length)
           .fill('')
           .map((_, i) => this.id + '-' + i)
-    this.connectors = [...config.inputs, ...config.outputs].map((c, i) => {
-      let connector = new Connector(this, ids[i], c.side, c.type, c.shape)
-      connector.update(this.inputShapes, this.parameters)
-      if (c.type == 'input' && data?.inputs[i].peer) {
-        connector.connectById(data.inputs[i].peer!)
-      }
-      return connector
-    })
-
-    this.updateLayout()
+    this.connectors = [...config.inputs, ...config.outputs].map(
+      (c, i) => new Connector(this, ids[i], c.side, c.type, c.shape),
+    )
+    if (!data) {
+      this.connectors.forEach((c) => c.update(this.inputShapes, this.parameters))
+      this.updateLayout()
+    }
 
     this.el.on('mousedown', () => {
       this.el.addClass('dragging')
@@ -114,6 +111,20 @@ export class Layer<P extends FlatConfigParameters = any> {
     })
 
     Layer.layers.set(this.id, this)
+  }
+
+  public initializeConnectors(data: LayerData<P>) {
+    let i = 0
+    this.connectors.forEach(c => {
+      c.update(this.inputShapes, this.parameters)
+      if (c.type != 'input') return
+      
+      if (data.inputs[i].peer) {
+        c.connectById(data.inputs[i].peer!)
+      }
+      i++
+    })
+    this.updateLayout()
   }
 
   public toJSON(): LayerData<P> {
@@ -167,7 +178,10 @@ export class Layer<P extends FlatConfigParameters = any> {
     this.layout?.updateLayout()
     if (inputShapes.every((s): s is DynamicShapeConnected => s.connected) && this.config.checkers) {
       const error = this.config.checkers.map((c) => c(inputShapes, this.parameters)).find((e) => e)
-      const center = [this.width / 2 - this.offsetX, this.height / 2 - this.offsetY] as [number, number]
+      const center = [this.width / 2 - this.offsetX, this.height / 2 - this.offsetY] as [
+        number,
+        number,
+      ]
       if (error) {
         this.errorText
           .text(error)
@@ -183,8 +197,7 @@ export class Layer<P extends FlatConfigParameters = any> {
         this.errorBubble.hide()
         this.errorText.hide()
       }
-    }
-    else {
+    } else {
       this.errorBubble.hide()
       this.errorText.hide()
     }

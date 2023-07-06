@@ -1,15 +1,24 @@
 import { LayerData } from '@/types/config/deepLearning'
-import { useQuery } from '@tanstack/react-query'
+import { QueryFunction, useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { baseUrl } from './network'
+
+const fetchPlainFile: QueryFunction<string, string[]> = async ({ queryKey }) => {
+  const filename = queryKey[3]
+  const response = await fetch(`${baseUrl}file/files/${filename}`)
+  if (response.status == 404) throw new Error('文件不存在')
+  return response.text()
+}
 
 export function usePlainTextFile(filename: string) {
   const {
     data: text,
     isFetching: fetchingFile,
     isError: fetchFileError,
-  } = useQuery<string, Error>({
+  } = useQuery<string, Error, string, string[]>({
     queryKey: ['public', 'file', 'files', filename],
     enabled: filename != 'new',
+    queryFn: fetchPlainFile,
   })
 
   return { text, fetchingFile, fetchFileError }

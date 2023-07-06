@@ -29,7 +29,9 @@ export function Component() {
     const layers = layerData.map((data) => {
       const layerConfig = allLayers.find((l) => l.name == data.name)
       if (!layerConfig) throw new Error('名称错误')
-      return new Layer(layerConfig, data)
+      const layer = new Layer(layerConfig, data)
+      layer.initializeConnectors(data)
+      return layer
     })
     setScene(
       new Scene(layers, containerRef.current!, (layer) => {
