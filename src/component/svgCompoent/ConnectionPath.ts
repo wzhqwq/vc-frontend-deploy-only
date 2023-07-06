@@ -17,8 +17,7 @@ export class ConnectionPath {
   constructor(private startingEnd: LayoutEndPoint) {
     this.id = nanoid()
     this.el = new Path().stroke(STROKE_ATTR).fill('none')
-    this.el.on('mousedown', (e) => {
-      if ((e as MouseEvent).buttons !== 2) return
+    this.el.on('contextmenu', (e) => {
       e.preventDefault()
 
       this.startingEnd.detach()
@@ -31,7 +30,6 @@ export class ConnectionPath {
     const lines = [this.startingEnd] as LayoutLine[]
     while (lines[0].nextLine) lines.unshift(lines[0].nextLine)
     const points = lines.reverse().flatMap((l) => l.points)
-    // console.log(points)
     this.el.plot('M' + points.map(([x, y]) => ` ${x} ${y}`).join(' L'))
   }
 
