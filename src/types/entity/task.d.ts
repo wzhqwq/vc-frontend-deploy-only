@@ -21,7 +21,7 @@ export interface TaskGroup {
   user_id: number
 }
 
-export interface Datum {
+export interface Task {
   /**
    * 算法名称
    */
