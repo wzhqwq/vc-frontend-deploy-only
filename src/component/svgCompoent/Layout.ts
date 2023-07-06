@@ -207,7 +207,7 @@ export class LayoutRow {
   private itemsDirty: boolean = true
   private lines: LayoutLine[] = []
 
-  constructor(public _index: number, public layout: Layout, layers: Layer[] = []) {
+  constructor(private _index: number, public layout: Layout, layers: Layer[] = []) {
     this.el = new G().addClass('layout-row')
     this.dropZone = this.el
       .rect()
@@ -397,7 +397,7 @@ export class LayoutLayer extends LayoutItem {
     this.outputs = endPoints.filter(({ c }) => c.type == 'output')
   }
   public updateX(x: number) {
-    if (this._x == x) return
+    // if (this._x == x) return
     super.updateX(x)
     this.layer.move(this._x, this._y)
     this.inputs.forEach((i) => i.updateX(this.layer.x))
@@ -448,6 +448,11 @@ export class LayoutLayer extends LayoutItem {
   public get peerOrder() {
     let orders = this.inputs.filter((i) => i.prevLine).map((i) => i.prevLine!.order)
     return orders.sort((a, b) => a - b)[Math.floor(orders.length / 2)] ?? 0
+  }
+  public updateLayout() {
+    this.width = this.layer.width
+    this.height = this.layer.height
+    this.row.layout.updateLayout(this.row.index)
   }
 }
 

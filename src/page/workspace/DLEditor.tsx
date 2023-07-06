@@ -3,7 +3,7 @@ import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
 import { layers } from '@/config/deepLearning/layers'
 
-import { Box, Button, Typography } from '@mui/joy'
+import { Box, Button, Divider, Typography } from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
 import { Popover } from '@mui/material'
 import { useForm, SubmitHandler } from 'react-hook-form'
@@ -48,7 +48,7 @@ export function Component() {
       sx={{
         height: '100vh',
         display: 'grid',
-        gridTemplateColumns: 'minmax(400px, 1fr) 400px',
+        gridTemplateColumns: 'minmax(400px, 1fr) auto 400px',
         '.svg-container': {
           overflow: 'hidden',
           svg: {
@@ -67,26 +67,30 @@ export function Component() {
         onDrop={scene?.drop}
         className="svg-container"
       />
+      <Divider orientation="vertical" />
       <Box
         sx={{
-          borderLeft: '1px solid',
-          borderColor: 'divider',
-          display: 'grid',
-          gridTemplateRows: '1fr auto',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
-        <Box sx={{ overflow: 'auto' }}>
+        <Box sx={{ p: 1 }}>
+          <Typography level="h6">拖拽层至左侧虚线框</Typography>
+        </Box>
+        <Divider />
+        <Box sx={{ overflow: 'auto', minHeight: 0, flexGrow: 1 }}>
           <LayerListMemo />
         </Box>
+        <Divider />
         <Box
           sx={{
             px: 2,
             py: 1,
-            borderTop: '1px solid',
-            borderColor: 'divider',
             display: 'flex',
             gap: 2,
             justifyContent: 'flex-end',
+            flexShrink: 0,
           }}
         >
           <Button variant="soft" color="neutral" startDecorator={<ChevronLeftIcon />}>

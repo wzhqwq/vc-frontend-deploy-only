@@ -1,6 +1,6 @@
 import { placeholderToShortName } from '@/config/deepLearning/connectorHelper'
 import { joyTheme } from '@/theme'
-import { DynamicShape } from '@/types/config/deepLearning'
+import { DynamicShape, VirtualValue } from '@/types/config/deepLearning'
 import { ShapeParameter, FlatConfigParameters, AnyDimPlaceholders } from '@/types/config/parameter'
 import { Container, Text } from '@svgdotjs/svg.js'
 
@@ -34,8 +34,7 @@ export class Label<P extends FlatConfigParameters> {
     })
   }
 
-  update(inputs: DynamicShape[], parameters: P) {
-    const shape = this.shapeParameter.getShape(inputs, parameters)
+  update(shape: VirtualValue[] | undefined) {
     if (!shape) return this.renderFullyUnknown()
     return this.label.clear().text((add) => {
       add.plain('(')

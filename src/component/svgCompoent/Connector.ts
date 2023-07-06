@@ -1,5 +1,5 @@
 import { joyTheme } from '@/theme'
-import { ConnectorSide, ConnectorType, DynamicShape } from '@/types/config/deepLearning'
+import { ConnectorSide, ConnectorType, DynamicShape, VirtualValue } from '@/types/config/deepLearning'
 import { G, Line, Rect } from '@svgdotjs/svg.js'
 import { FlatConfigParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
@@ -46,15 +46,16 @@ export class Connector<P extends FlatConfigParameters = any> {
   public endPoint: LayoutEndPoint | null = null
 
   public readonly shapeDimension: number
+  public shapeValue: VirtualValue[] | undefined = undefined
 
   constructor(
     public readonly layer: Layer<P>,
     public readonly id: string,
     public readonly side: ConnectorSide,
     public readonly type: ConnectorType,
-    shape: ShapeParameter<P>,
+    private readonly shapeParameter: ShapeParameter<P>,
   ) {
-    this.shapeDimension = shape.anyDimension ? 0 : shape.placeholders.length
+    this.shapeDimension = shapeParameter.anyDimension ? 0 : shapeParameter.placeholders.length
     this.el = layer.el
       .group()
       .addClass('connector')
@@ -71,7 +72,7 @@ export class Connector<P extends FlatConfigParameters = any> {
       .rect()
       .fill(ISOLATED_COLOR)
       .radius(CONNECTOR_PILL_HEIGHT / 2)
-    this.label = new Label(this.end, shape)
+    this.label = new Label(this.end, shapeParameter)
 
     this.end.on('mousedown', this.startDragging.bind(this))
     this.end.on('mouseup', this.dropped.bind(this))
@@ -80,8 +81,13 @@ export class Connector<P extends FlatConfigParameters = any> {
   }
 
   update(inputs: DynamicShape[], parameters: P) {
+    this.shapeValue = this.shapeParameter.getShape(inputs, parameters)
+    if (this.type == 'output' && this.peer) {
+      this.peer.shapeValue = this.shapeValue
+      this.peer.layer.updateInputShapes()
+    }
     const textBBox = this.label
-      .update(inputs, parameters)
+      .update(this.shapeValue)
       .center(0, 0)
       .bbox()
     const { width: textWidth } = textBBox
@@ -124,6 +130,10 @@ export class Connector<P extends FlatConfigParameters = any> {
     this.line.stroke({ color: CONNECTED_COLOR })
     this.pill.fill(CONNECTED_COLOR)
     this.el.addClass('connected')
+    if (this.type == 'input') {
+      this.shapeValue = peer.shapeValue
+      this.layer.updateInputShapes()
+    }
     return this
   }
   disconnect() {
@@ -132,6 +142,10 @@ export class Connector<P extends FlatConfigParameters = any> {
     this.line.stroke({ color: ISOLATED_COLOR })
     this.pill.fill(ISOLATED_COLOR)
     this.el.removeClass('connected')
+    if (this.type == 'input') {
+      this.shapeValue = undefined
+      this.layer.updateInputShapes()
+    }
     return this
   }
   get peer() {

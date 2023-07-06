@@ -1,5 +1,10 @@
 import { Element, G, Rect, SVG, Text } from '@svgdotjs/svg.js'
-import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearning'
+import {
+  DynamicShape,
+  DynamicShapeConnected,
+  LayerConfig,
+  LayerData,
+} from '@/types/config/deepLearning'
 import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
 import { FlatConfigParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
@@ -127,13 +132,38 @@ export class Layer<P extends FlatConfigParameters = any> {
     )
   }
   public updateParameters(parameters: P) {
-    const parametersInShape = this.config.parameters.filter(p => p.inShape)
-    const updateConnectors = parametersInShape.some(p => parameters[p.key] != this.parameters[p.key])
+    const parametersInShape = this.config.parameters.filter((p) => p.inShape)
+    const updateConnectors = parametersInShape.some(
+      (p) => parameters[p.key] != this.parameters[p.key],
+    )
     this.parameters = parameters
-    if (updateConnectors) {
-      this.connectors.forEach((c) => c.update(this.inputShapes, this.parameters))
-      this.updateLayout()
+    if (updateConnectors) this.checkAndUpdate()
+  }
+  public updateInputShapes() {
+    this.inputShapes = this.connectors
+      .filter((c) => c.type == 'input')
+      .map((c) =>
+        c.peer
+          ? {
+              connected: true,
+              shapeValue: c.shapeValue!,
+            }
+          : { connected: false },
+      )
+    this.checkAndUpdate()
+  }
+  private checkAndUpdate() {
+    const inputShapes = this.inputShapes
+    if (
+      inputShapes.every((s): s is DynamicShapeConnected => s.connected) &&
+      this.config.checkers
+    ) {
+      const error = this.config.checkers.find((c) => !c(inputShapes, this.parameters))
+      if (error) console.error(error)
     }
+    this.connectors.forEach((c) => c.update(inputShapes, this.parameters))
+    this.updateLayout()
+    this.layout?.updateLayout()
   }
   public remove() {
     this.scene?.layout.removeLayer(this)
