@@ -43,13 +43,20 @@ export function useSession() {
       initialData: () => localStorage.getItem('token') !== null,
     },
   )
-  const { mutateAsync: logIn, isLoading: loggingIn } = usePost<string, LoginForm>(['public', 'user', 'login'], {
-    onSuccess: (data) => {
-      localStorage.setItem('token', data)
-      queryClient.invalidateQueries(['state', 'loggedIn'])
+  const { mutateAsync: logIn, isLoading: loggingIn } = usePost<string, LoginForm>(
+    ['public', 'user', 'login'],
+    {
+      onSuccess: (data) => {
+        localStorage.setItem('token', data)
+        queryClient.invalidateQueries(['state', 'loggedIn'])
+      },
     },
-  })
-  const { mutateAsync: registerUser, isLoading: registering } = usePost<User, UserCreatingForm>(['public', 'user', 'register'])
+  )
+  const { mutateAsync: registerUser, isLoading: registering } = usePost<User, UserCreatingForm>([
+    'public',
+    'user',
+    'register',
+  ])
 
   const logOut = useCallback(() => {
     localStorage.removeItem('token')

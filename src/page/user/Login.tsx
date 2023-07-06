@@ -1,5 +1,6 @@
 import { LoginForm, useSession } from '@/api/user'
 import { Button, Input, Link, Sheet, Typography } from '@mui/joy'
+import { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
@@ -7,7 +8,17 @@ export default function Login() {
   const { logIn, loggingIn } = useSession()
   const { register, handleSubmit, formState } = useForm<LoginForm>()
   const navigate = useNavigate()
-  const onSubmit: SubmitHandler<LoginForm> = (data) => logIn(data).then(() => navigate('/'))
+
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const onSubmit: SubmitHandler<LoginForm> = async (data) => {
+    try {
+      await logIn(data)
+      navigate('/')
+    }
+    catch (e) {
+      setErrorMsg((e as Error).message)
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -41,6 +52,11 @@ export default function Login() {
           type="password"
           autoComplete="current-password"
         />
+        {errorMsg && (
+          <Typography color="danger" level='body2' sx={{ mt: -2 }}>
+            {errorMsg}
+          </Typography>
+        )}
 
         <Button type="submit" loading={loggingIn} disabled={loggingIn || !formState.isValid}>
           登录

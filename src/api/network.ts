@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { StandardResponse } from './common'
 import qs from 'qs'
 
@@ -12,16 +12,23 @@ export async function request(path: string, method: string, useAuth: boolean, da
     if (!localStorage.getItem('token')) throw new Error('login required')
     headers['Authorization'] = 'Bearer ' + localStorage.getItem('token')
   }
-  const res = await axios<StandardResponse>(baseUrl + path, {
-    method,
-    headers,
-    data: data ? qs.stringify(data) : undefined,
-  })
-  const { data: respData, code, msg, _links } = res.data
-  if (code > 299) {
-    throw new Error(msg)
+  try {
+    const res = await axios<StandardResponse>(baseUrl + path, {
+      method,
+      headers,
+      data: data ? qs.stringify(data) : undefined,
+    })
+    const { data: respData, code, msg } = res.data
+    if (code > 299) {
+      throw new Error(msg)
+    }
+    return respData
   }
-  let nextLink = _links?.find(l => l.rel === 'next')?.href
-  if (nextLink) respData.nextLink = nextLink
-  return respData
+  catch (e) {
+    if ((e as AxiosError).response?.data) {
+      const { msg } = (e as AxiosError).response?.data as StandardResponse
+      throw new Error(msg)
+    }
+    throw e
+  }
 }
