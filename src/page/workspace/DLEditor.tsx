@@ -1,9 +1,9 @@
 import { SimpleErrorBoundary } from '@/component/basic/errorBoundaries'
 import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
-import { layers } from '@/config/deepLearning/layers'
+import { layers as allLayers } from '@/config/deepLearning/layers'
 
-import { Box, Button, Divider, Typography } from '@mui/joy'
+import { Box, Button, CircularProgress, Divider, Typography } from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
 import { Popover } from '@mui/material'
 import { useForm, SubmitHandler } from 'react-hook-form'
@@ -14,16 +14,25 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import CheckIcon from '@mui/icons-material/Check'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ParameterInput from '@/component/basic/ParameterInput'
+import { useParams } from 'react-router-dom'
+import { useLayerData } from '@/api/files'
 
 export function Component() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>()
   const [anchorEl, setAnchorEl] = useState<null | SVGElement>(null)
   const [layer, setLayer] = useState<Layer | null>(null)
+  const { id: modelId } = useParams<{ id: string }>()
+  const { layerData, fetchingLayer } = useLayerData(modelId ?? 'new')
 
   useEffect(() => {
+    const layers = layerData.map((data) => {
+      const layerConfig = allLayers.find((l) => l.name == data.name)
+      if (!layerConfig) throw new Error('名称错误')
+      return new Layer(layerConfig, data)
+    })
     setScene(
-      new Scene([], containerRef.current!, (layer) => {
+      new Scene(layers, containerRef.current!, (layer) => {
         setLayer(layer)
         setAnchorEl(layer.el.node)
       }),
@@ -37,7 +46,7 @@ export function Component() {
       setAnchorEl(null)
       setLayer(null)
     }
-  }, [])
+  }, [layerData])
 
   const handleSave = useCallback(() => {
     console.log(JSON.stringify(scene?.toJSON()))
@@ -122,6 +131,15 @@ export function Component() {
           </>
         )}
       </Popover>
+      <CircularProgress
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          visibility: fetchingLayer ? 'visible' : 'hidden',
+        }}
+      />
     </Box>
   )
 }
@@ -137,7 +155,7 @@ function LayerList() {
         gridTemplateColumns: '1fr 1fr',
       }}
     >
-      {layers.map((layer) => (
+      {allLayers.map((layer) => (
         <LayerItem config={layer} key={layer.name} />
       ))}
     </Box>

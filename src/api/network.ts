@@ -2,7 +2,7 @@ import axios from 'axios'
 import { StandardResponse } from './common'
 import qs from 'qs'
 
-const baseUrl = 'http://localhost:5552/v1/'
+const baseUrl = 'http://202.194.15.150:6999/api/'
 
 export async function request(path: string, method: string, useAuth: boolean, data?: any) {
   const headers = {
