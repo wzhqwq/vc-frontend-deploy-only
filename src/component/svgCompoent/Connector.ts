@@ -1,7 +1,7 @@
 import { joyTheme } from '@/theme'
 import { ConnectorSide, ConnectorType, DynamicShape } from '@/types/config/deepLearning'
 import { G, Line, Rect } from '@svgdotjs/svg.js'
-import { LayerParameters, ShapeParameter } from '@/types/config/parameter'
+import { FlatConfigParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
 import { Layer } from './Layer'
 import { Scene } from './Scene'
@@ -27,7 +27,7 @@ const { palette } = joyTheme.vars
 const ISOLATED_COLOR = palette.neutral[500]
 const CONNECTED_COLOR = palette.primary[500]
 
-export class Connector<P extends LayerParameters = any> {
+export class Connector<P extends FlatConfigParameters = any> {
   public static readonly connectors = new Map<string, Connector>()
 
   private el: G

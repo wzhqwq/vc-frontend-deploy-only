@@ -1,12 +1,10 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
-export type LayerParameterType = 'int' | 'float' | 'tuple' | 'str' | 'bool' | 'tuple2'
-export type LayerParameterValue<T extends 'int' | 'tuple' | 'str' | 'bool' | 'tuple2'> = T extends
+export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2'
+export type ConfigParameterValue<T extends 'int' | 'str' | 'bool' | 'tuple2'> = T extends
   | 'int'
   | 'float'
   ? number
-  : T extends 'tuple'
-  ? number[]
   : T extends 'str'
   ? string
   : T extends 'bool'
@@ -14,24 +12,23 @@ export type LayerParameterValue<T extends 'int' | 'tuple' | 'str' | 'bool' | 'tu
   : T extends 'tuple2'
   ? [number, number]
   : never
-export type LayerParameters = Record<string, LayerParameterValue<LayerParameterType>>
+export type FlatConfigParameters = Record<string, ConfigParameterValue<ConfigParameterType>>
 
-export interface LayerParameter<T extends LayerParameterType, K extends string = string> {
+export interface ConfigParameter<T extends ConfigParameterType, K extends string = string> {
   key: K
   type: T
   description: string
   inShape?: boolean
-  nullable?: boolean
-  default: LayerParameterValue<T>
+  default: ConfigParameterValue<T> | ((parameters: FlatConfigParameters) => ConfigParameterValue<T>)
   selections?: string[]
+  validator?: (value: ConfigParameterValue<T>) => boolean
 }
-export type EachTypeLayerParameter<K extends string = string> =
-  | LayerParameter<'int', K>
-  | LayerParameter<'float', K>
-  | LayerParameter<'tuple', K>
-  | LayerParameter<'str', K>
-  | LayerParameter<'bool', K>
-  | LayerParameter<'tuple2', K>
+export type EachTypeOfConfigParameter<K extends string = string> =
+  | ConfigParameter<'int', K>
+  | ConfigParameter<'float', K>
+  | ConfigParameter<'str', K>
+  | ConfigParameter<'bool', K>
+  | ConfigParameter<'tuple2', K>
 
 export type AnyDimPlaceholders = `d${number}`
 export type AllShapePlaceholders =
@@ -47,20 +44,20 @@ export type AllShapePlaceholders =
   | 'seq_length'
   | 'embed_dim'
 
-type ShapeGetter<P extends LayerParameters> = (
+type ShapeGetter<P extends FlatConfigParameters> = (
   inputs: DynamicShape[],
   parameters: P,
 ) => VirtualValue[] | undefined
-export interface FixedDimensionShapeParameter<P extends LayerParameters> {
+export interface FixedDimensionShapeParameter<P extends FlatConfigParameters> {
   anyDimension?: false
   placeholders: AllShapePlaceholders[]
   getShape: ShapeGetter<P>
 }
-export interface AnyDimensionShapeParameter<P extends LayerParameters> {
+export interface AnyDimensionShapeParameter<P extends FlatConfigParameters> {
   anyDimension: true
   getShape: ShapeGetter<P>
 }
-export type ShapeParameter<P extends LayerParameters> =
+export type ShapeParameter<P extends FlatConfigParameters> =
   | FixedDimensionShapeParameter<P>
   | AnyDimensionShapeParameter<P>
 

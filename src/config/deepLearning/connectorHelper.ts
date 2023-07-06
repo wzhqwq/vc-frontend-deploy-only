@@ -5,7 +5,7 @@ import {
   Base2DKernelParameters,
   Conv1DParameters,
   Conv2DParameters,
-  LayerParameters,
+  FlatConfigParameters,
   ShapeGetter,
 } from '@/types/config/parameter'
 
@@ -27,7 +27,7 @@ export const generateInputShapeFn = (index: number) =>
     const shape = inputShapes[index]
     return shape.connected ? shape.shapeValue : undefined
   }
-export function topInput<P extends LayerParameters>(
+export function topInput<P extends FlatConfigParameters>(
   index: number,
   placeholders?: AllShapePlaceholders[],
 ) {
@@ -47,7 +47,7 @@ export function topInput<P extends LayerParameters>(
   } as ConnectorConfig<P>
 }
 
-export function bottomOutput<P extends LayerParameters>(
+export function bottomOutput<P extends FlatConfigParameters>(
   getShape: ShapeGetter<P>,
   placeholders?: AllShapePlaceholders[],
 ) {

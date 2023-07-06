@@ -1,5 +1,5 @@
 import {
-  EachTypeLayerParameter,
+  EachTypeOfConfigParameter,
   Base1DKernelParameters,
   Base2DKernelParameters,
   Conv2DParameters,
@@ -23,7 +23,7 @@ import {
 import { createLayerConfig, rectRenderer1, rectRenderer2 } from './layerHelper'
 import { check1DKernelSize, check2DKernelSize, checkInChannel, checkNumFeatures } from './validation'
 
-const base1DKernelParameters: EachTypeLayerParameter<keyof Base1DKernelParameters>[] = [
+const base1DKernelParameters: EachTypeOfConfigParameter<keyof Base1DKernelParameters>[] = [
   { key: 'in_channels', type: 'int', description: '输入通道数', default: 1 },
   { key: 'out_channels', type: 'int', description: '输出通道数', inShape: true, default: 1 },
   { key: 'kernel_size', type: 'int', description: '卷积核大小', inShape: true, default: 1 },
@@ -31,7 +31,7 @@ const base1DKernelParameters: EachTypeLayerParameter<keyof Base1DKernelParameter
   { key: 'padding', type: 'int', description: '填充大小', inShape: true, default: 0 },
   { key: 'dilation', type: 'int', description: '扩张率', default: 1 },
 ]
-const base2DKernelParameters: EachTypeLayerParameter<keyof Base2DKernelParameters>[] = [
+const base2DKernelParameters: EachTypeOfConfigParameter<keyof Base2DKernelParameters>[] = [
   { key: 'in_channels', type: 'int', description: '输入通道数', default: 1 },
   { key: 'out_channels', type: 'int', description: '输出通道数', inShape: true, default: 1 },
   {
@@ -45,7 +45,7 @@ const base2DKernelParameters: EachTypeLayerParameter<keyof Base2DKernelParameter
   { key: 'padding', type: 'tuple2', description: '填充大小', inShape: true, default: [0, 0] },
   { key: 'dilation', type: 'tuple2', description: '扩张率', default: [1, 1] },
 ]
-const convCommonParameters: EachTypeLayerParameter<keyof ConvCommonParameters>[] = [
+const convCommonParameters: EachTypeOfConfigParameter<keyof ConvCommonParameters>[] = [
   {
     key: 'groups',
     type: 'int',
@@ -79,7 +79,7 @@ const conv2d = createLayerConfig<Conv2DParameters>({
   checkers: [checkInChannel, check2DKernelSize],
 })
 
-const maxPoolCommonParameters: EachTypeLayerParameter<keyof MaxPoolCommonParameters>[] = [
+const maxPoolCommonParameters: EachTypeOfConfigParameter<keyof MaxPoolCommonParameters>[] = [
   {
     key: 'padding_mode',
     type: 'str',
@@ -118,7 +118,7 @@ const maxPool2d = createLayerConfig<MaxPool2DParameters>({
   checkers: [checkInChannel, check2DKernelSize],
 })
 
-const avgPoolCommonParameters: EachTypeLayerParameter<keyof AvgPoolCommonParameters>[] = [
+const avgPoolCommonParameters: EachTypeOfConfigParameter<keyof AvgPoolCommonParameters>[] = [
   {
     key: 'ceil_mode',
     type: 'bool',
@@ -159,7 +159,7 @@ const avgPool2d = createLayerConfig<AvgPool2DParameters>({
   checkers: [checkInChannel, check2DKernelSize],
 })
 
-const batchNormParameters: EachTypeLayerParameter<keyof BatchNormParameters>[] = [
+const batchNormParameters: EachTypeOfConfigParameter<keyof BatchNormParameters>[] = [
   {
     key: 'num_features',
     type: 'int',

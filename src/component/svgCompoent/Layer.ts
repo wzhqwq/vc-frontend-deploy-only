@@ -1,7 +1,7 @@
 import { Element, G, Rect, SVG, Text } from '@svgdotjs/svg.js'
 import { DynamicShape, LayerConfig, LayerData } from '@/types/config/deepLearning'
 import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
-import { LayerParameters } from '@/types/config/parameter'
+import { FlatConfigParameters } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
 import { LayoutLayer } from './Layout'
 import { Scene } from './Scene'
@@ -26,7 +26,7 @@ const getHeightOfVerticalConnectors = (connectors: Connector[]) =>
     ? connectors.length * CONNECTOR_PILL_HEIGHT + (connectors.length - 1) * CONNECTOR_GAP_Y
     : 0
 
-export class Layer<P extends LayerParameters = any> {
+export class Layer<P extends FlatConfigParameters = any> {
   public static readonly layers = new Map<string, Layer>()
   public readonly id: string
   public row: number
