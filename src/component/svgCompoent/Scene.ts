@@ -9,7 +9,7 @@ export class Scene {
   private activeLayer: Layer | null = null
   private moving = false
 
-  constructor(private layers: Layer[], private parent: HTMLElement) {
+  constructor(private layers: Layer[], private parent: HTMLElement, private onLayerClick: (layer: Layer) => void) {
     this.layout = new Layout(layers)
     layers.forEach((layer) => {
       layer.scene = this
@@ -61,6 +61,9 @@ export class Scene {
 
   public setPossibleDraggingLayer(layer: Layer | null) {
     this.activeLayer = layer
+  }
+  public setSelectedLayer(layer: Layer) {
+    this.onLayerClick(layer)
   }
 
   public dragStart(e: React.DragEvent<HTMLDivElement>) {

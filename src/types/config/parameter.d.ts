@@ -23,7 +23,7 @@ export interface LayerParameter<T extends LayerParameterType, K extends string =
   inShape?: boolean
   nullable?: boolean
   default: LayerParameterValue<T>
-  selections?: LayerParameterValue<T>[]
+  selections?: string[]
 }
 export type EachTypeLayerParameter<K extends string = string> =
   | LayerParameter<'int', K>

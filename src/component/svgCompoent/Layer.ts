@@ -50,9 +50,9 @@ export class Layer<P extends LayerParameters = any> {
   public readonly connectors: Connector[]
 
   private inputShapes: DynamicShape[]
-  private parameters: P
+  public parameters: P
 
-  constructor(private config: LayerConfig<P>, data?: LayerData<P>) {
+  constructor(public readonly config: LayerConfig<P>, data?: LayerData<P>) {
     this.el = new G().addClass('layer')
     this.parameters = data?.parameters ?? config.defaultParameters
     this.id = data?.id ?? nanoid()
@@ -96,6 +96,9 @@ export class Layer<P extends LayerParameters = any> {
       this.el.removeClass('dragging')
       this.scene?.setPossibleDraggingLayer(null)
     })
+    this.el.on('click', () => {
+      this.scene?.setSelectedLayer(this)
+    })
 
     Layer.layers.set(this.id, this)
   }
@@ -123,6 +126,19 @@ export class Layer<P extends LayerParameters = any> {
       )
     )
   }
+  public updateParameters(parameters: P) {
+    const parametersInShape = this.config.parameters.filter(p => p.inShape)
+    const updateConnectors = parametersInShape.some(p => parameters[p.key] != this.parameters[p.key])
+    this.parameters = parameters
+    if (updateConnectors) {
+      this.connectors.forEach((c) => c.update(this.inputShapes, this.parameters))
+      this.updateLayout()
+    }
+  }
+  public remove() {
+    this.scene?.layout.removeLayer(this)
+  }
+
   public has(connector: Connector) {
     return connector.id.startsWith(this.id)
   }

@@ -3,24 +3,49 @@ import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
 import { layers } from '@/config/deepLearning/layers'
 
-import { Box, Button } from '@mui/joy'
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  Box,
+  Button,
+  Chip,
+  FormHelperText,
+  FormLabel,
+  Input,
+  Select,
+  Switch,
+  Option,
+  Typography,
+} from '@mui/joy'
+import { Layer } from '@/component/svgCompoent/Layer'
+import { Popover } from '@mui/material'
+import { useForm, SubmitHandler, Controller } from 'react-hook-form'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import CheckIcon from '@mui/icons-material/Check'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 export function Component() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>()
+  const [anchorEl, setAnchorEl] = useState<null | SVGElement>(null)
+  const [layer, setLayer] = useState<Layer | null>(null)
 
   useEffect(() => {
-    setScene(new Scene([], containerRef.current!))
+    setScene(
+      new Scene([], containerRef.current!, (layer) => {
+        setLayer(layer)
+        setAnchorEl(layer.el.node)
+      }),
+    )
 
     return () => {
       setScene((s) => {
         s?.dispose()
         return undefined
       })
+      setAnchorEl(null)
+      setLayer(null)
     }
   }, [])
 
@@ -87,6 +112,22 @@ export function Component() {
           </Button>
         </Box>
       </Box>
+      <Popover
+        open={!!anchorEl}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        {layer && (
+          <>
+            <Box sx={{ borderBottom: '1px solid', borderBottomColor: 'divider', p: 1 }}>
+              <Typography level="h6">设置参数： {layer.config.name}</Typography>
+            </Box>
+            <LayerInfoMemo layer={layer} onClose={() => setAnchorEl(null)} />
+          </>
+        )}
+      </Popover>
     </Box>
   )
 }
@@ -109,5 +150,102 @@ function LayerList() {
   )
 }
 const LayerListMemo = memo(LayerList)
+
+function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
+  const { register, handleSubmit, formState, control } = useForm<any>({
+    values: layer.parameters,
+  })
+  const onSubmit: SubmitHandler<any> = (data) => {
+    layer.updateParameters(data)
+    onClose()
+  }
+  const handleDelete = () => {
+    layer.remove()
+    onClose()
+  }
+  const parameterList = useMemo(
+    () =>
+      layer.config.parameters.map((parameter) => (
+        <Box key={parameter.key as string}>
+          <FormLabel>
+            {parameter.key as string}
+            <Chip size="sm" variant="soft" sx={{ ml: 1 }}>
+              {parameter.type}
+            </Chip>
+          </FormLabel>
+          <FormHelperText>{parameter.description}</FormHelperText>
+          {parameter.type == 'bool' ? (
+            <Controller
+              control={control}
+              name={parameter.key as string}
+              render={({ field: { onChange, value, ref } }) => (
+                <Switch onChange={onChange} checked={value} ref={ref} sx={{ my: 0.5 }} />
+              )}
+            />
+          ) : parameter.type == 'int' || parameter.type == 'float' ? (
+            <Controller
+              control={control}
+              name={parameter.key as string}
+              render={({ field: { onChange, value, ref } }) => (
+                <Input
+                  type="number"
+                  onChange={(e) =>
+                    onChange(
+                      parameter.type == 'int'
+                        ? parseInt(e.target.value)
+                        : parseFloat(e.target.value),
+                    )
+                  }
+                  value={value}
+                  ref={ref}
+                  size="sm"
+                />
+              )}
+            />
+          ) : parameter.selections ? (
+            <Controller
+              control={control}
+              name={parameter.key as string}
+              render={({ field: { onChange, value, ref } }) => (
+                <Select onChange={(_, value) => onChange(value)} value={value} ref={ref}>
+                  {parameter.selections?.map((selection) => (
+                    <Option value={selection} key={selection}>
+                      {selection}
+                    </Option>
+                  ))}
+                </Select>
+              )}
+            />
+          ) : (
+            <Input {...register(parameter.key as string, { required: true })} size="sm" />
+          )}
+        </Box>
+      )),
+    [layer.config.parameters, register],
+  )
+
+  return (
+    <Box sx={{ p: 1, minWidth: 200 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: 2,
+        }}
+      >
+        {parameterList}
+      </Box>
+      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+        <Button disabled={!formState.isValid} onClick={handleSubmit(onSubmit)}>
+          <CheckIcon />
+        </Button>
+        <Button color="danger" disabled={!formState.isValid} onClick={handleDelete}>
+          <DeleteIcon />
+        </Button>
+      </Box>
+    </Box>
+  )
+}
+const LayerInfoMemo = memo(LayerInfo)
 
 export const ErrorBoundary = SimpleErrorBoundary
