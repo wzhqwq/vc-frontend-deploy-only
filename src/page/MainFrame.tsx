@@ -10,6 +10,8 @@ import Person from '@mui/icons-material/Person'
 import Task from '@mui/icons-material/Task'
 import TaskTwoTone from '@mui/icons-material/TaskTwoTone'
 import ViewInAr from '@mui/icons-material/ViewInAr'
+import AccountTree from '@mui/icons-material/AccountTree'
+import Description from '@mui/icons-material/Description'
 
 import { useSession, useUser } from '@/api/user'
 import { SearchInput } from '@/component/basic/CustomInput'
@@ -72,19 +74,19 @@ export default function MainFrame() {
             多模态可视化平台
           </Typography>
           <SearchInput placeholder="平台内搜索…" />
-          <Button variant="plain" color="neutral">
+          <Button variant="plain" color="neutral" onClick={() => navigate('/explore')}>
             <ExploreTwoTone fontSize="small" sx={{ mr: 1 }} />
             探索
           </Button>
-          <Button variant="plain" color="neutral">
+          <Button variant="plain" color="neutral" onClick={() => navigate('/tasks')}>
             <TaskTwoTone fontSize="small" sx={{ mr: 1 }} />
             公开任务
           </Button>
-          <Button variant="plain" color="neutral">
+          <Button variant="plain" color="neutral" onClick={() => navigate('/help')}>
             <HelpTwoTone fontSize="small" sx={{ mr: 1 }} />
             指引
           </Button>
-          <Button variant="plain" color="neutral">
+          <Button variant="plain" color="neutral" onClick={() => navigate('/about')}>
             <InfoTwoTone fontSize="small" sx={{ mr: 1 }} />
             关于
           </Button>
@@ -123,6 +125,9 @@ export default function MainFrame() {
 const UserControl = memo(() => {
   const { user } = useUser()
   const { logOut } = useSession()
+
+  const navigate = useNavigate()
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -138,7 +143,7 @@ const UserControl = memo(() => {
         <Person />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose} placement="bottom-end">
-        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, pt: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, pt: 0, gap: 2 }}>
           {user ? (
             <Typography level="h6" sx={{ flexGrow: 1 }}>
               {user.email}
@@ -151,12 +156,16 @@ const UserControl = memo(() => {
           </IconButton>
         </Box>
         <Divider sx={{ mb: 1 }} />
-        <NormalMenuButton Icon={AccountCircle} text="个人信息" />
-        <NormalMenuButton Icon={Notifications} text="通知" />
+        <NormalMenuButton Icon={AccountCircle} text="个人信息" onClick={() => navigate('/user/profile')} />
+        <NormalMenuButton Icon={Notifications} text="通知" onClick={() => navigate('/user/notifications')} />
         <Divider sx={{ my: 1 }} />
-        <NormalMenuButton Icon={ViewInAr} text="模型库" />
-        <NormalMenuButton Icon={Task} text="任务管理" />
-        <NormalMenuButton Icon={Cloud} text="文件管理" />
+        <Typography level="body2" color="neutral" sx={{ px: 2, pb: 1 }}>
+          个人数据
+        </Typography>
+        <NormalMenuButton Icon={ViewInAr} text="算法模型" onClick={() => navigate('/user/models')} />
+        <NormalMenuButton Icon={Description} text="数据集" onClick={() => navigate('/user/datasets')} />
+        <NormalMenuButton Icon={AccountTree} text="项目" onClick={() => navigate('/user/projects')} />
+        <NormalMenuButton Icon={Task} text="任务管理" onClick={() => navigate('/user/tasks')} />
       </Menu>
     </>
   )

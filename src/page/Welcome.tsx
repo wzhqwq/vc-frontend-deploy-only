@@ -1,10 +1,12 @@
 import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import { Badge, Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { memo } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import logo from '@/logo.svg'
 
 export default function Welcome() {
+  const navigate = useNavigate()
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -19,7 +21,7 @@ export default function Welcome() {
               <li>文本数据</li>
               <li>图像数据</li>
             </ul>
-            <Button sx={{ mt: 1 }} fullWidth>
+            <Button sx={{ mt: 1 }} fullWidth onClick={() => navigate('/explore/datasets')}>
               探索数据集
               <ChevronRightRounded />
             </Button>
@@ -46,7 +48,7 @@ export default function Welcome() {
               <li>深度学习</li>
               <li>用户自上传模型</li>
             </ul>
-            <Button sx={{ mt: 1 }} fullWidth>
+            <Button sx={{ mt: 1 }} fullWidth onClick={() => navigate('/explore/models')}>
               探索模型
               <ChevronRightRounded />
             </Button>
