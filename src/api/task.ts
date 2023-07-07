@@ -2,6 +2,39 @@ import { useDelete, useErrorlessQuery, usePost, usePut } from './common'
 import { Task, TaskGroup } from '@/types/entity/task'
 import { queryClient } from './queryClient'
 
+export function usePublicTaskGroups() {
+  const { data: groups, isFetching: fetchingGroups } = useErrorlessQuery<TaskGroup[]>({
+    queryKey: ['private', 'algo', 'projects', 'task_groups'],
+  })
+
+  return {
+    groups,
+    fetchingGroups,
+  }
+}
+
+export function useProjectTaskGroups(projectId: number) {
+  const { data: taskGroups, isFetching: fetchingTaskGroups } = useErrorlessQuery<Task[]>({
+    queryKey: ['private', 'algo', 'projects', projectId, 'task_groups'],
+  })
+  const { mutate: createTaskGroup, isLoading: creatingTaskGroup } = usePost<TaskGroup, undefined>(
+    ['private', 'algo', 'projects', projectId, 'task_groups'],
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['private', 'algo', 'projects', projectId, 'task_groups'])
+      },
+    },
+  )
+
+  return {
+    taskGroups,
+    fetchingTaskGroups,
+
+    createTaskGroup,
+    creatingTaskGroup,
+  }
+}
+
 type TaskCreatingForm = Pick<Task, 'algo' | 'data_id' | 'pre_task_ids'>
 export function useTaskGroup(groupId: number) {
   const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>({
@@ -10,7 +43,7 @@ export function useTaskGroup(groupId: number) {
   const { data: tasks, isFetching: fetchingTasks } = useErrorlessQuery<Task[]>({
     queryKey: ['private', 'algo', 'task_groups', groupId, 'tasks'],
   })
-  const { mutate: createTask, isLoading: creatingTask } = usePost<Task, TaskCreatingForm>(
+  const { mutateAsync: createTask } = usePost<Task, TaskCreatingForm>(
     ['private', 'algo', 'task_groups', groupId, 'tasks'],
     {
       onSuccess: () => {
@@ -18,7 +51,7 @@ export function useTaskGroup(groupId: number) {
       },
     },
   )
-  const { mutate: runGroup, isLoading: runningGroup } = usePut<Task, undefined>(
+  const { mutate: startGroup, isLoading: startingGroup } = usePut<Task, undefined>(
     ['private', 'algo', 'task_groups', groupId, 'process'],
     {
       onSuccess: () => {
@@ -43,10 +76,9 @@ export function useTaskGroup(groupId: number) {
     fetchingTasks,
 
     createTask,
-    creatingTask,
 
-    runGroup,
-    runningGroup,
+    startGroup,
+    startingGroup,
 
     terminateGroup,
     terminatingGroup,
