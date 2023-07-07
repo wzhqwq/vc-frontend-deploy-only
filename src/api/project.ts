@@ -26,9 +26,10 @@ export function useProjects(isPublic: boolean) {
   }
 }
 
-export function useProject(projectId: number) {
+export function useProject(projectId?: number) {
   const { data: project, isFetching: fetchingProject } = useErrorlessQuery<Project>({
     queryKey: ['private', 'algo', 'projects', projectId],
+    enabled: projectId !== undefined,
   })
   const { mutate: updateProject, isLoading: updatingProject } = usePut<
     Project,
