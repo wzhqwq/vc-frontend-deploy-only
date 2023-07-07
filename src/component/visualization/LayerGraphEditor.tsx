@@ -14,16 +14,19 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import CheckIcon from '@mui/icons-material/Check'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ParameterInput from '@/component/basic/ParameterInput'
-import { useParams } from 'react-router-dom'
 import { useLayerData } from '@/api/files'
 
-export default function DLEditor() {
+interface LayerGraphEditorProps {
+  filename?: string
+  onSave?: (filename: string) => void
+}
+
+export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>()
   const [anchorEl, setAnchorEl] = useState<null | SVGElement>(null)
   const [layer, setLayer] = useState<Layer | null>(null)
-  const { id: modelId } = useParams<{ id: string }>()
-  const { layerData, fetchingLayer } = useLayerData(modelId ?? 'new')
+  const { layerData, fetchingLayer, uploadLayer, uploadingLayer } = useLayerData(filename ?? 'new')
 
   useEffect(() => {
     const layers = layerData.map((data) => {
@@ -51,7 +54,10 @@ export default function DLEditor() {
   }, [layerData])
 
   const handleSave = useCallback(() => {
-    console.log(JSON.stringify(scene?.toJSON()))
+    if (!scene) return
+    uploadLayer(scene.toJSON()).then((filename) => {
+      onSave?.(filename)
+    })
   }, [scene])
 
   return (
@@ -112,6 +118,8 @@ export default function DLEditor() {
             color="primary"
             startDecorator={<SaveIcon />}
             onClick={handleSave}
+            disabled={uploadingLayer || !scene}
+            loading={uploadingLayer}
           >
             保存
           </Button>
@@ -200,7 +208,7 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
       >
         {parameterList}
       </Box>
-      <Stack direction='row' spacing={1} mt={1}>
+      <Stack direction="row" spacing={1} mt={1}>
         <Button disabled={!formState.isValid} onClick={handleSubmit(onSubmit)}>
           <CheckIcon />
         </Button>

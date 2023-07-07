@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 import { StandardResponse } from './common'
 import qs from 'qs'
 
@@ -12,12 +12,17 @@ export async function request(path: string, method: string, useAuth: boolean, da
     if (!localStorage.getItem('token')) throw new Error('login required')
     headers['Authorization'] = 'Bearer ' + localStorage.getItem('token')
   }
+  return await wrapAxios({
+    url: baseUrl + path,
+    method,
+    headers,
+    data: data ? qs.stringify(data) : undefined,
+  })
+}
+
+export async function wrapAxios(config: AxiosRequestConfig<any>) {
   try {
-    const res = await axios<StandardResponse>(baseUrl + path, {
-      method,
-      headers,
-      data: data ? qs.stringify(data) : undefined,
-    })
+    const res = await axios<StandardResponse>(config)
     const { data: respData, code, msg } = res.data
     if (code > 299) {
       throw new Error(msg)

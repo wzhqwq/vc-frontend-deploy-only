@@ -6,7 +6,7 @@ import Login from './user/Login'
 import Register from './user/Register'
 
 import Welcome from './index/Welcome'
-import Tasks from './index/Tasks'
+import PublicTasks from './index/PublicTasks'
 import ExploreFrame from './explore/ExploreFrame'
 import Guide from './index/Guide'
 import About from './index/About'
@@ -28,8 +28,8 @@ export const welcome = {
   ErrorBoundary: SimpleErrorBoundary,
 }
 
-export const tasks = {
-  Component: Tasks,
+export const publicTasks = {
+  Component: PublicTasks,
   ErrorBoundary: SimpleErrorBoundary,
 }
 export const exploreFrame = {

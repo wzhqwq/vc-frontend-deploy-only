@@ -52,7 +52,7 @@ export function TaskGroupDataGrid({ result }: { result: QueryTaskGroupsResult })
             <Button
               variant="plain"
               startDecorator={<PageviewRoundedIcon />}
-              onClick={() => navigate(`/tasks/${params.row.id}`)}
+              onClick={() => navigate(`/task/${params.row.id}`)}
             >
               查看
             </Button>
