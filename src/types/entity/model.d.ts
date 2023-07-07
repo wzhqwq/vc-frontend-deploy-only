@@ -14,7 +14,7 @@ export interface Model {
   /**
    * 模型类型
    */
-  type: number;
+  kind: number;
   /**
    * 模型标题
    */

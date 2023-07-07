@@ -4,7 +4,7 @@ import { Component, useMemo } from 'react'
 
 import { TaskGroup } from '@/types/entity/task'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { taskStatus } from '../basic/status'
+import { taskStatus } from '../basic/chips'
 import { formatTime } from '@/utils/time'
 import { ProjectName, UserWidget } from '../basic/getters'
 import { QueryTaskGroupsResult } from '@/api/task'

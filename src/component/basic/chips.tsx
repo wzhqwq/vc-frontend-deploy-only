@@ -16,3 +16,8 @@ export const taskStatus = [
   <Chip color='neutral' startDecorator={<StopCircleRoundedIcon />}>手动中止</Chip>,
   <Chip color='danger' startDecorator={<ReportRoundedIcon />}>异常中止</Chip>,
 ]
+
+export const modelKinds = [
+  <Chip color='primary' variant="soft">深度学习模型</Chip>,
+  <Chip color='neutral' variant="soft">Python代码</Chip>
+]
