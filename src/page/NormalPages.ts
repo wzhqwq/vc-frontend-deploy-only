@@ -7,9 +7,9 @@ import Register from './user/Register'
 
 import Welcome from './index/Welcome'
 import Tasks from './index/Tasks'
-
 import ExploreFrame from './explore/ExploreFrame'
-import ExploreProjects from './explore/ExploreProjects'
+import Guide from './index/Guide'
+import About from './index/About'
 
 export const mainFrame = {
   Component: MainFrame,
@@ -27,12 +27,20 @@ export const welcome = {
   Component: Welcome,
   ErrorBoundary: SimpleErrorBoundary,
 }
+
 export const tasks = {
   Component: Tasks,
   ErrorBoundary: SimpleErrorBoundary,
 }
-
 export const exploreFrame = {
   Component: ExploreFrame,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const guide = {
+  Component: Guide,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const about = {
+  Component: About,
   ErrorBoundary: SimpleErrorBoundary,
 }

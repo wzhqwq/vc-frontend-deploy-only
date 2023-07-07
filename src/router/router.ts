@@ -19,6 +19,8 @@ export const router = createBrowserRouter([
         path: 'explore/:type',
         lazy: () => import('@/page/NormalPages').then((m) => m.exploreFrame),
       },
+      { path: 'guide', lazy: () => import('@/page/NormalPages').then((m) => m.guide) },
+      { path: 'about', lazy: () => import('@/page/NormalPages').then((m) => m.about) },
     ],
   },
 ])

@@ -80,7 +80,7 @@ export default function MainFrame() {
             <TaskTwoTone fontSize="small" sx={{ mr: 1 }} />
             公开任务
           </Button>
-          <Button variant="plain" color="neutral" onClick={() => navigate('/help')}>
+          <Button variant="plain" color="neutral" onClick={() => navigate('/guide')}>
             <HelpTwoTone fontSize="small" sx={{ mr: 1 }} />
             指引
           </Button>
