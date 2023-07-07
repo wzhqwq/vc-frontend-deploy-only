@@ -1,5 +1,4 @@
 import AccountCircle from '@mui/icons-material/AccountCircle'
-import Cloud from '@mui/icons-material/Cloud'
 import DeleteSweep from '@mui/icons-material/DeleteSweep'
 import ExitToApp from '@mui/icons-material/ExitToApp'
 import ExploreTwoTone from '@mui/icons-material/ExploreTwoTone'
@@ -25,6 +24,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Stack,
   Typography,
 } from '@mui/joy'
 import { AppBar, Toolbar } from '@mui/material'
@@ -41,10 +41,8 @@ export default function MainFrame() {
   const inWorkspace = pathname.startsWith('/workspace')
 
   return (
-    <Box
+    <Stack
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
         height: '100vh',
       }}
     >
@@ -118,7 +116,7 @@ export default function MainFrame() {
       >
         <Outlet />
       </Container>
-    </Box>
+    </Stack>
   )
 }
 
@@ -143,7 +141,7 @@ const UserControl = memo(() => {
         <Person />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose} placement="bottom-end">
-        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, pt: 0, gap: 2 }}>
+        <Stack direction='row' p={1} pt={0} spacing={2} alignItems='center'>
           {user ? (
             <Typography level="h6" sx={{ flexGrow: 1 }}>
               {user.email}
@@ -154,7 +152,7 @@ const UserControl = memo(() => {
           <IconButton color="danger" size="sm">
             <ExitToApp fontSize="small" onClick={logOut} />
           </IconButton>
-        </Box>
+        </Stack>
         <Divider sx={{ mb: 1 }} />
         <NormalMenuButton Icon={AccountCircle} text="个人信息" onClick={() => navigate('/user/profile')} />
         <NormalMenuButton Icon={Notifications} text="通知" onClick={() => navigate('/user/notifications')} />
@@ -195,14 +193,14 @@ const MessageControl = memo(() => {
           minWidth: 300,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, pt: 0 }}>
+        <Stack direction='row' alignItems='center' p={1} pt={0}>
           <Typography level="h6" sx={{ flexGrow: 1 }}>
             消息中心
           </Typography>
           <IconButton color="danger" size="sm">
             <DeleteSweep fontSize="small" />
           </IconButton>
-        </Box>
+        </Stack>
         <Divider sx={{ mb: 1 }} />
         <MenuItem>暂无消息</MenuItem>
       </Menu>

@@ -3,7 +3,7 @@ import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
 import { layers as allLayers } from '@/config/deepLearning/layers'
 
-import { Box, Button, CircularProgress, Divider, Typography } from '@mui/joy'
+import { Box, Button, CircularProgress, Divider, Stack, Typography } from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
 import { Popover } from '@mui/material'
 import { useForm, SubmitHandler } from 'react-hook-form'
@@ -200,14 +200,14 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
       >
         {parameterList}
       </Box>
-      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+      <Stack direction='row' spacing={1} mt={1}>
         <Button disabled={!formState.isValid} onClick={handleSubmit(onSubmit)}>
           <CheckIcon />
         </Button>
         <Button color="danger" disabled={!formState.isValid} onClick={handleDelete}>
           <DeleteIcon />
         </Button>
-      </Box>
+      </Stack>
     </Box>
   )
 }

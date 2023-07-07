@@ -1,5 +1,5 @@
 import { LayerConfig } from '@/types/config/deepLearning'
-import { Box, CircularProgress, Sheet } from '@mui/joy'
+import { Box, CircularProgress, Stack } from '@mui/joy'
 import { memo, useEffect, useRef, useState } from 'react'
 import { Layer } from '../svgCompoent/Layer'
 
@@ -32,7 +32,7 @@ function LayerItem({ config }: LayerItemProps) {
   }
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <Stack direction='row' alignItems='center'>
       {src ? (
         <Box
           component="img"
@@ -50,7 +50,7 @@ function LayerItem({ config }: LayerItemProps) {
       ) : (
         <CircularProgress />
       )}
-    </Box>
+    </Stack>
   )
 }
 

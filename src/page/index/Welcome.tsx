@@ -1,5 +1,5 @@
 import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
-import { Badge, Box, Button, Chip, Sheet, Typography } from '@mui/joy'
+import { Badge, Box, Button, Chip, Sheet, Stack, Typography } from '@mui/joy'
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -8,13 +8,13 @@ import logo from '@/logo.svg'
 export default function Welcome() {
   const navigate = useNavigate()
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <Stack alignItems='center' justifyContent='center' height='100%'>
+      <Stack alignItems='center'>
         <img src={logo} alt="logo" width="200" />
         <Typography level="h4" >
           多模态可视化平台
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 4 }}>
+        <Stack direction='row' alignItems='center' spacing={0.5} mt={4}>
           <StepBlock step={1} title="上传数据集" badgeContent="xxx个在线公开数据集">
             <ul>
               <li>生物数据</li>
@@ -64,9 +64,9 @@ export default function Welcome() {
               <ChevronRightRounded />
             </Button>
           </StepBlock>
-        </Box>
-      </Box>
-    </Box>
+        </Stack>
+      </Stack>
+    </Stack>
   )
 }
 
