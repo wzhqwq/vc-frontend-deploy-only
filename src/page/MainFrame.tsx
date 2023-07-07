@@ -72,7 +72,7 @@ export default function MainFrame() {
             多模态可视化平台
           </Typography>
           <SearchInput placeholder="平台内搜索…" />
-          <Button variant="plain" color="neutral" onClick={() => navigate('/explore')}>
+          <Button variant="plain" color="neutral" onClick={() => navigate('/explore/projects')}>
             <ExploreTwoTone fontSize="small" sx={{ mr: 1 }} />
             探索
           </Button>

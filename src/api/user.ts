@@ -14,26 +14,17 @@ export type UserForm = Partial<UserCreatingForm>
 export type LoginForm = Omit<UserCreatingForm, 'confirmPassword'>
 export type JwtUserData = Omit<User, 'email'>
 
-export function useUser() {
+export function useUser(userId?: number) {
   const { loggedIn } = useSession()
   const { data: user, isFetching: fetchingUser } = useErrorlessQuery<User>({
-    queryKey: ['private', 'user', 'me'],
+    queryKey: userId ? ['public', 'user', 'users', userId] : ['private', 'user', 'me'],
     enabled: loggedIn,
   })
-  // const { isLoading: updatingUser, mutate: updateUser } = usePatch<User, UserForm>(
-  //   ['private', 'user', 'me'],
-  //   {
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries(['private', 'user', 'me'])
-  //     },
-  //   },
-  // )
 
   return {
     user,
     fetchingUser,
-    // updateUser,
-    // updatingUser,
+
     isAdmin: user?.role_id === 2,
   }
 }

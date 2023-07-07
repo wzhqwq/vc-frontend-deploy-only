@@ -6,7 +6,7 @@ import { TaskGroup } from '@/types/entity/task'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { taskStatus } from '../basic/status'
 import { formatTime } from '@/utils/time'
-import { ProjectName } from '../basic/getters'
+import { ProjectName, UserWidget } from '../basic/getters'
 import { QueryTaskGroupsResult } from '@/api/task'
 
 import PageviewRoundedIcon from '@mui/icons-material/PageviewRounded'
@@ -31,7 +31,12 @@ export function TaskGroupDataGrid({ result }: { result: QueryTaskGroupsResult })
         width: 160,
         valueGetter: (params) => formatTime(params.row.created_at),
       },
-      { field: 'user', headerName: '所属用户', width: 200 },
+      {
+        field: 'user',
+        headerName: '所属用户',
+        width: 200,
+        renderCell: (params) => <UserWidget userId={params.row.user_id} />,
+      },
       {
         field: 'status',
         headerName: '状态',

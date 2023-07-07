@@ -16,6 +16,10 @@ export interface Project {
    */
   name: string
   /**
+   * 项目描述
+   */
+  description: string
+  /**
    * 是否私有
    */
   private: boolean
