@@ -1,8 +1,9 @@
 import { useErrorlessQuery, usePost } from './common'
 import { queryClient } from './queryClient'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { User } from '@/types/entity/user'
 import { useQuery } from '@tanstack/react-query'
+import jwt_decode from 'jwt-decode'
 
 export interface UserCreatingForm {
   email: string
@@ -11,6 +12,7 @@ export interface UserCreatingForm {
 }
 export type UserForm = Partial<UserCreatingForm>
 export type LoginForm = Omit<UserCreatingForm, 'confirmPassword'>
+export type JwtUserData = Omit<User, 'email'>
 
 export function useUser() {
   const { loggedIn } = useSession()
@@ -36,14 +38,25 @@ export function useUser() {
   }
 }
 
+const checkLoggedIn = () =>
+  !!localStorage.getItem('token') &&
+  !jwt_decode<JwtUserData>(localStorage.getItem('token')!).is_anon
+
 export function useSession() {
-  const { data: loggedIn } = useQuery<boolean>(
-    ['state', 'loggedIn'],
-    () => localStorage.getItem('token') !== null,
-    {
-      initialData: () => localStorage.getItem('token') !== null,
-    },
-  )
+  const { data: loggedIn } = useQuery<boolean>(['state', 'loggedIn'], checkLoggedIn, {
+    initialData: checkLoggedIn,
+  })
+  const { data: anonymousToken } = useErrorlessQuery<string>({
+    queryKey: ['public', 'user', 'login', 'anon'],
+    enabled: !loggedIn,
+  })
+
+  useEffect(() => {
+    if (!loggedIn && anonymousToken) {
+      localStorage.setItem('token', anonymousToken)
+    }
+  }, [loggedIn, anonymousToken])
+
   const { mutateAsync: logIn, isLoading: loggingIn } = usePost<string, LoginForm>(
     ['public', 'user', 'login'],
     {
