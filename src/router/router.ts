@@ -1,20 +1,15 @@
 import { createBrowserRouter } from 'react-router-dom'
 
-import MainFrame from '@/page/MainFrame'
-import Welcome from '@/page/Welcome'
-import Login from '@/page/user/Login'
-import Register from '@/page/user/Register'
-
 export const router = createBrowserRouter([
   {
     path: '/',
-    Component: MainFrame,
+    lazy: () => import('@/page/NormalPages').then(m => m.mainFrame),
     children: [
-      { index: true, Component: Welcome },
-      { path: 'login', Component: Login },
-      { path: 'register', Component: Register },
+      { index: true, lazy: () => import('@/page/NormalPages').then(m => m.welcome) },
+      { path: 'login', lazy: () => import('@/page/NormalPages').then(m => m.login) },
+      { path: 'register', lazy: () => import('@/page/NormalPages').then(m => m.register) },
       { path: 'workspace', children: [
-        { path: 'dl-editor/:id', lazy: () => import('@/page/workspace/DLEditor') },
+        { path: 'dl-editor/:id', lazy: () => import('@/page/SVGPages').then(m => m.dlEditor) },
       ]}
     ],
   },

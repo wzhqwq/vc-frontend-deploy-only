@@ -17,7 +17,7 @@ import ParameterInput from '@/component/basic/ParameterInput'
 import { useParams } from 'react-router-dom'
 import { useLayerData } from '@/api/files'
 
-export function Component() {
+export default function DLEditor() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>()
   const [anchorEl, setAnchorEl] = useState<null | SVGElement>(null)
@@ -145,7 +145,6 @@ export function Component() {
     </Box>
   )
 }
-Component.displayName = 'DLEditor'
 
 function LayerList() {
   return (
@@ -213,5 +212,3 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
   )
 }
 const LayerInfoMemo = memo(LayerInfo)
-
-export const ErrorBoundary = SimpleErrorBoundary
