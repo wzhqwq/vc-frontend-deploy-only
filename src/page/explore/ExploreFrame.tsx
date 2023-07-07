@@ -1,10 +1,12 @@
-import { Box, ListItemDecorator, Stack, Tab, TabList, TabPanel, Tabs } from '@mui/joy'
-import { Outlet, useNavigate, useParams } from 'react-router-dom'
+import { Box, ListItemDecorator, Tab, TabList, TabPanel, Tabs } from '@mui/joy'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import ViewInAr from '@mui/icons-material/ViewInAr'
 import AccountTree from '@mui/icons-material/AccountTree'
 import Description from '@mui/icons-material/Description'
 import ExploreProjects from './ExploreProjects'
+import ExploreDatasets from './ExploreDatasets'
+import ExploreModels from './ExploreModels'
 
 export default function ExploreFrame() {
   const { type } = useParams<{ type: string }>()
@@ -41,8 +43,12 @@ export default function ExploreFrame() {
         <TabPanel value="projects">
           <ExploreProjects />
         </TabPanel>
-        <TabPanel value="datasets">数据集</TabPanel>
-        <TabPanel value="models">算法</TabPanel>
+        <TabPanel value="datasets">
+          <ExploreDatasets />
+        </TabPanel>
+        <TabPanel value="models">
+          <ExploreModels />
+        </TabPanel>
       </Tabs>
     </Box>
   )
