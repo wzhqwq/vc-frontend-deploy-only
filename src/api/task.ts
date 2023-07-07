@@ -2,19 +2,37 @@ import { useDelete, useErrorlessQuery, usePost, usePut } from './common'
 import { Task, TaskGroup } from '@/types/entity/task'
 import { queryClient } from './queryClient'
 
-export function usePublicTaskGroups() {
-  const { data: groups, isFetching: fetchingGroups } = useErrorlessQuery<TaskGroup[]>({
+export interface QueryTaskGroupsResult {
+  taskGroups: TaskGroup[]
+  fetchingTaskGroups: boolean
+  refetchTaskGroup: () => void
+}
+export function usePublicTaskGroups(): QueryTaskGroupsResult {
+  const {
+    data: taskGroups,
+    isFetching: fetchingTaskGroups,
+    refetch: refetchTaskGroup,
+  } = useErrorlessQuery<TaskGroup[]>({
     queryKey: ['private', 'algo', 'projects', 'task_groups'],
   })
 
   return {
-    groups,
-    fetchingGroups,
-  }
+    taskGroups,
+    fetchingTaskGroups,
+    refetchTaskGroup,
+  } as QueryTaskGroupsResult
 }
 
+export interface CreateTaskGroupResult {
+  createTaskGroup: () => void
+  creatingTaskGroup: boolean
+}
 export function useProjectTaskGroups(projectId: number) {
-  const { data: taskGroups, isFetching: fetchingTaskGroups } = useErrorlessQuery<Task[]>({
+  const {
+    data: taskGroups,
+    isFetching: fetchingTaskGroups,
+    refetch: refetchTaskGroup,
+  } = useErrorlessQuery<TaskGroup[]>({
     queryKey: ['private', 'algo', 'projects', projectId, 'task_groups'],
   })
   const { mutate: createTaskGroup, isLoading: creatingTaskGroup } = usePost<TaskGroup, undefined>(
@@ -29,13 +47,15 @@ export function useProjectTaskGroups(projectId: number) {
   return {
     taskGroups,
     fetchingTaskGroups,
+    refetchTaskGroup,
 
-    createTaskGroup,
+    createTaskGroup: () => createTaskGroup(undefined),
     creatingTaskGroup,
-  }
+  } as QueryTaskGroupsResult & CreateTaskGroupResult
 }
 
 type TaskCreatingForm = Pick<Task, 'algo' | 'data_id' | 'pre_task_ids'>
+
 export function useTaskGroup(groupId: number) {
   const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>({
     queryKey: ['private', 'algo', 'task_groups', groupId],

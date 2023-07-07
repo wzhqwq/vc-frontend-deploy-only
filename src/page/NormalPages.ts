@@ -1,11 +1,12 @@
-import { SimpleErrorBoundary } from "@/component/basic/errorBoundaries"
+import { SimpleErrorBoundary } from '@/component/basic/errorBoundaries'
 
-import MainFrame from "./MainFrame"
+import MainFrame from './MainFrame'
 
-import Login from "./user/Login"
-import Register from "./user/Register"
+import Login from './user/Login'
+import Register from './user/Register'
 
-import Welcome from "./index/Welcome"
+import Welcome from './index/Welcome'
+import Tasks from './index/Tasks'
 
 export const mainFrame = {
   Component: MainFrame,
@@ -21,5 +22,9 @@ export const register = {
 }
 export const welcome = {
   Component: Welcome,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const tasks = {
+  Component: Tasks,
   ErrorBoundary: SimpleErrorBoundary,
 }
