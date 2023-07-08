@@ -1,5 +1,5 @@
+import { EachTypeOfConfigParameter } from '@/types/config/parameter'
 import {
-  EachTypeOfConfigParameter,
   Base1DKernelParameters,
   Base2DKernelParameters,
   Conv2DParameters,
@@ -17,7 +17,7 @@ import {
   MSELossParameters,
   ReLUParameters,
   SplitParameters,
-} from '@/types/config/parameter'
+} from '@/types/config/details/layers'
 import {
   bottomOutput,
   generateInputLayerOutputShapeFn,
@@ -350,21 +350,21 @@ const copy = createLayerConfig<{}>({
 })
 
 const inputLayer1 = createLayerConfig<{}>({
-  name: 'Input',
+  name: 'Input2D',
   renderer: rectRenderer1,
   inputs: [],
   outputs: [bottomOutput(generateInputLayerOutputShapeFn(2), ['m', 'n'])],
   parameters: [],
 })
 const inputLayer2 = createLayerConfig<{}>({
-  name: 'Input',
+  name: 'Input3D',
   renderer: rectRenderer1,
   inputs: [],
   outputs: [bottomOutput(generateInputLayerOutputShapeFn(3), ['m', 'n', 'k'])],
   parameters: [],
 })
 const inputLayer3 = createLayerConfig<{}>({
-  name: 'Input',
+  name: 'Input4D',
   renderer: rectRenderer1,
   inputs: [],
   outputs: [bottomOutput(generateInputLayerOutputShapeFn(4), ['m', 'n', 'width', 'height'])],
@@ -396,9 +396,4 @@ export const layers = [
 ]
 
 export const inputLayers = [inputLayer1, inputLayer2, inputLayer3]
-export const tensorProcessingLayers = [
-  sum,
-  hadamardProduct,
-  split,
-  copy,
-]
+export const tensorProcessingLayers = [sum, hadamardProduct, split, copy]

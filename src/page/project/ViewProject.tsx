@@ -11,7 +11,7 @@ export default function ViewProject() {
 
   return (
     <div>
-      <LayerGraphEditor />
+      {/* <LayerGraphEditor /> */}
     </div>
   )
 }
