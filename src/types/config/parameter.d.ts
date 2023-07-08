@@ -126,3 +126,12 @@ export type MSELossParameters = {
   reduce: boolean
   reduction: 'mean' | 'sum' | 'none'
 }
+
+export type ReLUParameters = {
+  inplace: boolean
+}
+
+export type SplitParameters = {
+  split_size_or_sections: [number, number]
+  dim: number
+}

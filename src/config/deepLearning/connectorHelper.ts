@@ -8,6 +8,7 @@ import {
   FlatConfigParameters,
   LinearParameters,
   ShapeGetter,
+  SplitParameters,
 } from '@/types/config/parameter'
 
 export const placeholderToShortName: Record<AllShapePlaceholders, string> = {
@@ -141,12 +142,21 @@ export function get2DKernelOutputShapeFn(
   )
   return [batchSize, toVirtualValue(parameters.out_channels), newHeight, newWidth]
 }
-export function getLinearOutputShapeFn(
-  inputShapes: DynamicShape[],
-  parameters: LinearParameters,
-) {
+
+export function getLinearOutputShapeFn(inputShapes: DynamicShape[], parameters: LinearParameters) {
   if (!inputShapes[0].connected) return [UNAVAILABLE, toVirtualValue(parameters.out_features)]
 
   const [dim] = inputShapes[0].shapeValue
   return [dim, toVirtualValue(parameters.out_features)]
 }
+
+export const generateSplitOutputShapeFn = (index: number) =>
+  function (inputShapes: DynamicShape[], parameters: SplitParameters) {
+    if (!inputShapes[0].connected) return undefined
+    const shape = inputShapes[0].shapeValue
+    const splitted = parameters.split_size_or_sections[index]
+    return shape.map((value, i) => {
+      if (i === parameters.dim) return toVirtualValue(splitted)
+      return value
+    })
+  }

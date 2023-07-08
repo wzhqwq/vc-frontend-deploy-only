@@ -1,5 +1,9 @@
 import { DynamicShapeConnected, LayerChecker } from '@/types/config/deepLearning'
-import { Base1DKernelParameters, Base2DKernelParameters, BaseChannelParameters } from '@/types/config/parameter'
+import {
+  Base1DKernelParameters,
+  Base2DKernelParameters,
+  BaseChannelParameters,
+} from '@/types/config/parameter'
 
 export const checkInChannel: LayerChecker<{ in_channels: number }> = (
   inputShapes: DynamicShapeConnected[],
@@ -46,10 +50,7 @@ export const check1DKernelSize: LayerChecker<Base1DKernelParameters> = (
   parameters: Base1DKernelParameters,
 ) => {
   const [, , length] = inputShapes[0].shapeValue
-  if (
-    length.available &&
-    length.value - parameters.kernel_size + 2 * parameters.padding < 0
-  ) {
+  if (length.available && length.value - parameters.kernel_size + 2 * parameters.padding < 0) {
     return `输入形状中的长度过小，无法进行卷积运算`
   }
   return null
@@ -73,4 +74,23 @@ export const check2DKernelSize: LayerChecker<Base2DKernelParameters> = (
     return `输入形状中的高度过小，无法进行卷积运算`
   }
   return null
+}
+
+export const checkSameInputShape: LayerChecker<any> = (inputShapes: DynamicShapeConnected[]) => {
+  const input1 = inputShapes[0].shapeValue
+  const input2 = inputShapes[1].shapeValue
+
+  if (input1.length != input2.length) {
+    return '输入形状的维度不同'
+  }
+  return (
+    input1
+      .map((shape, index) => {
+        if (shape.available && input2[index].available && shape.value != input2[index].value) {
+          return `输入形状中的第 ${index + 1} 维度不同`
+        }
+        return null
+      })
+      .find((item) => item != null) ?? null
+  )
 }

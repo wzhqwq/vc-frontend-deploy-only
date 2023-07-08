@@ -15,17 +15,34 @@ import {
   LinearParameters,
   DropoutParameters,
   MSELossParameters,
+  ReLUParameters,
+  SplitParameters,
 } from '@/types/config/parameter'
 import {
   bottomOutput,
   generateInputShapeFn,
+  generateSplitOutputShapeFn,
   get1DKernelOutputShapeFn,
   get2DKernelOutputShapeFn,
   getLinearOutputShapeFn,
   topInput,
 } from './connectorHelper'
-import { createLayerConfig, rectRenderer1, rectRenderer2 } from './layerHelper'
-import { check1DKernelSize, check2DKernelSize, checkInChannel, checkInFeatures, checkNumFeatures } from './validation'
+import {
+  createLayerConfig,
+  productRenderer,
+  rectRenderer1,
+  rectRenderer2,
+  splitRenderer,
+  sumRenderer,
+} from './layerHelper'
+import {
+  check1DKernelSize,
+  check2DKernelSize,
+  checkInChannel,
+  checkInFeatures,
+  checkNumFeatures,
+  checkSameInputShape,
+} from './validation'
 
 const base1DKernelParameters: EachTypeOfConfigParameter<keyof Base1DKernelParameters>[] = [
   { key: 'in_channels', type: 'int', description: '输入通道数', default: 1 },
@@ -241,9 +258,13 @@ const dropout = createLayerConfig<DropoutParameters>({
 const mseLossParameters: EachTypeOfConfigParameter<keyof MSELossParameters>[] = [
   { key: 'size_average', type: 'bool', description: '是否对损失进行平均', default: true },
   { key: 'reduce', type: 'bool', description: '是否对损失进行降维', default: true },
-  { key: 'reduction', type: 'str', description: '指定损失函数的计算方式', default: 'mean', selections: [
-    'none', 'mean', 'sum'
-  ] },
+  {
+    key: 'reduction',
+    type: 'str',
+    description: '指定损失函数的计算方式',
+    default: 'mean',
+    selections: ['none', 'mean', 'sum'],
+  },
 ]
 const mseLoss = createLayerConfig<MSELossParameters>({
   name: 'MSELoss',
@@ -251,8 +272,72 @@ const mseLoss = createLayerConfig<MSELossParameters>({
   inputs: [topInput(0), topInput(1)],
   outputs: [bottomOutput(generateInputShapeFn(0))],
   parameters: mseLossParameters,
+  checkers: [checkSameInputShape],
 })
 
+const reLUParameters: EachTypeOfConfigParameter<keyof ReLUParameters>[] = [
+  { key: 'inplace', type: 'bool', description: '是否就地进行操作', default: false },
+]
+const reLU = createLayerConfig<ReLUParameters>({
+  name: 'ReLU',
+  renderer: rectRenderer1,
+  inputs: [topInput(0)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: reLUParameters,
+})
+const sigmoid = createLayerConfig<{}>({
+  name: 'Sigmoid',
+  renderer: rectRenderer1,
+  inputs: [topInput(0)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: [],
+})
+const tanh = createLayerConfig<{}>({
+  name: 'Tanh',
+  renderer: rectRenderer1,
+  inputs: [topInput(0)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: [],
+})
+
+const sum = createLayerConfig<{}>({
+  name: 'Sum',
+  displayName: '',
+  renderer: sumRenderer,
+  inputs: [topInput(0), topInput(1)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: [],
+  checkers: [checkSameInputShape],
+})
+const hadamardProduct = createLayerConfig<{}>({
+  name: 'HadamardProduct',
+  displayName: '',
+  renderer: productRenderer,
+  inputs: [topInput(0), topInput(1)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: [],
+  checkers: [checkSameInputShape],
+})
+
+const splitParameters: EachTypeOfConfigParameter<keyof SplitParameters>[] = [
+  {
+    key: 'split_size_or_sections',
+    type: 'tuple2',
+    description: '将输入分成给定大小的部分',
+    default: [0, 0],
+  },
+  { key: 'dim', type: 'int', description: '沿着哪个维度进行切分', default: 0 },
+]
+const split = createLayerConfig<SplitParameters>({
+  name: 'Split',
+  renderer: splitRenderer,
+  inputs: [topInput(0)],
+  outputs: [
+    bottomOutput(generateSplitOutputShapeFn(0)),
+    bottomOutput(generateSplitOutputShapeFn(1)),
+  ],
+  parameters: splitParameters,
+})
 export const layers = [
   conv1d,
   conv2d,
@@ -265,4 +350,10 @@ export const layers = [
   linear,
   dropout,
   mseLoss,
+  reLU,
+  sigmoid,
+  tanh,
+  sum,
+  hadamardProduct,
+  split,
 ]
