@@ -28,7 +28,7 @@ export class Scene {
     this.mouseMove = this.mouseMove.bind(this)
 
     this.el.on('mousedown', (e) => {
-      if ((e as MouseEvent).button != 1) return
+      if ((e as MouseEvent).button) return
       this.moving = true
     })
     this.el.on('mouseup', () => {

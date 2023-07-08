@@ -14,7 +14,7 @@ const mutateUploadFile = async ({ file }: { file: File }) => {
   const data = new FormData()
   data.append('file', file)
   return await wrapAxios({
-    url: baseUrl + '/file/files',
+    url: baseUrl + 'file/files',
     method: 'POST',
     headers: {
       'Content-Type': 'multipart/form-data',

@@ -156,13 +156,13 @@ export class Layer<P extends FlatConfigParameters = any> {
       (p) => parameters[p.key] != this.parameters[p.key],
     )
     this.parameters = parameters
-    if (updateConnectors) this.checkAndUpdate()
+    this.checkAndUpdate(updateConnectors)
   }
   public updateInputShapes() {
     this.inputShapes = this.connectors
       .filter((c) => c.type == 'input')
       .map((c) =>
-        c.peer
+        c.peer && c.shapeValue
           ? {
               connected: true,
               shapeValue: c.shapeValue!,
@@ -171,11 +171,8 @@ export class Layer<P extends FlatConfigParameters = any> {
       )
     this.checkAndUpdate()
   }
-  private checkAndUpdate() {
+  private checkAndUpdate(updateNeeded = true) {
     const inputShapes = this.inputShapes
-    this.connectors.forEach((c) => c.update(inputShapes, this.parameters))
-    this.updateLayout()
-    this.layout?.updateLayout()
     if (inputShapes.every((s): s is DynamicShapeConnected => s.connected) && this.config.checkers) {
       const error = this.config.checkers.map((c) => c(inputShapes, this.parameters)).find((e) => e)
       const center = [this.width / 2 - this.offsetX, this.height / 2 - this.offsetY] as [
@@ -200,6 +197,11 @@ export class Layer<P extends FlatConfigParameters = any> {
     } else {
       this.errorBubble.hide()
       this.errorText.hide()
+    }
+    if (updateNeeded) {
+      this.connectors.forEach((c) => c.update(inputShapes, this.parameters))
+      this.updateLayout()
+      this.layout?.updateLayout()
     }
   }
   public remove() {
