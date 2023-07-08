@@ -63,8 +63,13 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
   return (
     <Box
       sx={{
-        height: '100%',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        height: '100vh',
+        width: '100vw',
         display: 'grid',
+        bgcolor: 'white',
         gridTemplateColumns: 'minmax(400px, 1fr) auto 400px',
         '.svg-container': {
           overflow: 'hidden',
@@ -137,7 +142,7 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
             <Box sx={{ borderBottom: '1px solid', borderBottomColor: 'divider', p: 1 }}>
               <Typography level="h6">设置参数： {layer.config.name}</Typography>
             </Box>
-            <LayerInfoMemo layer={layer} onClose={() => setAnchorEl(null)} />
+            <LayerInfo layer={layer} onClose={() => setAnchorEl(null)} />
           </>
         )}
       </Popover>
@@ -160,7 +165,8 @@ function LayerList() {
       sx={{
         p: 2,
         display: 'grid',
-        gap: 2,
+        rowGap: 4,
+        columnGap: 2,
         gridTemplateColumns: '1fr 1fr',
       }}
     >
@@ -197,12 +203,14 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
     [layer.config.parameters, register],
   )
 
+  const columns = Math.max(2, layer.config.parameters.length / 3).toFixed(0)
+
   return (
     <Box sx={{ p: 1, minWidth: 200 }}>
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${(layer.config.parameters.length / 3).toFixed(0)}, 200px)`,
+          gridTemplateColumns: `repeat(${columns}, 200px)`,
           gap: 2,
         }}
       >
@@ -219,4 +227,3 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
     </Box>
   )
 }
-const LayerInfoMemo = memo(LayerInfo)
