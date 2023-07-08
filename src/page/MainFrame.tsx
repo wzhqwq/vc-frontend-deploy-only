@@ -29,16 +29,13 @@ import {
 } from '@mui/joy'
 import { AppBar, Toolbar } from '@mui/material'
 import { memo, useCallback, useState } from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 import logo from '@/logo.svg'
 
 export default function MainFrame() {
   const { loggedIn } = useSession()
   const navigate = useNavigate()
-  const { pathname } = useLocation()
-
-  const inWorkspace = pathname.startsWith('/workspace')
 
   return (
     <Stack
@@ -46,13 +43,7 @@ export default function MainFrame() {
         height: '100vh',
       }}
     >
-      <AppBar
-        position={inWorkspace ? 'absolute' : 'static'}
-        sx={{
-          transition: 'transform 0.3s',
-          transform: inWorkspace ? 'translateY(-100%)' : 'translateY(0)',
-        }}
-      >
+      <AppBar position="static">
         <Toolbar sx={{ gap: 1 }}>
           <Typography
             level="h6"
@@ -107,8 +98,7 @@ export default function MainFrame() {
         </Toolbar>
       </AppBar>
       <Container
-        maxWidth={inWorkspace ? false : 'lg'}
-        disableGutters={inWorkspace}
+        maxWidth="lg"
         sx={{
           flexGrow: 1,
           overflow: 'auto',
@@ -141,7 +131,7 @@ const UserControl = memo(() => {
         <Person />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose} placement="bottom-end">
-        <Stack direction='row' p={1} pt={0} spacing={2} alignItems='center'>
+        <Stack direction="row" p={1} pt={0} spacing={2} alignItems="center">
           {user ? (
             <Typography level="h6" sx={{ flexGrow: 1 }}>
               {user.email}
@@ -154,15 +144,35 @@ const UserControl = memo(() => {
           </IconButton>
         </Stack>
         <Divider sx={{ mb: 1 }} />
-        <NormalMenuButton Icon={AccountCircle} text="个人信息" onClick={() => navigate('/user/profile')} />
-        <NormalMenuButton Icon={Notifications} text="通知" onClick={() => navigate('/user/notifications')} />
+        <NormalMenuButton
+          Icon={AccountCircle}
+          text="个人信息"
+          onClick={() => navigate('/user/profile')}
+        />
+        <NormalMenuButton
+          Icon={Notifications}
+          text="通知"
+          onClick={() => navigate('/user/notifications')}
+        />
         <Divider sx={{ my: 1 }} />
         <Typography level="body2" color="neutral" sx={{ px: 2, pb: 1 }}>
           个人数据
         </Typography>
-        <NormalMenuButton Icon={ViewInAr} text="算法模型" onClick={() => navigate('/user/models')} />
-        <NormalMenuButton Icon={Description} text="数据集" onClick={() => navigate('/user/datasets')} />
-        <NormalMenuButton Icon={AccountTree} text="项目" onClick={() => navigate('/user/projects')} />
+        <NormalMenuButton
+          Icon={ViewInAr}
+          text="算法模型"
+          onClick={() => navigate('/user/models')}
+        />
+        <NormalMenuButton
+          Icon={Description}
+          text="数据集"
+          onClick={() => navigate('/user/datasets')}
+        />
+        <NormalMenuButton
+          Icon={AccountTree}
+          text="项目"
+          onClick={() => navigate('/user/projects')}
+        />
         <NormalMenuButton Icon={Task} text="任务管理" onClick={() => navigate('/user/tasks')} />
       </Menu>
     </>
@@ -193,7 +203,7 @@ const MessageControl = memo(() => {
           minWidth: 300,
         }}
       >
-        <Stack direction='row' alignItems='center' p={1} pt={0}>
+        <Stack direction="row" alignItems="center" p={1} pt={0}>
           <Typography level="h6" sx={{ flexGrow: 1 }}>
             消息中心
           </Typography>

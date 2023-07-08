@@ -2,25 +2,30 @@ import { Project } from '@/types/entity/project'
 import { useErrorlessQuery, usePost, usePut, useDelete } from './common'
 import { queryClient } from './queryClient'
 
-type ProjectCreatingForm = Pick<Project, 'name' | 'config'>
+export type ProjectCreatingForm = Pick<Project, 'name' | 'config' | 'description' | 'private'>
 
 export function useProjects(isPublic: boolean) {
   const { data: projects, isFetching: fetchingProjects } = useErrorlessQuery<Project[]>({
     queryKey: ['private', 'algo', 'projects', { all: Number(isPublic) }],
   })
-  const { mutate: createProject, isLoading: creatingProject } = usePost<
-    Project,
-    ProjectCreatingForm
-  >(['private', 'algo', 'projects'], {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['private', 'algo', 'projects'])
-    }
-  })
 
   return {
     projects,
     fetchingProjects,
+  }
+}
+export function useCreateProject() {
+  const { mutateAsync: createProject, isLoading: creatingProject } = usePost<
+    Project,
+    ProjectCreatingForm
+  >(['private', 'algo', 'projects'], {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(['private', 'algo', 'projects'])
+      queryClient.setQueryData(['private', 'algo', 'projects', data.id], data)
+    },
+  })
 
+  return {
     createProject,
     creatingProject,
   }

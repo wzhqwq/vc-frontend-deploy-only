@@ -26,6 +26,7 @@ export function useUser(userId?: number) {
     fetchingUser,
 
     isAdmin: user?.role_id === 2,
+    isAnonymous: user?.is_anon ?? true,
   }
 }
 

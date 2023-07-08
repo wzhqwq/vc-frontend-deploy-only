@@ -5,7 +5,7 @@ import { CircularProgress, Stack } from '@mui/joy'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
 import PersonIcon from '@mui/icons-material/Person'
 
-export function UserWidget({ userId }: { userId: number }) {
+export function UserWidget({ userId }: { userId?: number }) {
   const { user, fetchingUser } = useUser(userId)
   return (
     <Stack direction="row" alignItems="center" spacing={0.5} useFlexGap>

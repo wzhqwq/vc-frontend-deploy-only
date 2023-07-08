@@ -11,6 +11,10 @@ import ExploreFrame from './explore/ExploreFrame'
 import Guide from './index/Guide'
 import About from './index/About'
 
+import NewProject from './project/NewProject'
+import ViewProject from './project/ViewProject'
+import EditProject from './project/EditProject'
+
 export const mainFrame = {
   Component: MainFrame,
   ErrorBoundary: SimpleErrorBoundary,
@@ -42,5 +46,18 @@ export const guide = {
 }
 export const about = {
   Component: About,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+
+export const newProject = {
+  Component: NewProject,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const viewProject = {
+  Component: ViewProject,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const editProject = {
+  Component: EditProject,
   ErrorBoundary: SimpleErrorBoundary,
 }
