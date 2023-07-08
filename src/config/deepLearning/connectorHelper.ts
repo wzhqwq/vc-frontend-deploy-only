@@ -6,6 +6,7 @@ import {
   Conv1DParameters,
   Conv2DParameters,
   FlatConfigParameters,
+  LinearParameters,
   ShapeGetter,
 } from '@/types/config/parameter'
 
@@ -139,4 +140,13 @@ export function get2DKernelOutputShapeFn(
     parameters.padding[1],
   )
   return [batchSize, toVirtualValue(parameters.out_channels), newHeight, newWidth]
+}
+export function getLinearOutputShapeFn(
+  inputShapes: DynamicShape[],
+  parameters: LinearParameters,
+) {
+  if (!inputShapes[0].connected) return [UNAVAILABLE, toVirtualValue(parameters.out_features)]
+
+  const [dim] = inputShapes[0].shapeValue
+  return [dim, toVirtualValue(parameters.out_features)]
 }

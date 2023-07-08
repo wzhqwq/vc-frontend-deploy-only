@@ -110,3 +110,19 @@ export type BatchNormParameters = {
   affine: boolean
   track_running_stats: boolean
 }
+
+export type LinearParameters = {
+  in_features: number
+  out_features: number
+  bias: boolean
+}
+export type DropoutParameters = {
+  p: number
+  inplace: boolean
+}
+
+export type MSELossParameters = {
+  size_average: boolean
+  reduce: boolean
+  reduction: 'mean' | 'sum' | 'none'
+}

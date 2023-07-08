@@ -63,7 +63,7 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
   return (
     <Box
       sx={{
-        height: '100vh',
+        height: '100%',
         display: 'grid',
         gridTemplateColumns: 'minmax(400px, 1fr) auto 400px',
         '.svg-container': {

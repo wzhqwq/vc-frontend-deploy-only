@@ -12,16 +12,20 @@ import {
   AvgPool1DParameters,
   AvgPool2DParameters,
   BatchNormParameters,
+  LinearParameters,
+  DropoutParameters,
+  MSELossParameters,
 } from '@/types/config/parameter'
 import {
   bottomOutput,
   generateInputShapeFn,
   get1DKernelOutputShapeFn,
   get2DKernelOutputShapeFn,
+  getLinearOutputShapeFn,
   topInput,
 } from './connectorHelper'
 import { createLayerConfig, rectRenderer1, rectRenderer2 } from './layerHelper'
-import { check1DKernelSize, check2DKernelSize, checkInChannel, checkNumFeatures } from './validation'
+import { check1DKernelSize, check2DKernelSize, checkInChannel, checkInFeatures, checkNumFeatures } from './validation'
 
 const base1DKernelParameters: EachTypeOfConfigParameter<keyof Base1DKernelParameters>[] = [
   { key: 'in_channels', type: 'int', description: '输入通道数', default: 1 },
@@ -208,6 +212,47 @@ const batchNorm2d = createLayerConfig<BatchNormParameters>({
   checkers: [checkNumFeatures],
 })
 
+const linearParameters: EachTypeOfConfigParameter<keyof LinearParameters>[] = [
+  { key: 'in_features', type: 'int', description: '输入数据特征向量的长度', default: 1 },
+  { key: 'out_features', type: 'int', description: '输出数据特征向量的长度', default: 1 },
+  { key: 'bias', type: 'bool', description: '是否添加偏置', default: true },
+]
+const linear = createLayerConfig<LinearParameters>({
+  name: 'Linear',
+  renderer: rectRenderer1,
+  inputs: [topInput(0, ['dim', 'features'])],
+  outputs: [bottomOutput(getLinearOutputShapeFn, ['dim', 'features'])],
+  parameters: linearParameters,
+  checkers: [checkInFeatures],
+})
+
+const dropoutParameters: EachTypeOfConfigParameter<keyof DropoutParameters>[] = [
+  { key: 'p', type: 'float', description: '丢弃概率', default: 0.5 },
+  { key: 'inplace', type: 'bool', description: '是否原地操作', default: false },
+]
+const dropout = createLayerConfig<DropoutParameters>({
+  name: 'Dropout',
+  renderer: rectRenderer1,
+  inputs: [topInput(0)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: dropoutParameters,
+})
+
+const mseLossParameters: EachTypeOfConfigParameter<keyof MSELossParameters>[] = [
+  { key: 'size_average', type: 'bool', description: '是否对损失进行平均', default: true },
+  { key: 'reduce', type: 'bool', description: '是否对损失进行降维', default: true },
+  { key: 'reduction', type: 'str', description: '指定损失函数的计算方式', default: 'mean', selections: [
+    'none', 'mean', 'sum'
+  ] },
+]
+const mseLoss = createLayerConfig<MSELossParameters>({
+  name: 'MSELoss',
+  renderer: rectRenderer1,
+  inputs: [topInput(0), topInput(1)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: mseLossParameters,
+})
+
 export const layers = [
   conv1d,
   conv2d,
@@ -216,4 +261,8 @@ export const layers = [
   avgPool1d,
   avgPool2d,
   batchNorm1d,
+  batchNorm2d,
+  linear,
+  dropout,
+  mseLoss,
 ]
