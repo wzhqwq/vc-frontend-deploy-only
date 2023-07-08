@@ -35,30 +35,3 @@
     }
   }
 }
-
-.connecting-within {
-  .connector:not(.connected) {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-  &.start-input-1d .connector.connector-output-1d,
-  &.start-input-2d .connector.connector-output-2d,
-  &.start-input-3d .connector.connector-output-3d,
-  &.start-input-4d .connector.connector-output-4d,
-  &.start-input-5d .connector.connector-output-5d,
-  &.start-output-1d .connector.connector-input-1d,
-  &.start-output-2d .connector.connector-input-2d,
-  &.start-output-3d .connector.connector-input-3d,
-  &.start-output-4d .connector.connector-input-4d,
-  &.start-output-5d .connector.connector-input-5d {
-    &:not(.connected) {
-      cursor: copy;
-      opacity: 1;
-      &:hover {
-        rect {
-          transform: scale(1.2);
-        }
-      }
-    }
-  }
-}

@@ -1,11 +1,17 @@
 import { joyTheme } from '@/theme'
-import { ConnectorSide, ConnectorType, DynamicShape, VirtualValue } from '@/types/config/deepLearning'
+import {
+  ConnectorSide,
+  ConnectorType,
+  DynamicShape,
+  VirtualValue,
+} from '@/types/config/deepLearning'
 import { G, Line, Rect } from '@svgdotjs/svg.js'
 import { FlatConfigParameters, ShapeParameter } from '@/types/config/parameter'
 import { Label } from './Label'
 import { Layer } from './Layer'
 import { Scene } from './Scene'
 import { LayoutEndPoint } from './Layout'
+import { css } from '@emotion/css'
 
 export type ConnectorPoints = [endPos: [number, number], cornerPos: [number, number]]
 
@@ -55,13 +61,13 @@ export class Connector<P extends FlatConfigParameters = any> {
     public readonly type: ConnectorType,
     private readonly shapeParameter: ShapeParameter<P>,
   ) {
-    this.shapeDimension = shapeParameter.anyDimension ? 0 : shapeParameter.placeholders.length
+    this.shapeDimension = shapeParameter.anyDimension ? -1 : shapeParameter.placeholders.length
     this.el = layer.el
       .group()
       .addClass('connector')
       .addClass(`connector-${side}`)
       .addClass(`connector-${type}`)
-      .addClass(`connector-${type}-${this.shapeDimension}d`)
+      .addClass(`connector-${type}-${this.shapeDimension == -1 ? 'any' : this.shapeDimension}d`)
 
     this.endPos = connectorDirectionMap[side]
     this.line = this.el
@@ -86,17 +92,11 @@ export class Connector<P extends FlatConfigParameters = any> {
       this.peer.shapeValue = this.shapeValue
       this.peer.layer.updateInputShapes()
     }
-    const textBBox = this.label
-      .update(this.shapeValue)
-      .center(0, 0)
-      .bbox()
+    const textBBox = this.label.update(this.shapeValue).center(0, 0).bbox()
     const { width: textWidth } = textBBox
     this.pillWidth = textWidth + CONNECTOR_PILL_PAD_X * 2
 
-    this.pill
-      .width(this.pillWidth)
-      .height(CONNECTOR_PILL_HEIGHT)
-      .center(0, 0)
+    this.pill.width(this.pillWidth).height(CONNECTOR_PILL_HEIGHT).center(0, 0)
 
     return this
   }
@@ -163,14 +163,29 @@ export class Connector<P extends FlatConfigParameters = any> {
     const scene = this.layer.scene
     if (this.connectedConnector || !scene) return
     e.stopPropagation()
-    scene.el.addClass('connecting-within').addClass(`start-${this.type}-${this.shapeDimension}d`)
+    const targetType = this.type == 'input' ? 'output' : 'input'
+    const connectClassName = css`
+      .connector:not(.connected) {
+        cursor: not-allowed;
+        opacity: 0.5;
+        &.connector-${targetType + (this.shapeDimension == -1 ? '' : `-${this.shapeDimension}d`)},
+          &.connector-${targetType}-anyd {
+          cursor: copy;
+          opacity: 1;
+          &:hover {
+            rect {
+              transform: scale(1.2);
+            }
+          }
+        }
+      }
+    `
+    scene.el.addClass(connectClassName)
 
     this.el.addClass('connecting')
     const { cx, cy } = this.end.rbox(scene.el)
     new ConnectorDraggingIndicator([cx, cy], this, scene).startListen(() => {
-      scene.el
-        .removeClass('connecting-within')
-        .removeClass(`start-${this.type}-${this.shapeDimension}d`)
+      scene.el.removeClass(connectClassName)
       this.el.removeClass('connecting')
     })
   }
@@ -185,7 +200,12 @@ export class Connector<P extends FlatConfigParameters = any> {
     // 输出对输入
     if (peer.type == this.type) return
     // 张量维度必须相同
-    if (peer.shapeDimension != this.shapeDimension) return
+    if (
+      peer.shapeDimension != -1 &&
+      this.shapeDimension != -1 &&
+      peer.shapeDimension != this.shapeDimension
+    )
+      return
 
     if (this.disabled) return
     if (this.connectedConnector) return
