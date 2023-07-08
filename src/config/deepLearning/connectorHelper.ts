@@ -22,6 +22,9 @@ export const placeholderToShortName: Record<AllShapePlaceholders, string> = {
   num_classes: 'cls',
   seq_length: 'seq',
   embed_dim: 'em',
+  m: 'm',
+  n: 'n',
+  k: 'k',
 }
 
 export const generateInputShapeFn = (index: number) =>
@@ -159,4 +162,11 @@ export const generateSplitOutputShapeFn = (index: number) =>
       if (i === parameters.dim) return toVirtualValue(splitted)
       return value
     })
+  }
+
+export const generateInputLayerOutputShapeFn = (dim: number) =>
+  function () {
+    return new Array(dim)
+      .fill(0)
+      .map(() => toVirtualValue(Math.floor(Math.random() * 100 + 1), true))
   }

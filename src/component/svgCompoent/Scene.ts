@@ -2,6 +2,7 @@ import { SVG } from '@svgdotjs/svg.js'
 import { Layer } from './Layer'
 import { LayerData } from '@/types/config/deepLearning'
 import { Layout } from './Layout'
+import { Label } from './Label'
 
 export class Scene {
   public readonly el = SVG().addClass('scene')
@@ -55,6 +56,7 @@ export class Scene {
     this.layout.dispose()
     this.el.remove()
     this.layers.forEach((l) => l.cleanup())
+    Label.virtualValueMap = {}
     window.removeEventListener('resize', this.updateSize)
     window.removeEventListener('mousemove', this.mouseMove)
   }

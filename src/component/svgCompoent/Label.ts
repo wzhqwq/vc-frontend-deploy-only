@@ -4,7 +4,7 @@ import { DynamicShape, VirtualValue } from '@/types/config/deepLearning'
 import { ShapeParameter, FlatConfigParameters, AnyDimPlaceholders } from '@/types/config/parameter'
 import { Container, Text } from '@svgdotjs/svg.js'
 
-const shortNameAttr = { fill: joyTheme.vars.palette.primary[500], 'font-weight': 'bold' }
+const shortNameAttr = { fill: joyTheme.vars.palette.primary[200], 'font-weight': 'bold' }
 const placeholderAttr = { fill: joyTheme.vars.palette.neutral[100], 'font-size': 12 }
 const valueAttr = { fill: joyTheme.vars.palette.primary[50] }
 
@@ -15,7 +15,7 @@ export class Label<P extends FlatConfigParameters> {
   public readonly label: Text
   constructor(container: Container, private readonly shapeParameter: ShapeParameter<P>) {
     this.label = container.text('').font({ size: 18 }).fill('#FFF')
-}
+  }
 
   public renderFullyUnknown() {
     return this.label.clear().text((add) => {

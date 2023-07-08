@@ -1,7 +1,6 @@
-import { SimpleErrorBoundary } from '@/component/basic/errorBoundaries'
 import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
-import { layers as allLayers } from '@/config/deepLearning/layers'
+import { layers as allLayers, inputLayers, tensorProcessingLayers } from '@/config/deepLearning/layers'
 
 import { Box, Button, CircularProgress, Divider, Stack, Typography } from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
@@ -101,9 +100,7 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
           <Typography level="h6">拖拽层至左侧虚线框</Typography>
         </Box>
         <Divider />
-        <Box sx={{ overflow: 'auto', minHeight: 0, flexGrow: 1 }}>
-          <LayerListMemo />
-        </Box>
+        <LayerListMemo />
         <Divider />
         <Box
           sx={{
@@ -162,15 +159,36 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
 function LayerList() {
   return (
     <Box
-      sx={{
-        p: 2,
+      sx={(theme) => ({
+        px: 2,
+        pb: 2,
         display: 'grid',
         rowGap: 4,
         columnGap: 2,
         gridTemplateColumns: '1fr 1fr',
-      }}
+        overflow: 'auto',
+        minHeight: 0,
+        '.MuiTypography-root': {
+          position: 'sticky',
+          top: 0,
+          gridColumn: '1 / -1',
+          bgcolor: theme.vars.palette.primary[50],
+          mx: -2,
+          px: 2,
+          py: 1,
+        }
+      })}
     >
+      <Typography level="h6">输入层</Typography>
+      {inputLayers.map((layer) => (
+        <LayerItem config={layer} key={layer.name} />
+      ))}
+      <Typography level="h6">中间层</Typography>
       {allLayers.map((layer) => (
+        <LayerItem config={layer} key={layer.name} />
+      ))}
+      <Typography level="h6">张量处理层</Typography>
+      {tensorProcessingLayers.map((layer) => (
         <LayerItem config={layer} key={layer.name} />
       ))}
     </Box>

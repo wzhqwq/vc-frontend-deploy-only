@@ -20,6 +20,7 @@ import {
 } from '@/types/config/parameter'
 import {
   bottomOutput,
+  generateInputLayerOutputShapeFn,
   generateInputShapeFn,
   generateSplitOutputShapeFn,
   get1DKernelOutputShapeFn,
@@ -28,6 +29,7 @@ import {
   topInput,
 } from './connectorHelper'
 import {
+  copyRenderer,
   createLayerConfig,
   productRenderer,
   rectRenderer1,
@@ -338,6 +340,44 @@ const split = createLayerConfig<SplitParameters>({
   ],
   parameters: splitParameters,
 })
+const copy = createLayerConfig<{}>({
+  name: 'Copy',
+  displayName: '',
+  renderer: copyRenderer,
+  inputs: [topInput(0)],
+  outputs: [bottomOutput(generateInputShapeFn(0)), bottomOutput(generateInputShapeFn(0))],
+  parameters: [],
+})
+
+const inputLayer1 = createLayerConfig<{}>({
+  name: 'Input',
+  renderer: rectRenderer1,
+  inputs: [],
+  outputs: [bottomOutput(generateInputLayerOutputShapeFn(2), ['m', 'n'])],
+  parameters: [],
+})
+const inputLayer2 = createLayerConfig<{}>({
+  name: 'Input',
+  renderer: rectRenderer1,
+  inputs: [],
+  outputs: [bottomOutput(generateInputLayerOutputShapeFn(3), ['m', 'n', 'k'])],
+  parameters: [],
+})
+const inputLayer3 = createLayerConfig<{}>({
+  name: 'Input',
+  renderer: rectRenderer1,
+  inputs: [],
+  outputs: [bottomOutput(generateInputLayerOutputShapeFn(4), ['m', 'n', 'width', 'height'])],
+  parameters: [],
+})
+const outputLayer = createLayerConfig<{}>({
+  name: 'Output',
+  renderer: rectRenderer1,
+  inputs: [topInput(0)],
+  outputs: [],
+  parameters: [],
+})
+
 export const layers = [
   conv1d,
   conv2d,
@@ -353,7 +393,12 @@ export const layers = [
   reLU,
   sigmoid,
   tanh,
+]
+
+export const inputLayers = [inputLayer1, inputLayer2, inputLayer3]
+export const tensorProcessingLayers = [
   sum,
   hadamardProduct,
   split,
+  copy,
 ]

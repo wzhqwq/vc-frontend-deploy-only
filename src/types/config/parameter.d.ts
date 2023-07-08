@@ -43,6 +43,9 @@ export type AllShapePlaceholders =
   | 'num_classes'
   | 'seq_length'
   | 'embed_dim'
+  | 'm'
+  | 'n'
+  | 'k'
 
 type ShapeGetter<P extends FlatConfigParameters> = (
   inputs: DynamicShape[],
