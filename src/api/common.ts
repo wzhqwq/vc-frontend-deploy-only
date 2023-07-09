@@ -26,6 +26,7 @@ export function usePathMutation<TData = any, TVariables = any>(
   mutationKey: unknown[],
   method: string,
   options: MutationOptions<TData, Error, TVariables> = {},
+  action: string,
 ) {
   const { enqueueSnackbar } = useSnackbar()
   return useMutation<TData, Error, TVariables, any>({
@@ -53,7 +54,7 @@ export function usePathMutation<TData = any, TVariables = any>(
         return await request(path, method, useAuth, variables)
       }),
     onError: (e, v, c) => {
-      enqueueSnackbar(e.message, { variant: 'error' })
+      enqueueSnackbar(action + '失败：' + e.message, { variant: 'error' })
       options.onError?.(e, v, c)
     },
   })
@@ -61,37 +62,42 @@ export function usePathMutation<TData = any, TVariables = any>(
 
 export function usePost<TData = any, TVariables = any>(
   mutationKey: unknown[],
+  action: string,
   options?: MutationOptions<TData, Error, TVariables>,
 ) {
-  return usePathMutation<TData, TVariables>(mutationKey, 'POST', options)
+  return usePathMutation<TData, TVariables>(mutationKey, 'POST', options, action)
 }
 export function usePut<TData = any, TVariables = any>(
   mutationKey: unknown[],
+  action: string,
   options?: MutationOptions<TData, Error, TVariables>,
 ) {
-  return usePathMutation<TData, TVariables>(mutationKey, 'PUT', options)
+  return usePathMutation<TData, TVariables>(mutationKey, 'PUT', options, action)
 }
 export function useDelete<TData = undefined, TVariables = undefined>(
   mutationKey: unknown[],
+  action: string,
   options?: MutationOptions<TData, Error, TVariables>,
 ) {
-  return usePathMutation<TData, TVariables>(mutationKey, 'DELETE', options)
+  return usePathMutation<TData, TVariables>(mutationKey, 'DELETE', options, action)
 }
 export function usePatch<TData = any, TVariables = any>(
   mutationKey: unknown[],
+  action: string,
   options?: MutationOptions<TData, Error, TVariables>,
 ) {
-  return usePathMutation<TData, TVariables>(mutationKey, 'PATCH', options)
+  return usePathMutation<TData, TVariables>(mutationKey, 'PATCH', options, action)
 }
 
 export function useErrorlessQuery<TData = unknown>(
   options: UseQueryOptions<TData, Error, TData, any[]>,
+  action: string,
 ) {
   const result = useQuery(options)
   const { enqueueSnackbar } = useSnackbar()
   useEffect(() => {
     if (result.error) {
-      enqueueSnackbar(result.error.message, { variant: 'error' })
+      enqueueSnackbar(action + '失败：' + result.error.message, { variant: 'error' })
     }
   }, [result.error, enqueueSnackbar])
   return result

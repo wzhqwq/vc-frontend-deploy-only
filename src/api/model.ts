@@ -5,17 +5,21 @@ import { queryClient } from './queryClient'
 type ModelCreatingForm = Pick<Model, 'file_id' | 'description' | 'private' | 'title'>
 
 export function useModels(isPublic: boolean) {
-  const { data: models, isFetching: fetchingModels } = useErrorlessQuery<Model[]>({
-    queryKey: ['private', 'algo', 'models', { all: Number(isPublic) }],
-  })
-  const { mutate: createModel, isLoading: creatingModel } = usePost<
-    Model,
-    ModelCreatingForm
-  >(['private', 'algo', 'models'], {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['private', 'algo', 'models'])
-    }
-  })
+  const { data: models, isFetching: fetchingModels } = useErrorlessQuery<Model[]>(
+    {
+      queryKey: ['private', 'algo', 'models', { all: Number(isPublic) }],
+    },
+    '获取算法列表',
+  )
+  const { mutate: createModel, isLoading: creatingModel } = usePost<Model, ModelCreatingForm>(
+    ['private', 'algo', 'models'],
+    '新建算法',
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['private', 'algo', 'models'])
+      },
+    },
+  )
 
   return {
     models,
@@ -27,19 +31,24 @@ export function useModels(isPublic: boolean) {
 }
 
 export function useModel(modelId: number) {
-  const { data: model, isFetching: fetchingModel } = useErrorlessQuery<Model>({
-    queryKey: ['private', 'algo', 'models', modelId],
-  })
-  const { mutate: updateModel, isLoading: updatingModel } = usePut<
-    Model,
-    ModelCreatingForm
-  >(['private', 'algo', 'models', modelId], {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['private', 'algo', 'models', modelId])
+  const { data: model, isFetching: fetchingModel } = useErrorlessQuery<Model>(
+    {
+      queryKey: ['private', 'algo', 'models', modelId],
     },
-  })
+    '获取算法信息',
+  )
+  const { mutate: updateModel, isLoading: updatingModel } = usePut<Model, ModelCreatingForm>(
+    ['private', 'algo', 'models', modelId],
+    '更新算法',
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['private', 'algo', 'models', modelId])
+      },
+    },
+  )
   const { mutate: deleteModel, isLoading: deletingModel } = useDelete(
     ['private', 'algo', 'models', modelId],
+    '删除算法',
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['private', 'algo', 'models', modelId])

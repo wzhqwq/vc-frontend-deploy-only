@@ -14,7 +14,7 @@ export function usePublicTaskGroups(): QueryTaskGroupsResult {
     refetch: refetchTaskGroup,
   } = useErrorlessQuery<TaskGroup[]>({
     queryKey: ['private', 'algo', 'projects', 'task_groups'],
-  })
+  }, '获取公开任务失败')
 
   return {
     taskGroups,
@@ -27,16 +27,21 @@ export interface CreateTaskGroupResult {
   createTaskGroup: () => void
   creatingTaskGroup: boolean
 }
-export function useProjectTaskGroups(projectId: number) {
+export function useProjectTaskGroups(projectId?: number) {
   const {
     data: taskGroups,
     isFetching: fetchingTaskGroups,
     refetch: refetchTaskGroup,
-  } = useErrorlessQuery<TaskGroup[]>({
-    queryKey: ['private', 'algo', 'projects', projectId, 'task_groups'],
-  })
+  } = useErrorlessQuery<TaskGroup[]>(
+    {
+      queryKey: ['private', 'algo', 'projects', projectId, 'task_groups'],
+      enabled: projectId !== undefined,
+    },
+    '获取历史任务失败',
+  )
   const { mutate: createTaskGroup, isLoading: creatingTaskGroup } = usePost<TaskGroup, undefined>(
     ['private', 'algo', 'projects', projectId, 'task_groups'],
+    '创建任务失败',
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['private', 'algo', 'projects', projectId, 'task_groups'])
@@ -45,7 +50,7 @@ export function useProjectTaskGroups(projectId: number) {
   )
 
   return {
-    taskGroups,
+    taskGroups: taskGroups ?? ([] as TaskGroup[]),
     fetchingTaskGroups,
     refetchTaskGroup,
 
@@ -54,17 +59,26 @@ export function useProjectTaskGroups(projectId: number) {
   } as QueryTaskGroupsResult & CreateTaskGroupResult
 }
 
-type TaskCreatingForm = Pick<Task, 'algo' | 'data_id' | 'pre_task_ids'>
+type TaskCreatingForm = Pick<Task, 'algo' | 'data_id' | 'pre_task_ids' | 'item_id'>
 
-export function useTaskGroup(groupId: number) {
-  const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>({
-    queryKey: ['private', 'algo', 'task_groups', groupId],
-  })
-  const { data: tasks, isFetching: fetchingTasks } = useErrorlessQuery<Task[]>({
-    queryKey: ['private', 'algo', 'task_groups', groupId, 'tasks'],
-  })
+export function useTaskGroup(groupId?: number) {
+  const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>(
+    {
+      queryKey: ['private', 'algo', 'task_groups', groupId],
+      enabled: groupId !== undefined,
+    },
+    '获取历史任务失败',
+  )
+  const { data: tasks, isFetching: fetchingTasks } = useErrorlessQuery<Task[]>(
+    {
+      queryKey: ['private', 'algo', 'task_groups', groupId, 'tasks'],
+      enabled: groupId !== undefined,
+    },
+    '获取历史任务子任务失败',
+  )
   const { mutateAsync: createTask } = usePost<Task, TaskCreatingForm>(
     ['private', 'algo', 'task_groups', groupId, 'tasks'],
+    '创建子任务失败',
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId, 'tasks'])
@@ -73,6 +87,7 @@ export function useTaskGroup(groupId: number) {
   )
   const { mutate: startGroup, isLoading: startingGroup } = usePut<Task, undefined>(
     ['private', 'algo', 'task_groups', groupId, 'process'],
+    '启动任务失败',
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId])
@@ -81,6 +96,7 @@ export function useTaskGroup(groupId: number) {
   )
   const { mutate: terminateGroup, isLoading: terminatingGroup } = useDelete(
     ['private', 'algo', 'task_groups', groupId, 'process'],
+    '中止任务失败',
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId])
@@ -92,7 +108,7 @@ export function useTaskGroup(groupId: number) {
     group,
     fetchingGroup,
 
-    tasks,
+    tasks: tasks ?? ([] as Task[]),
     fetchingTasks,
 
     createTask,
@@ -105,10 +121,14 @@ export function useTaskGroup(groupId: number) {
   }
 }
 
-export function useTask(taskId: number) {
-  const { data: task, isFetching: fetchingTask } = useErrorlessQuery<Task>({
-    queryKey: ['private', 'algo', 'tasks', taskId],
-  })
+export function useTask(taskId?: number) {
+  const { data: task, isFetching: fetchingTask } = useErrorlessQuery<Task>(
+    {
+      queryKey: ['private', 'algo', 'tasks', taskId],
+      enabled: taskId !== undefined,
+    },
+    '获取任务详情失败',
+  )
 
   return {
     task,

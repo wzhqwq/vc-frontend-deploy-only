@@ -1,8 +1,9 @@
 import { LayerData } from '@/types/config/deepLearning'
-import { QueryFunction, useQuery } from '@tanstack/react-query'
+import { QueryFunction } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { baseUrl, wrapAxios } from './network'
 import { useErrorlessQuery, usePost } from './common'
+import { FileInfo } from '@/types/entity/file'
 
 const fetchPlainFile: QueryFunction<string, string[]> = async ({ queryKey }) => {
   const filename = queryKey[3]
@@ -23,18 +24,31 @@ const mutateUploadFile = async ({ file }: { file: File }) => {
   })
 }
 
-export function usePlainTextFile(filename: string) {
-  const { data: text, isFetching: fetchingFile } = useErrorlessQuery<string>({
-    queryKey: ['public', 'file', 'files', filename],
-    enabled: filename != 'new',
-    queryFn: fetchPlainFile,
-  })
-  const { mutateAsync: uploadFile, isLoading: uploadingFile } = usePost<string, { file: File }>(
+export function useUploadFile() {
+  const { mutateAsync: uploadFile, isLoading: uploadingFile } = usePost<FileInfo, { file: File }>(
     ['private', 'file', 'files'],
+    '上传文件',
     {
       mutationFn: mutateUploadFile,
     },
   )
+
+  return {
+    uploadFile,
+    uploadingFile,
+  }
+}
+
+export function usePlainTextFile(filename: string) {
+  const { data: text, isFetching: fetchingFile } = useErrorlessQuery<string>(
+    {
+      queryKey: ['public', 'file', 'files', filename],
+      enabled: filename != 'new',
+      queryFn: fetchPlainFile,
+    },
+    '下载文件',
+  )
+  const { uploadFile, uploadingFile } = useUploadFile()
 
   return {
     text,

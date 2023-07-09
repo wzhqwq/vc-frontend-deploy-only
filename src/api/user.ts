@@ -16,10 +16,13 @@ export type JwtUserData = Omit<User, 'email'>
 
 export function useUser(userId?: number) {
   const { hasToken } = useSession()
-  const { data: user, isFetching: fetchingUser } = useErrorlessQuery<User>({
-    queryKey: userId ? ['public', 'user', 'users', userId] : ['private', 'user', 'me'],
-    enabled: userId != undefined || hasToken,
-  })
+  const { data: user, isFetching: fetchingUser } = useErrorlessQuery<User>(
+    {
+      queryKey: userId ? ['public', 'user', 'users', userId] : ['private', 'user', 'me'],
+      enabled: userId != undefined || hasToken,
+    },
+    '获取用户信息',
+  )
 
   return {
     user,
@@ -38,10 +41,13 @@ export function useSession() {
   const { data: loggedIn } = useQuery<boolean>(['state', 'loggedIn'], checkLoggedIn, {
     initialData: checkLoggedIn,
   })
-  const { data: anonymousToken } = useErrorlessQuery<string>({
-    queryKey: ['public', 'user', 'login', 'anon'],
-    enabled: !loggedIn,
-  })
+  const { data: anonymousToken } = useErrorlessQuery<string>(
+    {
+      queryKey: ['public', 'user', 'login', 'anon'],
+      enabled: !loggedIn,
+    },
+    '获取匿名登录令牌',
+  )
 
   useEffect(() => {
     if (!loggedIn && anonymousToken) {
@@ -51,6 +57,7 @@ export function useSession() {
 
   const { mutateAsync: logIn, isLoading: loggingIn } = usePost<string, LoginForm>(
     ['public', 'user', 'login'],
+    '登录',
     {
       onSuccess: (data) => {
         localStorage.setItem('token', data)
@@ -58,11 +65,10 @@ export function useSession() {
       },
     },
   )
-  const { mutateAsync: registerUser, isLoading: registering } = usePost<User, UserCreatingForm>([
-    'public',
-    'user',
-    'register',
-  ])
+  const { mutateAsync: registerUser, isLoading: registering } = usePost<User, UserCreatingForm>(
+    ['public', 'user', 'register'],
+    '注册用户',
+  )
 
   const logOut = useCallback(() => {
     localStorage.removeItem('token')
