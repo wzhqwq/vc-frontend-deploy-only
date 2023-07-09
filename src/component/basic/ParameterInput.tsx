@@ -1,15 +1,14 @@
 import { EachTypeOfConfigParameter } from '@/types/config/parameter'
 import { FormLabel, Chip, FormHelperText, Switch, Input, Select, Box, Option } from '@mui/joy'
-import { Control, Controller, UseFormRegister } from 'react-hook-form'
+import { Control, Controller } from 'react-hook-form'
 import { Tuple2Input } from './CustomInput'
 
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any>
   control: Control
-  register: UseFormRegister<any>
 }
 
-export default function ParameterInput({ parameter, control, register }: ParameterInputProps) {
+export default function ParameterInput({ parameter, control }: ParameterInputProps) {
   return (
     <Box>
       <FormLabel>
@@ -19,47 +18,39 @@ export default function ParameterInput({ parameter, control, register }: Paramet
         </Chip>
       </FormLabel>
       <FormHelperText>{parameter.description}</FormHelperText>
-      {parameter.type == 'bool' ? (
-        <Controller
-          control={control}
-          name={parameter.key as string}
-          render={({ field: { onChange, value, ref } }) => (
-            <Switch onChange={onChange} checked={value} ref={ref} sx={{ my: 0.5 }} />
-          )}
-        />
-      ) : parameter.type == 'tuple2' ? (
-        <Controller
-          control={control}
-          name={parameter.key as string}
-          render={({ field }) => <Tuple2Input {...field} sx={{ my: 0.5 }} size="sm" />}
-          rules={{ required: true }}
-        />
-      ) : parameter.selections ? (
-        <Controller
-          control={control}
-          name={parameter.key as string}
-          render={({ field: { onChange, value, ref } }) => (
-            <Select onChange={(_, value) => onChange(value)} value={value} ref={ref} size="sm">
-              {parameter.selections?.map((selection) => (
-                <Option value={selection} key={selection}>
-                  {selection}
-                </Option>
-              ))}
-            </Select>
-          )}
-          rules={{ required: true }}
-        />
-      ) : parameter.type == 'int' || parameter.type == 'float' ? (
-        <Input
-          {...register(parameter.key as string, {
-            required: true,
-            valueAsNumber: true,
-          })}
-          size="sm"
-        />
-      ) : (
-        <Input {...register(parameter.key as string, { required: true })} size="sm" />
-      )}
+      <Controller
+        control={control}
+        name={parameter.key as string}
+        render={
+          parameter.type == 'bool'
+            ? ({ field: { onChange, value, ref } }) => (
+                <Switch onChange={onChange} checked={value} ref={ref} sx={{ my: 0.5 }} />
+              )
+            : parameter.type == 'tuple2'
+            ? ({ field }) => <Tuple2Input {...field} sx={{ my: 0.5 }} size="sm" />
+            : parameter.selections
+            ? ({ field: { onChange, value, ref } }) => (
+                <Select onChange={(_, value) => onChange(value)} value={value} ref={ref} size="sm">
+                  {parameter.selections?.map((selection) => (
+                    <Option value={selection} key={selection}>
+                      {selection}
+                    </Option>
+                  ))}
+                </Select>
+              )
+            : parameter.type == 'int' || parameter.type == 'float'
+            ? ({ field: { onChange, value, ref } }) => (
+                <Input
+                  onChange={(e) => onChange(Number(e.target.value))}
+                  value={value}
+                  ref={ref}
+                  sx={{ my: 0.5 }}
+                  size="sm"
+                />
+              )
+            : ({ field }) => <Input {...field} sx={{ my: 0.5 }} size="sm" />
+        }
+      />
     </Box>
   )
 }

@@ -1,6 +1,10 @@
 import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
-import { layers as allLayers, inputLayers, tensorProcessingLayers } from '@/config/deepLearning/layers'
+import {
+  layers as allLayers,
+  inputLayers,
+  tensorProcessingLayers,
+} from '@/config/deepLearning/layers'
 
 import { Box, Button, CircularProgress, Divider, Stack, Typography } from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
@@ -54,7 +58,7 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
 
   const handleSave = useCallback(() => {
     if (!scene) return
-    uploadLayer(scene.toJSON()).then((filename) => {
+    uploadLayer(scene.toJSON()).then(({ filename }) => {
       onSave?.(filename)
     })
   }, [scene])
@@ -176,7 +180,7 @@ function LayerList() {
           mx: -2,
           px: 2,
           py: 1,
-        }
+        },
       })}
     >
       <Typography level="h6">输入层</Typography>
@@ -197,7 +201,7 @@ function LayerList() {
 const LayerListMemo = memo(LayerList)
 
 function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
-  const { register, handleSubmit, formState, control } = useForm<any>({
+  const { handleSubmit, formState, control } = useForm<any>({
     values: layer.parameters,
   })
   const onSubmit: SubmitHandler<any> = (data) => {
@@ -211,14 +215,9 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
   const parameterList = useMemo(
     () =>
       layer.config.parameters.map((parameter) => (
-        <ParameterInput
-          key={parameter.key as string}
-          parameter={parameter}
-          register={register}
-          control={control}
-        />
+        <ParameterInput key={parameter.key as string} parameter={parameter} control={control} />
       )),
-    [layer.config.parameters, register],
+    [layer.config.parameters],
   )
 
   const columns = Math.max(2, layer.config.parameters.length / 3).toFixed(0)
