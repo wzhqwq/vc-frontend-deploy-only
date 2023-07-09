@@ -19,7 +19,7 @@ export interface ConfigParameter<T extends ConfigParameterType, K extends string
   type: T
   description: string
   inShape?: boolean
-  default: ConfigParameterValue<T> | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>)
+  default: ConfigParameterValue<T>/*  | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>) */
   selections?: string[]
   validator?: (value: ConfigParameterValue<T>) => boolean
   properties: T extends 'object' ? EachTypeOfConfigParameter<keyof P[K], P[K]> : undefined

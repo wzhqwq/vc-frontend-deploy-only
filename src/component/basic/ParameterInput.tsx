@@ -6,9 +6,10 @@ import { Tuple2Input } from './CustomInput'
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any>
   control: Control
+  prefix?: string
 }
 
-export default function ParameterInput({ parameter, control }: ParameterInputProps) {
+export default function ParameterInput({ prefix, parameter, control }: ParameterInputProps) {
   return (
     <Box>
       <FormLabel>
@@ -20,7 +21,8 @@ export default function ParameterInput({ parameter, control }: ParameterInputPro
       <FormHelperText>{parameter.description}</FormHelperText>
       <Controller
         control={control}
-        name={parameter.key as string}
+        name={(prefix ? prefix + '.' : '') + parameter.key}
+        defaultValue={parameter.default}
         render={
           parameter.type == 'bool'
             ? ({ field: { onChange, value, ref } }) => (
