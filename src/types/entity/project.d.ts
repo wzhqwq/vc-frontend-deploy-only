@@ -1,8 +1,10 @@
+import { ProjectGraph } from "../config/project"
+
 export interface Project {
   /**
    * 项目配置
    */
-  config: any
+  config: ProjectGraph
   /**
    * 创建时间
    */

@@ -17,7 +17,7 @@ export function useProjects(isPublic: boolean) {
 export function useCreateProject() {
   const { mutateAsync: createProject, isLoading: creatingProject } = usePost<
     Project,
-    ProjectCreatingForm
+    Omit<ProjectCreatingForm, 'config'> & { config: string }
   >(['private', 'algo', 'projects'], {
     onSuccess: (data) => {
       queryClient.invalidateQueries(['private', 'algo', 'projects'])
@@ -26,7 +26,8 @@ export function useCreateProject() {
   })
 
   return {
-    createProject,
+    createProject: (project: ProjectCreatingForm) =>
+      createProject({ ...project, config: JSON.stringify(project.config) }),
     creatingProject,
   }
 }

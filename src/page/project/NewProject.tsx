@@ -19,7 +19,10 @@ export default function NewProject() {
   const { register, handleSubmit, formState, control } = useForm<ProjectCreatingForm>()
   const navigate = useNavigate()
   const onSubmit: SubmitHandler<ProjectCreatingForm> = async (data) => {
-    const { id } = await createProject({ ...data, config: '{}' })
+    const { id } = await createProject({
+      ...data,
+      config: { preProcesses: [], algorithms: [], analyses: [] },
+    })
     navigate(`/project/${id}`)
   }
 
