@@ -1,14 +1,14 @@
 import { placeholderToShortName } from '@/config/deepLearning/connectorHelper'
 import { joyTheme } from '@/theme'
 import { DynamicShape, VirtualValue } from '@/types/config/deepLearning'
-import { ShapeParameter, FlatConfigParameters, AnyDimPlaceholders } from '@/types/config/parameter'
+import { ShapeParameter, ConfigParameterRecord, AnyDimPlaceholders } from '@/types/config/parameter'
 import { Container, Text } from '@svgdotjs/svg.js'
 
 const shortNameAttr = { fill: joyTheme.vars.palette.primary[200], 'font-weight': 'bold' }
 const placeholderAttr = { fill: joyTheme.vars.palette.neutral[100], 'font-size': 12 }
 const valueAttr = { fill: joyTheme.vars.palette.primary[50] }
 
-export class Label<P extends FlatConfigParameters> {
+export class Label<P extends ConfigParameterRecord> {
   // {"w": {"13" => "w1", "45" => "w2", "3" => "w3"}}
   public static virtualValueMap: Record<string, Map<string, string>> = {}
 

@@ -6,7 +6,7 @@ import {
   LayerData,
 } from '@/types/config/deepLearning'
 import { CONNECTOR_H_HEIGHT, CONNECTOR_LENGTH, CONNECTOR_PILL_HEIGHT, Connector } from './Connector'
-import { FlatConfigParameters } from '@/types/config/parameter'
+import { ConfigParameterRecord } from '@/types/config/parameter'
 import { nanoid } from 'nanoid'
 import { LayoutLayer } from './Layout'
 import { Scene } from './Scene'
@@ -34,7 +34,7 @@ const getHeightOfVerticalConnectors = (connectors: Connector[]) =>
     ? connectors.length * CONNECTOR_PILL_HEIGHT + (connectors.length - 1) * CONNECTOR_GAP_Y
     : 0
 
-export class Layer<P extends FlatConfigParameters = any> {
+export class Layer<P extends ConfigParameterRecord = any> {
   public static readonly layers = new Map<string, Layer>()
   public readonly id: string
   public row: number

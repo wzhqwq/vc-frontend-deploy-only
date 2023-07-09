@@ -1,4 +1,4 @@
-import { EachTypeOfConfigParameter } from '@/types/config/parameter'
+import { ConfigParameterArray, EachTypeOfConfigParameter } from '@/types/config/parameter'
 import {
   Base1DKernelParameters,
   Base2DKernelParameters,
@@ -46,7 +46,7 @@ import {
   checkSameInputShape,
 } from './validation'
 
-const base1DKernelParameters: EachTypeOfConfigParameter<keyof Base1DKernelParameters>[] = [
+const base1DKernelParameters: ConfigParameterArray<Base1DKernelParameters> = [
   { key: 'in_channels', type: 'int', description: '输入通道数', default: 1 },
   { key: 'out_channels', type: 'int', description: '输出通道数', inShape: true, default: 1 },
   { key: 'kernel_size', type: 'int', description: '卷积核大小', inShape: true, default: 1 },
@@ -54,7 +54,7 @@ const base1DKernelParameters: EachTypeOfConfigParameter<keyof Base1DKernelParame
   { key: 'padding', type: 'int', description: '填充大小', inShape: true, default: 0 },
   { key: 'dilation', type: 'int', description: '扩张率', default: 1 },
 ]
-const base2DKernelParameters: EachTypeOfConfigParameter<keyof Base2DKernelParameters>[] = [
+const base2DKernelParameters: ConfigParameterArray<Base2DKernelParameters> = [
   { key: 'in_channels', type: 'int', description: '输入通道数', default: 1 },
   { key: 'out_channels', type: 'int', description: '输出通道数', inShape: true, default: 1 },
   {
@@ -68,7 +68,7 @@ const base2DKernelParameters: EachTypeOfConfigParameter<keyof Base2DKernelParame
   { key: 'padding', type: 'tuple2', description: '填充大小', inShape: true, default: [0, 0] },
   { key: 'dilation', type: 'tuple2', description: '扩张率', default: [1, 1] },
 ]
-const convCommonParameters: EachTypeOfConfigParameter<keyof ConvCommonParameters>[] = [
+const convCommonParameters: ConfigParameterArray<ConvCommonParameters> = [
   {
     key: 'groups',
     type: 'int',
@@ -102,7 +102,7 @@ const conv2d = createLayerConfig<Conv2DParameters>({
   checkers: [checkInChannel, check2DKernelSize],
 })
 
-const maxPoolCommonParameters: EachTypeOfConfigParameter<keyof MaxPoolCommonParameters>[] = [
+const maxPoolCommonParameters: ConfigParameterArray<MaxPoolCommonParameters> = [
   {
     key: 'padding_mode',
     type: 'str',
@@ -141,7 +141,7 @@ const maxPool2d = createLayerConfig<MaxPool2DParameters>({
   checkers: [checkInChannel, check2DKernelSize],
 })
 
-const avgPoolCommonParameters: EachTypeOfConfigParameter<keyof AvgPoolCommonParameters>[] = [
+const avgPoolCommonParameters: ConfigParameterArray<AvgPoolCommonParameters> = [
   {
     key: 'ceil_mode',
     type: 'bool',
@@ -182,7 +182,7 @@ const avgPool2d = createLayerConfig<AvgPool2DParameters>({
   checkers: [checkInChannel, check2DKernelSize],
 })
 
-const batchNormParameters: EachTypeOfConfigParameter<keyof BatchNormParameters>[] = [
+const batchNormParameters: ConfigParameterArray<BatchNormParameters> = [
   {
     key: 'num_features',
     type: 'int',
@@ -231,7 +231,7 @@ const batchNorm2d = createLayerConfig<BatchNormParameters>({
   checkers: [checkNumFeatures],
 })
 
-const linearParameters: EachTypeOfConfigParameter<keyof LinearParameters>[] = [
+const linearParameters: ConfigParameterArray<LinearParameters> = [
   { key: 'in_features', type: 'int', description: '输入数据特征向量的长度', default: 1 },
   { key: 'out_features', type: 'int', description: '输出数据特征向量的长度', default: 1 },
   { key: 'bias', type: 'bool', description: '是否添加偏置', default: true },
@@ -245,7 +245,7 @@ const linear = createLayerConfig<LinearParameters>({
   checkers: [checkInFeatures],
 })
 
-const dropoutParameters: EachTypeOfConfigParameter<keyof DropoutParameters>[] = [
+const dropoutParameters: ConfigParameterArray<DropoutParameters> = [
   { key: 'p', type: 'float', description: '丢弃概率', default: 0.5 },
   { key: 'inplace', type: 'bool', description: '是否原地操作', default: false },
 ]
@@ -257,7 +257,7 @@ const dropout = createLayerConfig<DropoutParameters>({
   parameters: dropoutParameters,
 })
 
-const mseLossParameters: EachTypeOfConfigParameter<keyof MSELossParameters>[] = [
+const mseLossParameters: ConfigParameterArray<MSELossParameters> = [
   { key: 'size_average', type: 'bool', description: '是否对损失进行平均', default: true },
   { key: 'reduce', type: 'bool', description: '是否对损失进行降维', default: true },
   {
@@ -277,7 +277,7 @@ const mseLoss = createLayerConfig<MSELossParameters>({
   checkers: [checkSameInputShape],
 })
 
-const reLUParameters: EachTypeOfConfigParameter<keyof ReLUParameters>[] = [
+const reLUParameters: ConfigParameterArray<ReLUParameters> = [
   { key: 'inplace', type: 'bool', description: '是否就地进行操作', default: false },
 ]
 const reLU = createLayerConfig<ReLUParameters>({
@@ -321,7 +321,7 @@ const hadamardProduct = createLayerConfig<{}>({
   checkers: [checkSameInputShape],
 })
 
-const splitParameters: EachTypeOfConfigParameter<keyof SplitParameters>[] = [
+const splitParameters: ConfigParameterArray<SplitParameters> = [
   {
     key: 'split_size_or_sections',
     type: 'tuple2',

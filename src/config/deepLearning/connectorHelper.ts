@@ -1,7 +1,7 @@
 import { ConnectorConfig, DynamicShape, VirtualValue } from '@/types/config/deepLearning'
 import {
   AllShapePlaceholders,
-  FlatConfigParameters,
+  ConfigParameterRecord,
   ShapeGetter,
 } from '@/types/config/parameter'
 import {
@@ -32,7 +32,7 @@ export const generateInputShapeFn = (index: number) =>
     const shape = inputShapes[index]
     return shape.connected ? shape.shapeValue : undefined
   }
-export function topInput<P extends FlatConfigParameters>(
+export function topInput<P extends ConfigParameterRecord>(
   index: number,
   placeholders?: AllShapePlaceholders[],
 ) {
@@ -52,7 +52,7 @@ export function topInput<P extends FlatConfigParameters>(
   } as ConnectorConfig<P>
 }
 
-export function bottomOutput<P extends FlatConfigParameters>(
+export function bottomOutput<P extends ConfigParameterRecord>(
   getShape: ShapeGetter<P>,
   placeholders?: AllShapePlaceholders[],
 ) {

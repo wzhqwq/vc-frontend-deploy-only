@@ -1,6 +1,6 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
-export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2'
+export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2' | 'object'
 export type ConfigParameterValue<T extends 'int' | 'str' | 'bool' | 'tuple2'> = T extends
   | 'int'
   | 'float'
@@ -11,24 +11,27 @@ export type ConfigParameterValue<T extends 'int' | 'str' | 'bool' | 'tuple2'> = 
   ? boolean
   : T extends 'tuple2'
   ? [number, number]
-  : never
-export type FlatConfigParameters = Record<string, ConfigParameterValue<ConfigParameterType>>
+  : undefined
+export type ConfigParameterRecord = Record<string, ConfigParameterValue<ConfigParameterType>>
 
-export interface ConfigParameter<T extends ConfigParameterType, K extends string = string> {
+export interface ConfigParameter<T extends ConfigParameterType, K extends string = string, P = any> {
   key: K
   type: T
   description: string
   inShape?: boolean
-  default: ConfigParameterValue<T> | ((parameters: FlatConfigParameters) => ConfigParameterValue<T>)
+  default: ConfigParameterValue<T> | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>)
   selections?: string[]
   validator?: (value: ConfigParameterValue<T>) => boolean
+  properties: T extends 'object' ? EachTypeOfConfigParameter<keyof P[K], P[K]> : undefined
 }
-export type EachTypeOfConfigParameter<K extends string = string> =
+export type EachTypeOfConfigParameter<K extends string = string, P = any> =
   | ConfigParameter<'int', K>
   | ConfigParameter<'float', K>
   | ConfigParameter<'str', K>
   | ConfigParameter<'bool', K>
   | ConfigParameter<'tuple2', K>
+  | ConfigParameter<'object', K>
+export type ConfigParameterArray<P> = EachTypeOfConfigParameter<keyof P, P>[]
 
 export type AnyDimPlaceholders = `d${number}`
 export type AllShapePlaceholders =
@@ -47,20 +50,20 @@ export type AllShapePlaceholders =
   | 'n'
   | 'k'
 
-type ShapeGetter<P extends FlatConfigParameters> = (
+type ShapeGetter<P extends ConfigParameterRecord> = (
   inputs: DynamicShape[],
   parameters: P,
 ) => VirtualValue[] | undefined
-export interface FixedDimensionShapeParameter<P extends FlatConfigParameters> {
+export interface FixedDimensionShapeParameter<P extends ConfigParameterRecord> {
   anyDimension?: false
   placeholders: AllShapePlaceholders[]
   getShape: ShapeGetter<P>
 }
-export interface AnyDimensionShapeParameter<P extends FlatConfigParameters> {
+export interface AnyDimensionShapeParameter<P extends ConfigParameterRecord> {
   anyDimension: true
   getShape: ShapeGetter<P>
 }
-export type ShapeParameter<P extends FlatConfigParameters> =
+export type ShapeParameter<P extends ConfigParameterRecord> =
   | FixedDimensionShapeParameter<P>
   | AnyDimensionShapeParameter<P>
 

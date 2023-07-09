@@ -1,9 +1,9 @@
 import { CreateLayerConfigOptions, LayerConfig, LayerRenderer } from '@/types/config/deepLearning'
-import { FlatConfigParameters } from '@/types/config/parameter'
+import { ConfigParameterRecord } from '@/types/config/parameter'
 import { joyTheme } from '@/theme'
 import { Box, Path, Rect } from '@svgdotjs/svg.js'
 
-export function createLayerConfig<P extends FlatConfigParameters>(
+export function createLayerConfig<P extends ConfigParameterRecord>(
   options: CreateLayerConfigOptions<P>,
 ) {
   return {

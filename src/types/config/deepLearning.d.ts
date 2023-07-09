@@ -2,7 +2,7 @@ import { Box, Element } from '@svgdotjs/svg.js'
 import {
   EachTypeOfConfigParameter,
   ConfigParameter,
-  FlatConfigParameters,
+  ConfigParameterRecord,
   ShapeParameter,
 } from './parameter'
 
@@ -10,16 +10,16 @@ export type ConnectorSide = 'top' | 'bottom' | 'left' | 'right'
 export type ConnectorStatus = 'isolated' | 'connected' | 'dragging'
 export type ConnectorType = 'input' | 'output'
 
-export interface ConnectorConfig<P extends FlatConfigParameters> {
+export interface ConnectorConfig<P extends ConfigParameterRecord> {
   type: ConnectorType
   side: ConnectorSide
   shape: ShapeParameter<P>
 }
-export type LayerChecker<P extends FlatConfigParameters> = (
+export type LayerChecker<P extends ConfigParameterRecord> = (
   inputShapes: DynamicShapeConnected[],
   parameters: P,
 ) => string | null
-export interface LayerConfig<P extends FlatConfigParameters> {
+export interface LayerConfig<P extends ConfigParameterRecord> {
   name: string
   displayName?: string
   renderer: LayerRenderer
@@ -33,7 +33,7 @@ export interface LayerRenderer {
   getElement: (box: Box) => Element
   color: 'dark' | 'light'
 }
-export type CreateLayerConfigOptions<P extends FlatConfigParameters> = Omit<
+export type CreateLayerConfigOptions<P extends ConfigParameterRecord> = Omit<
   LayerConfig<P>,
   'defaultParameters'
 >
@@ -52,7 +52,7 @@ export interface DynamicShapeUnconnected {
 }
 export type DynamicShape = DynamicShapeConnected | DynamicShapeUnconnected
 
-export interface LayerData<P extends FlatConfigParameters> {
+export interface LayerData<P extends ConfigParameterRecord> {
   id: string
   name: string
   parameters: P
