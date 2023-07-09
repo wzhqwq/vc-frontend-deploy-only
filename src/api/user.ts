@@ -15,10 +15,10 @@ export type LoginForm = Omit<UserCreatingForm, 'confirmPassword'>
 export type JwtUserData = Omit<User, 'email'>
 
 export function useUser(userId?: number) {
-  const { loggedIn } = useSession()
+  const { hasToken } = useSession()
   const { data: user, isFetching: fetchingUser } = useErrorlessQuery<User>({
     queryKey: userId ? ['public', 'user', 'users', userId] : ['private', 'user', 'me'],
-    enabled: loggedIn,
+    enabled: userId != undefined || hasToken,
   })
 
   return {
@@ -72,6 +72,7 @@ export function useSession() {
 
   return {
     loggedIn,
+    hasToken: loggedIn || !!anonymousToken,
     logIn,
     loggingIn,
     registerUser,
