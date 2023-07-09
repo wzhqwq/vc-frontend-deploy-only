@@ -10,6 +10,8 @@ export interface OtherDataWithLabelConfig extends DataWithLabelConfig {
 }
 export interface DataWithoutLabelConfig {
   has_label: false
+  label_file_name?: string
+  label_name?: string
 }
 
 export type BioDataConfig = {

@@ -12,7 +12,7 @@ export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int
   : T extends 'object'
   ? undefined
   : T extends 'array'
-  ? undefined
+  ? any[]
   : never
 
 export type ConfigParameterRecord = Record<string, ConfigParameterValue<ConfigParameterType>>
@@ -30,6 +30,7 @@ export interface ConfigParameter<
   selections?: string[]
   validator?: (value: ConfigParameterValue<T>) => boolean
   properties?: ConfigParameterArray<P[K]>
+  shown?: (parameters: P) => boolean
 }
 export type EachTypeOfConfigParameter<K extends string = string, P = Record<K, any>> =
   | ConfigParameter<'int', K, P>
