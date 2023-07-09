@@ -1,9 +1,7 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
-export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2' | 'object'
-export type ConfigParameterValue<T extends 'int' | 'str' | 'bool' | 'tuple2'> = T extends
-  | 'int'
-  | 'float'
+export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2' | 'object' | 'array'
+export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int' | 'float'
   ? number
   : T extends 'str'
   ? string
@@ -13,27 +11,34 @@ export type ConfigParameterValue<T extends 'int' | 'str' | 'bool' | 'tuple2'> = 
   ? [number, number]
   : T extends 'object'
   ? undefined
+  : T extends 'array'
+  ? undefined
   : never
 
 export type ConfigParameterRecord = Record<string, ConfigParameterValue<ConfigParameterType>>
 
-export interface ConfigParameter<T extends ConfigParameterType, K extends string = string, P = any> {
+export interface ConfigParameter<
+  T extends ConfigParameterType,
+  K extends string = string,
+  P = Record<K, any>,
+> {
   key: K
   type: T
   description: string
   inShape?: boolean
-  default: ConfigParameterValue<T>/*  | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>) */
+  default: ConfigParameterValue<T> /*  | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>) */
   selections?: string[]
   validator?: (value: ConfigParameterValue<T>) => boolean
-  properties?: EachTypeOfConfigParameter<keyof P[K], P[K]>
+  properties?: ConfigParameterArray<P[K]>
 }
-export type EachTypeOfConfigParameter<K extends string = string, P = any> =
+export type EachTypeOfConfigParameter<K extends string = string, P = Record<K, any>> =
   | ConfigParameter<'int', K, P>
   | ConfigParameter<'float', K, P>
   | ConfigParameter<'str', K, P>
   | ConfigParameter<'bool', K, P>
   | ConfigParameter<'tuple2', K, P>
   | ConfigParameter<'object', K, P>
+  | ConfigParameter<'array', K, P>
 export type ConfigParameterArray<P> = EachTypeOfConfigParameter<keyof P, P>[]
 
 export type AnyDimPlaceholders = `d${number}`
