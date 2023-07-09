@@ -5,8 +5,8 @@ import { Tuple2Input } from './CustomInput'
 import FormModal from './FormModal'
 
 export interface ParameterInputProps {
-  parameter: EachTypeOfConfigParameter<any>
-  control: Control
+  parameter: EachTypeOfConfigParameter<any, any>
+  control: Control<any>
   prefix?: string
 }
 
@@ -27,6 +27,7 @@ export default function ParameterInput({ prefix, parameter, control }: Parameter
     ) : parameter.selections ? (
       <Select
         {...field}
+        value={parameter.type == 'int' ? field.value : parameter.selections.indexOf(field.value)}
         onChange={(_, value) =>
           field.onChange(parameter.type == 'int' ? parseInt(value) : parameter.selections![value])
         }

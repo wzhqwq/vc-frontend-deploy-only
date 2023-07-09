@@ -32,7 +32,7 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
       analyses: project.config.analyses.map(fillInTaskId),
     } as ProjectGraph
   }, [project, tasks])
-  const { control, setValue } = useForm({ values: graph })
+  const { control, reset } = useForm({ values: graph })
 
   return (
     <Box>
@@ -63,6 +63,7 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
                 key={task.id}
                 index={index}
                 control={control}
+                reset={reset}
                 originalParameters={
                   project.config.preProcesses.find((t) => t.id == task.id)?.parameters
                 }

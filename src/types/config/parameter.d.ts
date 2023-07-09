@@ -76,7 +76,7 @@ export type ShapeParameter<P extends ConfigParameterRecord> =
   | FixedDimensionShapeParameter<P>
   | AnyDimensionShapeParameter<P>
 
-export interface PreprocessParameter<T extends Record<string, any>, N extends 1 | 2 | 3 | 4> {
+export interface PreprocessParameter<T extends Record<string, any>, N extends number> {
   data_config: T
   data_type: N
   data_file_name: string

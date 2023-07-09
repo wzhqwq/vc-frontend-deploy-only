@@ -12,6 +12,7 @@ export interface DataWithoutLabelConfig {
   has_label: false
   label_file_name?: string
   label_name?: string
+  label_type?: 'txt' | 'mat'
 }
 
 export type BioDataConfig = {
@@ -40,10 +41,10 @@ export interface EncodeArgs {
   window_size: number
 }
 
-export type ImgPreprocessParameter = PreprocessParameter<ImgDataConfig, 1>
-export type TextPreprocessParameter = PreprocessParameter<TextDataConfig, 2>
-export type BioPreprocessParameter = PreprocessParameter<BioDataConfig, 3>
-export type OtherPreprocessParameter = PreprocessParameter<OtherDataConfig, 4>
+export type ImgPreprocessParameter = PreprocessParameter<ImgDataConfig, 0>
+export type TextPreprocessParameter = PreprocessParameter<TextDataConfig, 1>
+export type BioPreprocessParameter = PreprocessParameter<BioDataConfig, 2>
+export type OtherPreprocessParameter = PreprocessParameter<OtherDataConfig, 3>
 export type EachPreprocessParameter =
   | ImgPreprocessParameter
   | TextPreprocessParameter

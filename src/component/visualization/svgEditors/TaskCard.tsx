@@ -5,12 +5,17 @@ import { Box, Card, Stack, Typography } from '@mui/joy'
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import { taskStatus } from '@/component/basic/chips'
 import { FileUpload } from '@/component/basic/FileUpload'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { TaskConnector } from './TaskConnector'
-import { Control, Controller } from 'react-hook-form'
+import { Control, Controller, UseFormReset, useWatch } from 'react-hook-form'
 import { FormLabel } from '@mui/material'
 import FormModal from '@/component/basic/FormModal'
-import { imgDataConfigParameters } from '@/config/projectGraph/taskData'
+import {
+  allPreprocessDataConfigParameters,
+  allPreprocessDefaultParameters,
+  dataTypeParameter,
+} from '@/config/projectGraph/taskData'
+import ParameterInput from '@/component/basic/ParameterInput'
 
 export interface BasicTaskCardProps<T extends TaskData<Record<string, any>>> {
   taskData: T
@@ -58,29 +63,56 @@ export function BasicTaskCard({
 export interface TaskCardProps<T extends TaskData<Record<string, any>>> {
   originalParameters?: T['parameters']
   control: Control<ProjectGraph>
+  reset: UseFormReset<ProjectGraph>
   index: number
 }
 export function PreprocessTaskCard({
   control,
+  reset,
   originalParameters,
   index,
 }: TaskCardProps<PreprocessTaskData>) {
   const parameterPrefix = `preProcesses.${index}.parameters`
+  const dataType = useWatch({ control, name: `preProcesses.${index}.parameters.data_type` })
+  const dataConfigParameters = useMemo(
+    () => allPreprocessDataConfigParameters[dataType],
+    [dataType],
+  )
+  useEffect(() => {
+    console.log(dataType)
+    // reset((g) => ({
+    //   ...g,
+    //   preProcesses: g.preProcesses.map((t, i) => {
+    //     if (i === index)
+    //       return {
+    //         ...t,
+    //         parameters: allPreprocessDefaultParameters[dataType],
+    //       }
+    //     return t
+    //   }),
+    // }))
+  }, [dataType, reset])
+
   return (
     <Controller
       name={`preProcesses.${index}`}
       control={control}
       render={({ field: { value } }) => (
         <BasicTaskCard originalParameters={originalParameters} taskData={value} showOutput>
+          <ParameterInput
+            prefix={parameterPrefix}
+            control={control}
+            parameter={dataTypeParameter}
+          />
           <Stack direction="row" alignItems="center" spacing={2}>
             <FormLabel>数据文件</FormLabel>
             <FileUpload name={`${parameterPrefix}.data_file_name`} control={control} />
             <FormModal
-              label=''
+              label=""
               description="数据参数"
               name={`${parameterPrefix}.data_config`}
               control={control}
-              parameters={imgDataConfigParameters}
+              parameters={dataConfigParameters}
             />
           </Stack>
         </BasicTaskCard>
