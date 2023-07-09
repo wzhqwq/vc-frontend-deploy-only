@@ -11,7 +11,10 @@ export type ConfigParameterValue<T extends 'int' | 'str' | 'bool' | 'tuple2'> = 
   ? boolean
   : T extends 'tuple2'
   ? [number, number]
-  : undefined
+  : T extends 'object'
+  ? undefined
+  : never
+
 export type ConfigParameterRecord = Record<string, ConfigParameterValue<ConfigParameterType>>
 
 export interface ConfigParameter<T extends ConfigParameterType, K extends string = string, P = any> {
@@ -22,15 +25,15 @@ export interface ConfigParameter<T extends ConfigParameterType, K extends string
   default: ConfigParameterValue<T>/*  | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>) */
   selections?: string[]
   validator?: (value: ConfigParameterValue<T>) => boolean
-  properties: T extends 'object' ? EachTypeOfConfigParameter<keyof P[K], P[K]> : undefined
+  properties?: EachTypeOfConfigParameter<keyof P[K], P[K]>
 }
 export type EachTypeOfConfigParameter<K extends string = string, P = any> =
-  | ConfigParameter<'int', K>
-  | ConfigParameter<'float', K>
-  | ConfigParameter<'str', K>
-  | ConfigParameter<'bool', K>
-  | ConfigParameter<'tuple2', K>
-  | ConfigParameter<'object', K>
+  | ConfigParameter<'int', K, P>
+  | ConfigParameter<'float', K, P>
+  | ConfigParameter<'str', K, P>
+  | ConfigParameter<'bool', K, P>
+  | ConfigParameter<'tuple2', K, P>
+  | ConfigParameter<'object', K, P>
 export type ConfigParameterArray<P> = EachTypeOfConfigParameter<keyof P, P>[]
 
 export type AnyDimPlaceholders = `d${number}`
