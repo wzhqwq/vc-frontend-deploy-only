@@ -20,7 +20,7 @@ export default function ParameterInput({ prefix, parameter, control }: Parameter
         </Chip>
       </FormLabel>
       <FormHelperText>{parameter.description}</FormHelperText>
-      {parameter.type == 'object' && parameter.properties ? (
+      {parameter.type == 'dict' && parameter.properties ? (
         <FormModal
           control={control}
           name={(prefix ? prefix + '.' : '') + parameter.key}
@@ -43,13 +43,17 @@ export default function ParameterInput({ prefix, parameter, control }: Parameter
               : parameter.selections
               ? ({ field: { onChange, value, ref } }) => (
                   <Select
-                    onChange={(_, value) => onChange(value)}
+                    onChange={(_, value) =>
+                      onChange(
+                        parameter.type == 'int' ? parseInt(value) : parameter.selections![value],
+                      )
+                    }
                     value={value}
                     ref={ref}
                     size="sm"
                   >
-                    {parameter.selections?.map((selection) => (
-                      <Option value={selection} key={selection}>
+                    {parameter.selections?.map((selection, index) => (
+                      <Option value={index} key={selection}>
                         {selection}
                       </Option>
                     ))}
