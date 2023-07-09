@@ -3,6 +3,7 @@ import { FormLabel, Chip, FormHelperText, Switch, Input, Select, Box, Option } f
 import { Control, Controller, ControllerRenderProps, Field, useWatch } from 'react-hook-form'
 import { Tuple2Input } from './CustomInput'
 import FormModal from './FormModal'
+import FileUpload from './FileUpload'
 
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any, any>
@@ -21,8 +22,12 @@ export default function ParameterInput({ prefix, parameter, control }: Parameter
         control={control}
         name={(prefix ? prefix + '.' : '') + parameter.key}
         parameters={parameter.properties}
-        label={parameter.key as string}
-        description={parameter.description}
+      />
+    ) : parameter.type == 'file' ? (
+      <FileUpload
+        value={field.value}
+        onChange={field.onChange}
+        onRemove={() => field.onChange('')}
       />
     ) : parameter.selections ? (
       <Select
@@ -56,7 +61,7 @@ export default function ParameterInput({ prefix, parameter, control }: Parameter
     disabled: !parameter.shown,
   })
   const show = parameter.shown ? parameter.shown(form) : true
-  
+
   return (
     <Controller
       control={control}
@@ -65,15 +70,22 @@ export default function ParameterInput({ prefix, parameter, control }: Parameter
       render={({ field, fieldState }) => (
         <Box display={show ? 'block' : 'none'}>
           <FormLabel>
+            {fieldState.isDirty && (
+              <Box
+                sx={(theme) => ({
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  ml: '-10px',
+                  position: 'absolute',
+                  bgcolor: theme.vars.palette.primary[400],
+                })}
+              />
+            )}
             {parameter.key as string}
             <Chip size="sm" variant="soft" sx={{ ml: 1 }}>
               {parameter.type}
             </Chip>
-            {fieldState.isDirty && (
-              <Chip size="sm" variant="solid" sx={{ ml: 1 }}>
-                已修改
-              </Chip>
-            )}
           </FormLabel>
           <FormHelperText>{parameter.description}</FormHelperText>
           {renderInput(field)}

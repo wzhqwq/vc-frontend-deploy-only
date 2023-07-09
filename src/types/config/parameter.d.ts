@@ -1,9 +1,9 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
-export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2' | 'dict' | 'list'
+export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2' | 'dict' | 'list' | 'file'
 export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int' | 'float'
   ? number
-  : T extends 'str'
+  : T extends 'str' | 'file'
   ? string
   : T extends 'bool'
   ? boolean
@@ -40,6 +40,7 @@ export type EachTypeOfConfigParameter<K extends string = string, P = Record<K, a
   | ConfigParameter<'tuple2', K, P>
   | ConfigParameter<'dict', K, P>
   | ConfigParameter<'list', K, P>
+  | ConfigParameter<'file', K, P>
 export type ConfigParameterArray<P> = EachTypeOfConfigParameter<keyof P, P>[]
 
 export type AnyDimPlaceholders = `d${number}`

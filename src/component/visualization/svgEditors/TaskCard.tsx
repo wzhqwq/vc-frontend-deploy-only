@@ -4,7 +4,6 @@ import { Box, Card, Stack, Typography } from '@mui/joy'
 
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import { taskStatus } from '@/component/basic/chips'
-import { FileUpload } from '@/component/basic/FileUpload'
 import { useEffect, useMemo } from 'react'
 import { TaskConnector } from './TaskConnector'
 import { Control, Controller, UseFormReset, useWatch } from 'react-hook-form'
@@ -13,6 +12,7 @@ import FormModal from '@/component/basic/FormModal'
 import {
   allPreprocessDataConfigParameters,
   allPreprocessDefaultParameters,
+  dataFilenameParameter,
   dataTypeParameter,
 } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
@@ -41,7 +41,7 @@ export function BasicTaskCard({
     <Card variant="outlined" sx={{ minWidth: 300, p: 0 }}>
       <Stack direction="row" alignItems="center">
         {showInput && <TaskConnector type="input" id={taskData.id} />}
-        <Stack flexGrow={1} p={2} spacing={1}>
+        <Stack flexGrow={1} p={2} spacing={2}>
           <Stack direction="row" alignItems="center" spacing={2}>
             {changed && (
               <Stack direction="row" alignItems="center" spacing={1}>
@@ -104,15 +104,16 @@ export function PreprocessTaskCard({
             control={control}
             parameter={dataTypeParameter}
           />
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <FormLabel>数据文件</FormLabel>
-            <FileUpload name={`${parameterPrefix}.data_file_name`} control={control} />
-            <FormModal
-              label=""
-              description="数据参数"
-              name={`${parameterPrefix}.data_config`}
+          <Stack direction="row" spacing={4}>
+            <ParameterInput
+              prefix={parameterPrefix}
               control={control}
-              parameters={dataConfigParameters}
+              parameter={dataFilenameParameter}
+            />
+            <ParameterInput
+              prefix={parameterPrefix}
+              control={control}
+              parameter={dataConfigParameters}
             />
           </Stack>
         </BasicTaskCard>

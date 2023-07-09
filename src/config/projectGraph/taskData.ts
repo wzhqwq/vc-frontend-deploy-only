@@ -8,7 +8,11 @@ import {
   TextDataConfig,
   TextPreprocessParameter,
 } from '@/types/config/details/tasks'
-import { ConfigParameter, ConfigParameterArray, PreprocessParameter } from '@/types/config/parameter'
+import {
+  ConfigParameter,
+  ConfigParameterArray,
+  PreprocessParameter,
+} from '@/types/config/parameter'
 
 export const defaultImgPreprocessParameter: ImgPreprocessParameter = {
   data_type: 0,
@@ -33,6 +37,16 @@ export const dataTypeParameter: ConfigParameter<
   default: 0,
   selections: ['图片', '文本', '生物序列', '其他'],
 }
+export const dataFilenameParameter: ConfigParameter<
+  'file',
+  'data_file_name',
+  PreprocessParameter<any, any>
+> = {
+  key: 'data_file_name',
+  type: 'file',
+  description: '数据文件',
+  default: '',
+}
 export const imgDataConfigParameters: ConfigParameterArray<ImgDataConfig> = [
   { key: 'width', type: 'int', description: '压缩目标宽度', default: 400 },
   { key: 'height', type: 'int', description: '压缩目标高度', default: 400 },
@@ -41,7 +55,7 @@ export const imgDataConfigParameters: ConfigParameterArray<ImgDataConfig> = [
   { key: 'has_label', type: 'bool', description: '是否有标签', default: false },
   {
     key: 'label_file_name',
-    type: 'str',
+    type: 'file',
     description: '标签文件',
     default: '',
     shown: (p) => p.has_label,
@@ -111,7 +125,7 @@ export const bioDataConfigParameters: ConfigParameterArray<BioDataConfig> = [
   { key: 'has_label', type: 'bool', description: '是否有标签', default: false },
   {
     key: 'label_file_name',
-    type: 'str',
+    type: 'file',
     description: '标签文件',
     default: '',
     shown: (p) => p.has_label,
@@ -130,7 +144,7 @@ export const otherDataConfigParameters: ConfigParameterArray<OtherDataConfig> = 
   { key: 'has_label', type: 'bool', description: '是否有标签', default: false },
   {
     key: 'label_file_name',
-    type: 'str',
+    type: 'file',
     description: '标签文件',
     default: '',
     shown: (p) => p.has_label,
@@ -157,7 +171,15 @@ export const allPreprocessDataConfigParameters = [
   textDataConfigParameters,
   bioDataConfigParameters,
   otherDataConfigParameters,
-]
+].map(
+  (p) =>
+    ({
+      key: 'data_config',
+      type: 'dict',
+      description: '数据配置',
+      properties: p,
+    } as ConfigParameter<'dict', 'data_config', PreprocessParameter<any, any>>),
+)
 export const allPreprocessDefaultParameters = [
   defaultImgPreprocessParameter,
   defaultTextPreprocessParameter,

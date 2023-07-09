@@ -1,17 +1,13 @@
-import { ConfigParameterArray, EachTypeOfConfigParameter } from '@/types/config/parameter'
-import { Box, Button, FormLabel, Modal, ModalDialog, Stack } from '@mui/joy'
+import { ConfigParameterArray } from '@/types/config/parameter'
+import { Box, Button, Modal, ModalDialog } from '@mui/joy'
 import { useMemo, useState } from 'react'
 import { Control } from 'react-hook-form'
 import ParameterInput from './ParameterInput'
-
-import CheckIcon from '@mui/icons-material/Check'
 
 export interface FormModalProps {
   control: Control<any>
   name: string
   parameters: ConfigParameterArray<any>
-  label: string
-  description: string
 }
 
 export default function FormModal(props: FormModalProps) {
@@ -33,10 +29,7 @@ export default function FormModal(props: FormModalProps) {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" spacing={2}>
-        <FormLabel>{props.description}</FormLabel>
-        <Button onClick={() => setOpen(true)}>详情</Button>
-      </Stack>
+      <Button onClick={() => setOpen(true)} size='sm' sx={{ my: 0.5 }}>点击编辑</Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalDialog sx={{ p: 2, minWidth: 200 }}>
           <Box
