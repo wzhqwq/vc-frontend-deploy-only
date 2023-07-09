@@ -1,15 +1,15 @@
 import { ConnectorConfig, DynamicShape, VirtualValue } from '@/types/config/deepLearning'
 import {
   AllShapePlaceholders,
+  FlatConfigParameters,
+  ShapeGetter,
+} from '@/types/config/parameter'
+import {
   Base1DKernelParameters,
   Base2DKernelParameters,
-  Conv1DParameters,
-  Conv2DParameters,
-  FlatConfigParameters,
   LinearParameters,
-  ShapeGetter,
   SplitParameters,
-} from '@/types/config/parameter'
+} from '@/types/config/details/layers'
 
 export const placeholderToShortName: Record<AllShapePlaceholders, string> = {
   batch_size: 'b',

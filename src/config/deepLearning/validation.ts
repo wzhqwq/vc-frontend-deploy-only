@@ -2,8 +2,7 @@ import { DynamicShapeConnected, LayerChecker } from '@/types/config/deepLearning
 import {
   Base1DKernelParameters,
   Base2DKernelParameters,
-  BaseChannelParameters,
-} from '@/types/config/parameter'
+} from '@/types/config/details/layers'
 
 export const checkInChannel: LayerChecker<{ in_channels: number }> = (
   inputShapes: DynamicShapeConnected[],
