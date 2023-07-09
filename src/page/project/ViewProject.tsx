@@ -1,6 +1,7 @@
 import { useProject } from '@/api/project'
 import { LayerGraphEditor } from '@/component/visualization/lazySvgEditors'
-import { Box } from '@mui/joy'
+import { ProjectGraphEditor } from '@/component/visualization/svgEditors'
+import { Box, CircularProgress } from '@mui/joy'
 import { useParams } from 'react-router-dom'
 
 export default function ViewProject() {
@@ -10,8 +11,10 @@ export default function ViewProject() {
   )
 
   return (
-    <div>
+    <Box mt={4}>
       {/* <LayerGraphEditor /> */}
-    </div>
+      {fetchingProject && <CircularProgress sx={{ mx: 'auto', display: 'block' }} />}
+      {project && <ProjectGraphEditor project={project} editing={false} />}
+    </Box>
   )
 }

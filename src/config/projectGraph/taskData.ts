@@ -1,4 +1,11 @@
-import { BioPreprocessParameter, ImgPreprocessParameter, OtherPreprocessParameter, TextPreprocessParameter } from "@/types/config/details/tasks";
+import {
+  BioPreprocessParameter,
+  ImgDataConfig,
+  ImgPreprocessParameter,
+  OtherPreprocessParameter,
+  TextPreprocessParameter,
+} from '@/types/config/details/tasks'
+import { ConfigParameter, ConfigParameterArray } from '@/types/config/parameter'
 
 export const defaultImgPreprocessParameter: ImgPreprocessParameter = {
   data_type: 1,
@@ -9,9 +16,24 @@ export const defaultImgPreprocessParameter: ImgPreprocessParameter = {
     batch_size: 16,
     organization_method: 1,
     has_label: false,
-    preprocess_config: []
+    preprocess_config: [],
   },
 }
+export const imgDataConfigParameters: ConfigParameterArray<ImgDataConfig> = [
+  { key: 'width', type: 'int', description: '压缩目标宽度', default: 400 },
+  { key: 'height', type: 'int', description: '压缩目标高度', default: 400 },
+  { key: 'batch_size', type: 'int', description: '分批大小', default: 16 },
+  { key: 'organization_method', type: 'int', description: '数据组织方式', default: 1 },
+  { key: 'has_label', type: 'bool', description: '是否有标签', default: false },
+  {
+    key: 'label_file_name',
+    type: 'str',
+    description: '标签文件',
+    default: '',
+    shown: (p) => p.has_label,
+  },
+  { key: 'preprocess_config', type: 'array', description: '预处理配置', default: [] },
+]
 export const defaultTextPreprocessParameter: TextPreprocessParameter = {
   data_type: 2,
   data_file_name: '',
@@ -43,4 +65,3 @@ export const defaultOtherPreprocessParameter: OtherPreprocessParameter = {
     has_label: false,
   },
 }
-
