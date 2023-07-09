@@ -1,6 +1,7 @@
 import { useDelete, useErrorlessQuery, usePost, usePut } from './common'
 import { Task, TaskGroup } from '@/types/entity/task'
 import { queryClient } from './queryClient'
+import { useMemo } from 'react'
 
 export interface QueryTaskGroupsResult {
   taskGroups: TaskGroup[]
@@ -12,9 +13,12 @@ export function usePublicTaskGroups(): QueryTaskGroupsResult {
     data: taskGroups,
     isFetching: fetchingTaskGroups,
     refetch: refetchTaskGroup,
-  } = useErrorlessQuery<TaskGroup[]>({
-    queryKey: ['private', 'algo', 'projects', 'task_groups'],
-  }, '获取公开任务失败')
+  } = useErrorlessQuery<TaskGroup[]>(
+    {
+      queryKey: ['private', 'algo', 'projects', 'task_groups'],
+    },
+    '获取公开任务失败',
+  )
 
   return {
     taskGroups,
@@ -50,7 +54,7 @@ export function useProjectTaskGroups(projectId?: number) {
   )
 
   return {
-    taskGroups: taskGroups ?? ([] as TaskGroup[]),
+    taskGroups: useMemo(() => taskGroups ?? ([] as TaskGroup[]), [taskGroups]),
     fetchingTaskGroups,
     refetchTaskGroup,
 
@@ -59,7 +63,7 @@ export function useProjectTaskGroups(projectId?: number) {
   } as QueryTaskGroupsResult & CreateTaskGroupResult
 }
 
-type TaskCreatingForm = Pick<Task, 'algo' | 'data_id' | 'pre_task_ids' | 'item_id'>
+type TaskCreatingForm = Pick<Task, 'task_type' | 'data_id' | 'pre_task_ids' | 'item_id'>
 
 export function useTaskGroup(groupId?: number) {
   const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>(
@@ -108,7 +112,7 @@ export function useTaskGroup(groupId?: number) {
     group,
     fetchingGroup,
 
-    tasks: tasks ?? ([] as Task[]),
+    tasks: useMemo(() => tasks ?? ([] as Task[]), [tasks]),
     fetchingTasks,
 
     createTask,

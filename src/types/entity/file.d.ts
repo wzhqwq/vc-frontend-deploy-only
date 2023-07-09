@@ -10,6 +10,7 @@ export interface FileInfo {
    * 创建时间
    */
   created_at: string;
+  extension: string;
   /**
    * 访问名称
    */

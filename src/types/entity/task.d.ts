@@ -23,9 +23,9 @@ export interface TaskGroup {
 
 export interface Task {
   /**
-   * 算法名称
+   * 任务类型
    */
-  algo: string
+  task_type: string
   /**
    * 创建时间
    */
@@ -66,6 +66,7 @@ export interface Task {
    * 拥有者用户id
    */
   user_id: number
+  item_id: string
 }
 
 export interface TaskException {
