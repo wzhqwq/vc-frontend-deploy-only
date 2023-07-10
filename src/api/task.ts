@@ -42,14 +42,15 @@ export function useProjectTaskGroups(projectId?: number) {
     },
     '获取历史任务失败',
   )
-  const { mutateAsync: createTaskGroup, isLoading: creatingTaskGroup } = usePost<
-    TaskGroup,
-    undefined
-  >(['private', 'algo', 'projects', projectId, 'task_groups'], '创建任务失败', {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['private', 'algo', 'projects', projectId, 'task_groups'])
+  const { mutateAsync: createTaskGroup } = usePost<TaskGroup, undefined>(
+    ['private', 'algo', 'projects', projectId, 'task_groups'],
+    '创建任务失败',
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['private', 'algo', 'projects', projectId, 'task_groups'])
+      },
     },
-  })
+  )
 
   return {
     taskGroups: useMemo(() => taskGroups ?? ([] as TaskGroup[]), [taskGroups]),
@@ -62,11 +63,12 @@ export function useProjectTaskGroups(projectId?: number) {
 
 type TaskCreatingForm = Pick<Task, 'task_type' | 'pre_task_ids' | 'item_id'> & { data_config: any }
 
-export function useTaskGroup(groupId?: number) {
+export function useTaskGroup(groupId?: number, autoUpdate = false) {
   const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>(
     {
       queryKey: ['private', 'algo', 'task_groups', groupId],
       enabled: groupId !== undefined,
+      refetchInterval: autoUpdate ? 1000 : false,
     },
     '获取历史任务失败',
   )
@@ -74,6 +76,7 @@ export function useTaskGroup(groupId?: number) {
     {
       queryKey: ['private', 'algo', 'task_groups', groupId, 'tasks'],
       enabled: groupId !== undefined,
+      refetchInterval: autoUpdate ? 1000 : false,
     },
     '获取历史任务子任务失败',
   )
@@ -103,6 +106,13 @@ export function useTaskGroup(groupId?: number) {
       },
     },
   )
+  useEffect(() => {
+    if (tasks) {
+      tasks.forEach((task) => {
+        queryClient.setQueryData(['private', 'algo', 'tasks', task.id], task)
+      })
+    }
+  })
 
   return {
     group,

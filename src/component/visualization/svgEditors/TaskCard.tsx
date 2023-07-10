@@ -6,7 +6,6 @@ import { memo, useEffect, useMemo } from 'react'
 import { TaskConnector } from './TaskConnector'
 import {
   UseFieldArrayRemove,
-  useController,
   useFormContext,
   useFormState,
   useWatch,

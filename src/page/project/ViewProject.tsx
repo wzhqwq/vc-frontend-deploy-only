@@ -27,11 +27,14 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import FileCopyIcon from '@mui/icons-material/FileCopy'
+import { useUser } from '@/api/user'
 
 export default function ViewProject() {
   const { id: projectId } = useParams<{ id: string }>()
   const { project, fetchingProject, deleteProject, deletingProject } = useProject(Number(projectId))
   const { taskGroups, fetchingTaskGroups } = useProjectTaskGroups(Number(projectId))
+  const { user } = useUser()
+  const isOwner = !!user && user.id === project?.user_id
 
   return (
     <Box mt={4}>
@@ -52,26 +55,30 @@ export default function ViewProject() {
               </Chip>
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
-            <Button
-              color="danger"
-              variant="soft"
-              startDecorator={<DeleteIcon />}
-              onClick={deleteProject}
-              disabled={deletingProject}
-              loading={deletingProject}
-            >
-              删除项目
-            </Button>
-            <Button
-              component="a"
-              color="primary"
-              variant="soft"
-              startDecorator={<EditIcon />}
-              href={`/project/${projectId}/edit`}
-              sx={{ boxSizing: 'border-box' }}
-            >
-              编辑项目
-            </Button>
+            {isOwner && (
+              <>
+                <Button
+                  color="danger"
+                  variant="soft"
+                  startDecorator={<DeleteIcon />}
+                  onClick={deleteProject}
+                  disabled={deletingProject}
+                  loading={deletingProject}
+                >
+                  删除项目
+                </Button>
+                <Button
+                  component="a"
+                  color="primary"
+                  variant="soft"
+                  startDecorator={<EditIcon />}
+                  href={`/project/${projectId}/edit`}
+                  sx={{ boxSizing: 'border-box' }}
+                >
+                  编辑项目
+                </Button>
+              </>
+            )}
             <Button
               component="a"
               color="primary"

@@ -1,3 +1,5 @@
+import { ProjectGraph } from "../config/project"
+
 export interface TaskGroup {
   /**
    * 创建时间
@@ -19,6 +21,10 @@ export interface TaskGroup {
    * 拥有者用户id
    */
   user_id: number
+  /**
+   * 项目配置
+   */
+  config: ProjectGraph
 }
 
 export interface Task {

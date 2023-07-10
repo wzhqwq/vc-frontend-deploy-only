@@ -32,7 +32,7 @@ export default function ProjectGraphEditor({
   projectId,
   groupId,
 }: ProjectGraphEditorProps) {
-  const { tasks } = useTaskGroup(groupId)
+  const { group, tasks } = useTaskGroup(groupId)
   const { project, updateProject, updatingProject } = useProject(projectId)
   const methods = useForm<ProjectGraph>()
   const {
@@ -40,62 +40,69 @@ export default function ProjectGraphEditor({
     reset,
     handleSubmit,
   } = methods
+  const config = useMemo(() => {
+    const c = group?.config ?? project?.config
+    if (!c) return
+    const fillInTaskId = (taskData: TaskData<any>) =>
+      ({
+        ...taskData,
+        taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
+      } as TaskData<any>)
+    return {
+      preProcesses: c.preProcesses.map(fillInTaskId),
+      algorithms: c.algorithms.map(fillInTaskId),
+      analyses: c.analyses.map(fillInTaskId),
+    } as ProjectGraph
+  }, [group, project, tasks])
 
   useEffect(() => {
-    if (!project) return
-    const fillInTaskId = (taskData: TaskData<any>) => ({
-      ...taskData,
-      taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
-    })
-    reset({
-      preProcesses: project.config.preProcesses.map(fillInTaskId),
-      algorithms: project.config.algorithms.map(fillInTaskId),
-      analyses: project.config.analyses.map(fillInTaskId),
-    } as ProjectGraph)
-  }, [project, tasks])
+    reset(config)
+  }, [config])
 
   return project ? (
     <Box>
-      <Stack
-        direction="row"
-        alignItems="center"
-        spacing={2}
-        p={1}
-        sx={(theme) => ({
-          position: 'sticky',
-          top: 0,
-          bgcolor: theme.vars.palette.background.surface,
-          borderBottom: 'solid 1px',
-          borderColor: theme.vars.palette.divider,
-          zIndex: 100,
-        })}
-      >
-        <Box sx={{ flexGrow: 1 }} />
-        {isDirty ? (
-          <>
-            <Button
-              variant="solid"
-              startDecorator={<SaveIcon />}
-              color="primary"
-              onClick={handleSubmit((data) => updateProject({ ...project, config: data }))}
-              disabled={!isValid || updatingProject}
-              loading={updatingProject}
-            >
-              保存
-            </Button>
-            <Button
-              variant="soft"
-              startDecorator={<ReplayRoundedIcon />}
-              color="primary"
-              onClick={() => reset()}
-            >
-              重置
-            </Button>
-          </>
-        ) : (
-          <Runner project={project} noRestart={!groupId} />
-        )}
-      </Stack>
+      {!readonly && (
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={2}
+          p={1}
+          sx={(theme) => ({
+            position: 'sticky',
+            top: 0,
+            bgcolor: theme.vars.palette.background.surface,
+            borderBottom: 'solid 1px',
+            borderColor: theme.vars.palette.divider,
+            zIndex: 100,
+          })}
+        >
+          <Box sx={{ flexGrow: 1 }} />
+          {isDirty ? (
+            <>
+              <Button
+                variant="solid"
+                startDecorator={<SaveIcon />}
+                color="primary"
+                onClick={handleSubmit((data) => updateProject({ ...project, config: data }))}
+                disabled={!isValid || updatingProject}
+                loading={updatingProject}
+              >
+                保存
+              </Button>
+              <Button
+                variant="soft"
+                startDecorator={<ReplayRoundedIcon />}
+                color="primary"
+                onClick={() => reset()}
+              >
+                重置
+              </Button>
+            </>
+          ) : (
+            config && <Runner project={project} noRestart={!groupId} config={config} />
+          )}
+        </Stack>
+      )}
       <FormProvider {...methods}>
         <Box
           sx={{
@@ -168,7 +175,15 @@ function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
   )
 }
 
-function Runner({ project, noRestart }: { project: Project; noRestart: boolean }) {
+function Runner({
+  project,
+  noRestart,
+  config,
+}: {
+  project: Project
+  noRestart: boolean
+  config: ProjectGraph
+}) {
   const { createTaskGroup } = useProjectTaskGroups(project.id)
   const [newGroupId, setNewGroupId] = useState<number>()
   const [tasksToCreate, setTasksToCreate] = useState<TaskData<any>[]>([])
@@ -179,18 +194,14 @@ function Runner({ project, noRestart }: { project: Project; noRestart: boolean }
   const newTasks = useMemo(() => {
     if (!project) return []
     return [
-      ...project.config.preProcesses.filter((t) => !t.taskId),
-      ...project.config.algorithms.filter((t) => !t.taskId),
-      ...project.config.analyses.filter((t) => !t.taskId),
+      ...config.preProcesses.filter((t) => !t.taskId),
+      ...config.algorithms.filter((t) => !t.taskId),
+      ...config.analyses.filter((t) => !t.taskId),
     ]
   }, [project])
   const allTasks = useMemo(() => {
     if (!project) return []
-    return [
-      ...project.config.preProcesses,
-      ...project.config.algorithms,
-      ...project.config.analyses,
-    ]
+    return [...config.preProcesses, ...config.algorithms, ...config.analyses]
   }, [project])
 
   const startTaskGroup = async () => {
