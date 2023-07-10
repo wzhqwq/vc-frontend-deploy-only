@@ -5,8 +5,6 @@ import { useParams } from 'react-router-dom'
 import { ProjectName, UserWidget } from '@/component/basic/getters'
 import { useTaskGroup } from '@/api/task'
 
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DangerousIcon from '@mui/icons-material/Dangerous'
 import { useUser } from '@/api/user'
@@ -41,10 +39,7 @@ export default function ViewTask() {
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
             <FormLabel>自动更新</FormLabel>
-            <Switch
-              checked={autoUpdate}
-              onChange={(e) => setAutoUpdate(e.target.checked)}
-            />
+            <Switch checked={autoUpdate} onChange={(e) => setAutoUpdate(e.target.checked)} />
             {isOwner && group.status < TASK_FINISHED && (
               <Button
                 color="danger"

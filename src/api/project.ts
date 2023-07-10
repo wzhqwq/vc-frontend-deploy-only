@@ -47,7 +47,7 @@ export function useProject(projectId?: number) {
     },
     '获取项目信息',
   )
-  const { mutate: updateProject, isLoading: updatingProject } = usePut<
+  const { mutateAsync: updateProject, isLoading: updatingProject } = usePut<
     Project,
     Omit<ProjectCreatingForm, 'config'> & { config: string }
   >(['private', 'algo', 'projects', projectId], '更新项目', {

@@ -22,13 +22,13 @@ import SaveIcon from '@mui/icons-material/Save'
 import { useNavigate } from 'react-router-dom'
 
 interface ProjectGraphEditorProps {
-  readonly: boolean
+  readonly?: boolean
   projectId: number
   groupId?: number
 }
 
 export default function ProjectGraphEditor({
-  readonly,
+  readonly = false,
   projectId,
   groupId,
 }: ProjectGraphEditorProps) {

@@ -4,12 +4,7 @@ import { Box, Card, Chip, ChipDelete, IconButton, Stack } from '@mui/joy'
 import { taskStatus } from '@/component/basic/chips'
 import { memo, useEffect, useMemo } from 'react'
 import { TaskConnector } from './TaskConnector'
-import {
-  UseFieldArrayRemove,
-  useFormContext,
-  useFormState,
-  useWatch,
-} from 'react-hook-form'
+import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
 import {
   allPreprocessDataConfigParameters,
   allPreprocessDefaultParameters,
@@ -43,7 +38,7 @@ export function BasicTaskCard({
     <Card variant="outlined" sx={{ p: 0 }}>
       <Stack direction="row" alignItems="center">
         {showInput && <TaskConnector type="input" name={`${name}.${index}.id`} />}
-        <Stack flexGrow={1} p={2} spacing={2}>
+        <Stack flexGrow={1} p={2} spacing={1}>
           <Stack direction="row" alignItems="center" spacing={2}>
             <ChangeIndicator name={`${name}.${index}`} />
             <IconButton size="sm" onClick={() => remove(index)} color="danger" variant="plain">
