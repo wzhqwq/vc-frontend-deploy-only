@@ -69,7 +69,7 @@ export function useProject(projectId?: number) {
       updateProject({ ...project, config: JSON.stringify(project.config) }),
     updatingProject,
 
-    deleteProject,
+    deleteProject: () => deleteProject(undefined),
     deletingProject,
   }
 }

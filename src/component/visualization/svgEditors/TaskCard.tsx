@@ -118,10 +118,10 @@ export function PreprocessTaskCard(props: TaskCardProps) {
 
   return (
     <BasicTaskCard {...props} name="preProcesses" showOutput>
-      <ParameterInput prefix={name} parameter={dataTypeParameter} />
+      <ParameterInput prefix={name} parameter={dataTypeParameter} simple />
       <Stack direction="row" spacing={4}>
-        <ParameterInput prefix={name} parameter={dataFilenameParameter} />
-        <ParameterInput prefix={name} parameter={dataConfigParameters} />
+        <ParameterInput prefix={name} parameter={dataFilenameParameter} simple />
+        <ParameterInput prefix={name} parameter={dataConfigParameters} simple />
       </Stack>
     </BasicTaskCard>
   )

@@ -64,7 +64,20 @@ export default function ProjectGraphEditor({
 
   return project ? (
     <Box>
-      <Stack direction="row" alignItems="center" spacing={2}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
+        p={1}
+        sx={(theme) => ({
+          position: 'sticky',
+          top: 0,
+          bgcolor: theme.vars.palette.background.surface,
+          borderBottom: 'solid 1px',
+          borderColor: theme.vars.palette.divider,
+          zIndex: 100,
+        })}
+      >
         <Box sx={{ flexGrow: 1 }} />
         {isDirty ? (
           <>
@@ -91,7 +104,7 @@ export default function ProjectGraphEditor({
           <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
             运行
           </Button>
-        ): hasNewTask ? (
+        ) : hasNewTask ? (
           <>
             <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
               继续运行
@@ -112,7 +125,7 @@ export default function ProjectGraphEditor({
             display: 'grid',
             gridTemplateColumns: '1fr auto 1fr auto 1fr',
             gap: 2,
-            mt: 2,
+            p: 1,
           }}
         >
           <TaskSlot
@@ -165,7 +178,7 @@ function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
   }
   return (
     <Stack alignItems="center" spacing={1}>
-      <Typography level="h5" sx={{ mb: 2 }}>
+      <Typography level="h5" sx={{ my: 2 }}>
         {props.title}
       </Typography>
       {fields.map((task, index) => props.renderer(task, index, remove))}

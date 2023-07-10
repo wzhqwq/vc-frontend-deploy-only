@@ -41,8 +41,8 @@ export default function FileUpload({ value, onChange, onRemove }: FileUploadProp
         p: 2,
         my: 0.5,
         position: 'relative',
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         input: {
           width: '100%',
           height: '100%',

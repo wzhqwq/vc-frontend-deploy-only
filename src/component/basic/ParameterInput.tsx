@@ -15,9 +15,10 @@ import { useCallback } from 'react'
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any, any>
   prefix?: string
+  simple?: boolean
 }
 
-export default function ParameterInput({ prefix, parameter }: ParameterInputProps) {
+export default function ParameterInput({ prefix, parameter, simple = false }: ParameterInputProps) {
   const { control } = useFormContext()
   const form = useWatch({
     control,
@@ -25,7 +26,6 @@ export default function ParameterInput({ prefix, parameter }: ParameterInputProp
     disabled: !parameter.shown,
   })
   const show = parameter.shown ? parameter.shown(form) : true
-  // console.log((prefix ? prefix + '.' : '') + parameter.key)
   const renderBox = useCallback<ControllerProps['render']>(
     ({ field, fieldState }) => (
       <Box display={show ? 'block' : 'none'}>
@@ -42,12 +42,14 @@ export default function ParameterInput({ prefix, parameter }: ParameterInputProp
               })}
             />
           )}
-          {parameter.key as string}
-          <Chip size="sm" variant="soft" sx={{ ml: 1 }}>
-            {parameter.type}
-          </Chip>
+          {simple ? parameter.description : (parameter.key as string)}
+          {!simple && (
+            <Chip size="sm" variant="soft" sx={{ ml: 1 }}>
+              {parameter.type}
+            </Chip>
+          )}
         </FormLabel>
-        <FormHelperText>{parameter.description}</FormHelperText>
+        {!simple && <FormHelperText>{parameter.description}</FormHelperText>}
         {renderInput(field, parameter, prefix)}
       </Box>
     ),
