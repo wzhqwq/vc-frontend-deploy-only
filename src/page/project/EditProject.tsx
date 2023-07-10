@@ -1,6 +1,18 @@
 import { ProjectCreatingForm, useProject } from '@/api/project'
 import { ProjectGraphEditor } from '@/component/visualization/svgEditors'
-import { Box, Button, Card, Chip, Divider, Grid, Input, Stack, Switch, Textarea, Typography } from '@mui/joy'
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  Divider,
+  Grid,
+  Input,
+  Stack,
+  Switch,
+  Textarea,
+  Typography,
+} from '@mui/joy'
 import { Skeleton } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { UserWidget } from '@/component/basic/getters'
@@ -34,14 +46,18 @@ export default function EditProject() {
                 <UserWidget />
               </Typography>
               <ChevronRightIcon color="secondary" />
-              <Input {...register('name', { required: true })} sx={{ width: 200 }} />
+              <Input
+                {...register('name', { required: true })}
+                sx={{ width: 200 }}
+                defaultValue={project.name}
+              />
               <Controller
                 control={control}
                 name="private"
+                defaultValue={project.private}
                 render={({ field }) => (
                   <Switch
                     {...field}
-                    onChange={field.onChange}
                     checked={field.value}
                     slotProps={{
                       track: {
