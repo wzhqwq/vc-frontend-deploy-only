@@ -6,11 +6,18 @@ import { useTaskGroup } from '@/api/task'
 import { PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
 import { defaultImgPreprocessParameter } from '@/config/projectGraph/taskData'
-import { Control, useFieldArray, useForm } from 'react-hook-form'
+import {
+  FormProvider,
+  UseFieldArrayRemove,
+  useFieldArray,
+  useForm,
+  useFormContext,
+} from 'react-hook-form'
 
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
+import SaveIcon from '@mui/icons-material/Save'
 
 interface ProjectGraphEditorProps {
   editing: boolean
@@ -32,59 +39,80 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
       analyses: project.config.analyses.map(fillInTaskId),
     } as ProjectGraph
   }, [project, tasks])
-  const { control, reset } = useForm({ values: graph })
+  const methods = useForm({ values: graph })
+  const {
+    formState: { isDirty },
+    reset,
+    handleSubmit,
+  } = methods
 
   return (
     <Box>
       <Stack direction="row" alignItems="center" spacing={2}>
         <Box sx={{ flexGrow: 1 }} />
-        <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
-          继续运行
-        </Button>
-        <Button variant="soft" startDecorator={<ReplayRoundedIcon />} color="primary">
-          重新运行
-        </Button>
+        {isDirty ? (
+          <>
+            <Button
+              variant="solid"
+              startDecorator={<SaveIcon />}
+              color="primary"
+              onClick={handleSubmit(console.log)}
+            >
+              保存
+            </Button>
+            <Button
+              variant="solid"
+              startDecorator={<ReplayRoundedIcon />}
+              color="primary"
+              onClick={() => reset()}
+            >
+              重置
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
+              继续运行
+            </Button>
+            <Button variant="soft" startDecorator={<ReplayRoundedIcon />} color="primary">
+              重新运行
+            </Button>
+          </>
+        )}
       </Stack>
-      {graph && (
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto 1fr auto 1fr',
-            gap: 2,
-            mt: 2,
-          }}
-        >
-          <TaskSlot
-            title="预处理"
-            name='preProcesses'
-            control={control}
-            renderer={(task, index) => (
-              <PreprocessTaskCard
-                key={task.id}
-                index={index}
-                control={control}
-                reset={reset}
-                originalParameters={
-                  project.config.preProcesses.find((t) => t.id == task.id)?.parameters
-                }
-              />
-            )}
-            initialParameters={defaultImgPreprocessParameter}
-          />
-          {/* <Divider orientation="vertical" />
-          <TaskSlot
-            title="算法"
-            renderer={() => <div>结束</div>}
-            initialParameters={{}}
-          />
-          <Divider orientation="vertical" />
-          <TaskSlot
-            title="分析"
-            renderer={() => <div>结束</div>}
-            initialParameters={{}}
-          /> */}
-        </Box>
-      )}
+      <FormProvider {...methods}>
+        {graph && (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: '1fr auto 1fr auto 1fr',
+              gap: 2,
+              mt: 2,
+            }}
+          >
+            <TaskSlot
+              title="预处理"
+              name="preProcesses"
+              renderer={(task, index, remove) => (
+                <PreprocessTaskCard key={task.id} index={index} remove={remove} />
+              )}
+              initialParameters={defaultImgPreprocessParameter}
+            />
+            {/* <Divider orientation="vertical" />
+            <TaskSlot
+              title="算法"
+              renderer={() => <div>结束</div>}
+              initialParameters={{}}
+            />
+            <Divider orientation="vertical" />
+            <TaskSlot
+              title="分析"
+              renderer={() => <div>结束</div>}
+              initialParameters={{}}
+            /> */}
+          </Box>
+        )}
+      </FormProvider>
     </Box>
   )
 }
@@ -92,13 +120,13 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
 interface TaskSlotProps<T extends Record<string, any>> {
   title: string
   name: keyof ProjectGraph
-  control: Control<ProjectGraph>
-  renderer: (task: TaskData<T>, index: number) => JSX.Element
+  renderer: (task: TaskData<T>, index: number, remove: UseFieldArrayRemove) => JSX.Element
   initialParameters: T
 }
 function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
-  const { fields, append } = useFieldArray({
-    control: props.control,
+  const { control } = useFormContext<ProjectGraph>()
+  const { fields, append, remove } = useFieldArray({
+    control,
     name: props.name,
   })
   const handleAdd = () => {
@@ -116,7 +144,7 @@ function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
       <Typography level="h5" sx={{ mb: 2 }}>
         {props.title}
       </Typography>
-      {fields.map(props.renderer)}
+      {fields.map((task, index) => props.renderer(task, index, remove))}
       <Button variant="soft" size="lg" startDecorator={<AddIcon />} fullWidth onClick={handleAdd}>
         添加
       </Button>

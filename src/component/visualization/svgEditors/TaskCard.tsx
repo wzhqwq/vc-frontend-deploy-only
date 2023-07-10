@@ -1,14 +1,10 @@
 import { useTask } from '@/api/task'
-import { PreprocessTaskData, ProjectGraph, TaskData } from '@/types/config/project'
-import { Box, Card, Stack, Typography } from '@mui/joy'
-
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import { ProjectGraph } from '@/types/config/project'
+import { Box, Card, Chip, IconButton, Stack } from '@mui/joy'
 import { taskStatus } from '@/component/basic/chips'
 import { useEffect, useMemo } from 'react'
 import { TaskConnector } from './TaskConnector'
-import { Control, Controller, UseFormReset, useWatch } from 'react-hook-form'
-import { FormLabel } from '@mui/material'
-import FormModal from '@/component/basic/FormModal'
+import { UseFieldArrayRemove, useController, useFormContext, useWatch } from 'react-hook-form'
 import {
   allPreprocessDataConfigParameters,
   allPreprocessDefaultParameters,
@@ -17,25 +13,36 @@ import {
 } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
 
-export interface BasicTaskCardProps<T extends TaskData<Record<string, any>>> {
-  taskData: T
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import DeleteIcon from '@mui/icons-material/Delete'
+
+export interface TaskCardProps {
+  index: number
+  remove: UseFieldArrayRemove
+}
+export interface BasicTaskCardProps extends TaskCardProps {
   children: React.ReactNode
-  originalParameters?: T['parameters']
+  name: keyof ProjectGraph
   showInput?: boolean
   showOutput?: boolean
 }
 export function BasicTaskCard({
-  taskData,
+  name,
+  index,
+  remove,
   children,
-  originalParameters,
   showInput,
   showOutput,
-}: BasicTaskCardProps<TaskData<any>>) {
+}: BasicTaskCardProps) {
+  const { control } = useFormContext<ProjectGraph>()
+  const {
+    field: { value: taskData },
+    fieldState: { isDirty },
+  } = useController({
+    name: `${name}.${index}`,
+    control,
+  })
   const { task } = useTask(taskData.taskId)
-  const changed = useMemo(() => {
-    if (!originalParameters) return true
-    return JSON.stringify(taskData.parameters) !== JSON.stringify(originalParameters)
-  }, [taskData, originalParameters])
 
   return (
     <Card variant="outlined" sx={{ minWidth: 300, p: 0 }}>
@@ -43,12 +50,28 @@ export function BasicTaskCard({
         {showInput && <TaskConnector type="input" id={taskData.id} />}
         <Stack flexGrow={1} p={2} spacing={2}>
           <Stack direction="row" alignItems="center" spacing={2}>
-            {changed && (
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <FiberManualRecordIcon sx={{ color: 'warning.main' }} fontSize="small" />
-                <Typography level="body2">{taskData.taskId ? '已修改' : '新增'}</Typography>
-              </Stack>
-            )}
+            {!taskData.taskId ? (
+              <Chip
+                color="primary"
+                variant="soft"
+                startDecorator={<FiberManualRecordIcon fontSize="small" />}
+              >
+                新添
+              </Chip>
+            ) : isDirty ? (
+              <>
+                <Chip
+                  color="warning"
+                  variant="soft"
+                  startDecorator={<FiberManualRecordIcon fontSize="small" />}
+                >
+                  已修改
+                </Chip>
+              </>
+            ) : undefined}
+            <IconButton size="sm" onClick={() => remove(index)} color="danger" variant="plain">
+              <DeleteIcon />
+            </IconButton>
             <Box sx={{ flexGrow: 1 }} />
             {task && taskStatus[task.status]}
           </Stack>
@@ -60,26 +83,18 @@ export function BasicTaskCard({
   )
 }
 
-export interface TaskCardProps<T extends TaskData<Record<string, any>>> {
-  originalParameters?: T['parameters']
-  control: Control<ProjectGraph>
-  reset: UseFormReset<ProjectGraph>
-  index: number
-}
-export function PreprocessTaskCard({
-  control,
-  reset,
-  originalParameters,
-  index,
-}: TaskCardProps<PreprocessTaskData>) {
-  const parameterPrefix = `preProcesses.${index}.parameters`
-  const dataType = useWatch({ control, name: `preProcesses.${index}.parameters.data_type` })
+export function PreprocessTaskCard(props: TaskCardProps) {
+  const parameterPrefix = `preProcesses.${props.index}.parameters`
+  const { control, resetField } = useFormContext<ProjectGraph>()
+  const dataType = useWatch({
+    control: control,
+    name: `preProcesses.${props.index}.parameters.data_type`,
+  })
   const dataConfigParameters = useMemo(
     () => allPreprocessDataConfigParameters[dataType],
     [dataType],
   )
   useEffect(() => {
-    console.log(dataType)
     // reset((g) => ({
     //   ...g,
     //   preProcesses: g.preProcesses.map((t, i) => {
@@ -91,33 +106,18 @@ export function PreprocessTaskCard({
     //     return t
     //   }),
     // }))
-  }, [dataType, reset])
+    resetField(`preProcesses.${props.index}.parameters`, {
+      defaultValue: allPreprocessDefaultParameters[dataType],
+    })
+  }, [dataType, resetField])
 
   return (
-    <Controller
-      name={`preProcesses.${index}`}
-      control={control}
-      render={({ field: { value } }) => (
-        <BasicTaskCard originalParameters={originalParameters} taskData={value} showOutput>
-          <ParameterInput
-            prefix={parameterPrefix}
-            control={control}
-            parameter={dataTypeParameter}
-          />
-          <Stack direction="row" spacing={4}>
-            <ParameterInput
-              prefix={parameterPrefix}
-              control={control}
-              parameter={dataFilenameParameter}
-            />
-            <ParameterInput
-              prefix={parameterPrefix}
-              control={control}
-              parameter={dataConfigParameters}
-            />
-          </Stack>
-        </BasicTaskCard>
-      )}
-    />
+    <BasicTaskCard {...props} name="preProcesses" showOutput>
+      <ParameterInput prefix={parameterPrefix} parameter={dataTypeParameter} />
+      <Stack direction="row" spacing={4}>
+        <ParameterInput prefix={parameterPrefix} parameter={dataFilenameParameter} />
+        <ParameterInput prefix={parameterPrefix} parameter={dataConfigParameters} />
+      </Stack>
+    </BasicTaskCard>
   )
 }
