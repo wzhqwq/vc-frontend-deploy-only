@@ -63,6 +63,7 @@ export default function ViewTask() {
           projectId={group.project_id}
           groupId={Number(groupId)}
           readonly={!isOwner || group.status < TASK_FINISHED}
+          canRun={isOwner && group.status >= TASK_FINISHED}
         />
       ) : (
         fetchingGroup && <Skeleton variant="rounded" width="100%" height={300} />

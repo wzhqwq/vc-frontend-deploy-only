@@ -14,21 +14,25 @@ import {
   useFormContext,
 } from 'react-hook-form'
 import { useProject } from '@/api/project'
+import { useNavigate } from 'react-router-dom'
+import Collapse from '@mui/material/Collapse'
+import Fade from '@mui/material/Fade'
 
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
-import { useNavigate } from 'react-router-dom'
 
 interface ProjectGraphEditorProps {
   readonly?: boolean
+  canRun?: boolean
   projectId: number
   groupId?: number
 }
 
 export default function ProjectGraphEditor({
   readonly = false,
+  canRun = false,
   projectId,
   groupId,
 }: ProjectGraphEditorProps) {
@@ -61,7 +65,7 @@ export default function ProjectGraphEditor({
 
   return project ? (
     <Box>
-      {!readonly && (
+      <Collapse in={(!readonly && isDirty) || canRun}>
         <Stack
           direction="row"
           alignItems="center"
@@ -77,8 +81,13 @@ export default function ProjectGraphEditor({
           })}
         >
           <Box sx={{ flexGrow: 1 }} />
-          {isDirty ? (
-            <>
+          <Fade in={!readonly && isDirty}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={2}
+              sx={{ '.MuiButton-root': { flexShrink: 0 } }}
+            >
               <Button
                 variant="solid"
                 startDecorator={<SaveIcon />}
@@ -97,12 +106,13 @@ export default function ProjectGraphEditor({
               >
                 重置
               </Button>
-            </>
-          ) : (
-            config && <Runner project={project} noRestart={!groupId} config={config} />
-          )}
+            </Stack>
+          </Fade>
+          <Collapse in={canRun && !!config} orientation="horizontal">
+            {config && <Runner project={project} noRestart={!groupId} config={config} />}
+          </Collapse>
         </Stack>
-      )}
+      </Collapse>
       <FormProvider {...methods}>
         <Box
           sx={{

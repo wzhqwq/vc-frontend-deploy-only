@@ -113,7 +113,7 @@ export default function ViewProject() {
               </Typography>
               <List>
                 {taskGroups?.map((taskGroup) => (
-                  <ListItem>
+                  <ListItem key={taskGroup.id}>
                     <ListItemButton component="a" href={`/task/${taskGroup.id}`}>
                       <ListItemDecorator>{taskStatusIcon[taskGroup.status]}</ListItemDecorator>
                       <ListItemContent>
