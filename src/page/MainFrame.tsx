@@ -97,15 +97,16 @@ export default function MainFrame() {
           )}
         </Toolbar>
       </AppBar>
-      <Container
-        maxWidth="lg"
+      <Box
         sx={{
           flexGrow: 1,
           overflow: 'auto',
         }}
       >
-        <Outlet />
-      </Container>
+        <Container maxWidth="lg">
+          <Outlet />
+        </Container>
+      </Box>
     </Stack>
   )
 }

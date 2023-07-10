@@ -17,3 +17,6 @@ code {
 .MuiAppBar-colorPrimary .MuiButton-text.MuiButton-colorInherit:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
+.MuiSvgIcon-root {
+  display: block !important;
+}

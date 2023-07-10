@@ -1,7 +1,7 @@
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
 import { Box, Button, Stack, Typography } from '@mui/joy'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTaskGroup } from '@/api/task'
 import { PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
@@ -13,22 +13,26 @@ import {
   useForm,
   useFormContext,
 } from 'react-hook-form'
+import { useProject } from '@/api/project'
 
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
-import { useProject } from '@/api/project'
 
 interface ProjectGraphEditorProps {
-  editing: boolean
-  project: Project
+  readonly: boolean
+  projectId: number
   groupId?: number
 }
 
-export default function ProjectGraphEditor({ editing, project, groupId }: ProjectGraphEditorProps) {
+export default function ProjectGraphEditor({
+  readonly,
+  projectId,
+  groupId,
+}: ProjectGraphEditorProps) {
   const { tasks } = useTaskGroup(groupId)
-  const { updateProject, updatingProject } = useProject(project.id)
+  const { project, updateProject, updatingProject } = useProject(projectId)
   const methods = useForm<ProjectGraph>()
   const {
     formState: { isDirty, isValid },
@@ -36,7 +40,17 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
     handleSubmit,
   } = methods
 
+  const hasNewTask = useMemo(() => {
+    if (!project) return false
+    return (
+      project.config.preProcesses.some((t) => !t.taskId) ||
+      project.config.algorithms.some((t) => !t.taskId) ||
+      project.config.analyses.some((t) => !t.taskId)
+    )
+  }, [project])
+
   useEffect(() => {
+    if (!project) return
     const fillInTaskId = (taskData: TaskData<any>) => ({
       ...taskData,
       taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
@@ -48,7 +62,7 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
     } as ProjectGraph)
   }, [project, tasks])
 
-  return (
+  return project ? (
     <Box>
       <Stack direction="row" alignItems="center" spacing={2}>
         <Box sx={{ flexGrow: 1 }} />
@@ -65,7 +79,7 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
               保存
             </Button>
             <Button
-              variant="solid"
+              variant="soft"
               startDecorator={<ReplayRoundedIcon />}
               color="primary"
               onClick={() => reset()}
@@ -73,7 +87,11 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
               重置
             </Button>
           </>
-        ) : (
+        ) : !groupId ? (
+          <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
+            运行
+          </Button>
+        ): hasNewTask ? (
           <>
             <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
               继续运行
@@ -82,6 +100,10 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
               重新运行
             </Button>
           </>
+        ) : (
+          <Button variant="solid" startDecorator={<ReplayRoundedIcon />} color="primary">
+            重新运行
+          </Button>
         )}
       </Stack>
       <FormProvider {...methods}>
@@ -116,7 +138,7 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
         </Box>
       </FormProvider>
     </Box>
-  )
+  ) : undefined
 }
 
 interface TaskSlotProps<T extends Record<string, any>> {
