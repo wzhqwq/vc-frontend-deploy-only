@@ -121,7 +121,7 @@ export function useTaskGroup(groupId?: number) {
     ),
 
     startGroup: useCallback(() => startGroup(undefined), []),
-    terminateGroup,
+    terminateGroup: useCallback(() => terminateGroup(undefined), []),
     terminatingGroup,
   }
 }

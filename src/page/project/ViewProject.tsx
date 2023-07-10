@@ -19,13 +19,14 @@ import { Skeleton } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { FakeParagraph } from '@/utils/fake'
 import { UserWidget } from '@/component/basic/getters'
+import { useProjectTaskGroups } from '@/api/task'
+import { formatTime } from '@/utils/time'
+import { taskStatusIcon, taskStatusText } from '@/component/basic/chips'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import { useProjectTaskGroups } from '@/api/task'
-import { formatTime } from '@/utils/time'
-import { taskStatusIcon, taskStatusText } from '@/component/basic/chips'
+import FileCopyIcon from '@mui/icons-material/FileCopy'
 
 export default function ViewProject() {
   const { id: projectId } = useParams<{ id: string }>()
@@ -70,6 +71,16 @@ export default function ViewProject() {
               sx={{ boxSizing: 'border-box' }}
             >
               编辑项目
+            </Button>
+            <Button
+              component="a"
+              color="primary"
+              variant="soft"
+              startDecorator={<FileCopyIcon />}
+              href={`/project/new?copy=${projectId}`}
+              sx={{ boxSizing: 'border-box' }}
+            >
+              复制项目
             </Button>
           </>
         )}

@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
           { path: 'new', lazy: () => import('@/page/AllPages').then((m) => m.newProject) },
         ],
       },
-      // { path: 'task/:id' },
+      { path: 'task/:id', lazy: () => import('@/page/AllPages').then((m) => m.viewTask) },
     ],
   },
 ])

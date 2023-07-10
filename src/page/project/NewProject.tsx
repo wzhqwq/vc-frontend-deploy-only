@@ -1,4 +1,4 @@
-import { ProjectCreatingForm, useCreateProject } from '@/api/project'
+import { ProjectCreatingForm, useCreateProject, useProject } from '@/api/project'
 import { UserWidget } from '@/component/basic/getters'
 import {
   Box,
@@ -11,26 +11,43 @@ import {
   Textarea,
   Typography,
 } from '@mui/joy'
+import { useEffect } from 'react'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 export default function NewProject() {
   const { createProject, creatingProject } = useCreateProject()
-  const { register, handleSubmit, formState, control } = useForm<ProjectCreatingForm>()
-  const navigate = useNavigate()
-  const onSubmit: SubmitHandler<ProjectCreatingForm> = async (data) => {
-    const { id } = await createProject({
-      ...data,
+  const { register, handleSubmit, control, setValue } = useForm<ProjectCreatingForm>({
+    defaultValues: {
+      name: '',
+      description: '',
+      private: false,
       config: { preProcesses: [], algorithms: [], analyses: [] },
-    })
+    },
+  })
+  const navigate = useNavigate()
+  const { search } = useLocation()
+  const copy = new URLSearchParams(search).get('copy')
+  const { project } = useProject(copy ? Number(copy) : undefined)
+
+  const onSubmit: SubmitHandler<ProjectCreatingForm> = async (data) => {
+    const { id } = await createProject(data)
     navigate(`/project/${id}`)
   }
+
+  useEffect(() => {
+    if (!project) return
+    const { name, description, config } = project
+    setValue('name', name)
+    setValue('description', description)
+    setValue('config', config)
+  }, [project])
 
   return (
     <Container maxWidth="md">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2} pt={4}>
-          <Typography level="h3">新建项目</Typography>
+          <Typography level="h3">{copy ? '利用项目拷贝新建项目' : '新建项目'}</Typography>
           <Stack direction="row" spacing={2} alignItems="center">
             <UserWidget />
             <Typography level="h6">/</Typography>
@@ -70,7 +87,7 @@ export default function NewProject() {
           <Button
             type="submit"
             loading={creatingProject}
-            disabled={formState.isSubmitting}
+            disabled={creatingProject}
             sx={{ alignSelf: 'flex-end' }}
           >
             创建

@@ -30,15 +30,15 @@ code {
     filter: opacity(1);
   }
   60% {
-    transform: rotate(0deg);
+    transform: rotate(0deg) scale(.8);
     filter: opacity(0);
   }
   61% {
-    transform: rotate(180deg);
+    transform: rotate(180deg) scale(.8);
     filter: opacity(0);
   }
   70%, 80% {
-    transform: rotate(180deg);
+    transform: rotate(180deg) scale(1);
     filter: opacity(1);
   }
   100% {
