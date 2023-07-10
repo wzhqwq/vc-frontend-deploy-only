@@ -45,7 +45,7 @@ export function useProject(projectId?: number) {
   )
   const { mutate: updateProject, isLoading: updatingProject } = usePut<
     Project,
-    ProjectCreatingForm
+    Omit<ProjectCreatingForm, 'config'> & { config: string }
   >(['private', 'algo', 'projects', projectId], '更新项目', {
     onSuccess: () => {
       queryClient.invalidateQueries(['private', 'algo', 'projects', projectId])
@@ -65,7 +65,8 @@ export function useProject(projectId?: number) {
     project,
     fetchingProject,
 
-    updateProject,
+    updateProject: (project: ProjectCreatingForm) =>
+      updateProject({ ...project, config: JSON.stringify(project.config) }),
     updatingProject,
 
     deleteProject,

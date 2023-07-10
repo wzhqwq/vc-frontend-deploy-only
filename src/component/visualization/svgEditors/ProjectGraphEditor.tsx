@@ -18,15 +18,17 @@ import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
+import { useProject } from '@/api/project'
 
 interface ProjectGraphEditorProps {
   editing: boolean
-  project: Pick<Project, 'config'> & Partial<Project>
+  project: Project
   groupId?: number
 }
 
 export default function ProjectGraphEditor({ editing, project, groupId }: ProjectGraphEditorProps) {
   const { tasks } = useTaskGroup(groupId)
+  const { updateProject, updatingProject } = useProject(project.id)
 
   const graph = useMemo(() => {
     const fillInTaskId = (taskData: TaskData<any>) => ({
@@ -41,7 +43,7 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
   }, [project, tasks])
   const methods = useForm({ values: graph })
   const {
-    formState: { isDirty },
+    formState: { isDirty, isValid },
     reset,
     handleSubmit,
   } = methods
@@ -56,7 +58,9 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
               variant="solid"
               startDecorator={<SaveIcon />}
               color="primary"
-              onClick={handleSubmit(console.log)}
+              onClick={handleSubmit((data) => updateProject({ ...project, config: data }))}
+              disabled={!isValid || updatingProject}
+              loading={updatingProject}
             >
               保存
             </Button>
