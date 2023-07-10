@@ -1,8 +1,8 @@
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
 import { Box, Button, Stack, Typography } from '@mui/joy'
-import { useEffect, useMemo } from 'react'
-import { useTaskGroup } from '@/api/task'
+import { useEffect, useMemo, useState } from 'react'
+import { useProjectTaskGroups, useTaskGroup } from '@/api/task'
 import { PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
 import { defaultImgPreprocessParameter } from '@/config/projectGraph/taskData'
@@ -19,6 +19,7 @@ import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
+import { useNavigate } from 'react-router-dom'
 
 interface ProjectGraphEditorProps {
   readonly: boolean
@@ -39,15 +40,6 @@ export default function ProjectGraphEditor({
     reset,
     handleSubmit,
   } = methods
-
-  const hasNewTask = useMemo(() => {
-    if (!project) return false
-    return (
-      project.config.preProcesses.some((t) => !t.taskId) ||
-      project.config.algorithms.some((t) => !t.taskId) ||
-      project.config.analyses.some((t) => !t.taskId)
-    )
-  }, [project])
 
   useEffect(() => {
     if (!project) return
@@ -100,23 +92,8 @@ export default function ProjectGraphEditor({
               重置
             </Button>
           </>
-        ) : !groupId ? (
-          <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
-            运行
-          </Button>
-        ) : hasNewTask ? (
-          <>
-            <Button variant="solid" startDecorator={<PlayArrowRoundedIcon />} color="primary">
-              继续运行
-            </Button>
-            <Button variant="soft" startDecorator={<ReplayRoundedIcon />} color="primary">
-              重新运行
-            </Button>
-          </>
         ) : (
-          <Button variant="solid" startDecorator={<ReplayRoundedIcon />} color="primary">
-            重新运行
-          </Button>
+          <Runner project={project} noRestart={!groupId} />
         )}
       </Stack>
       <FormProvider {...methods}>
@@ -135,6 +112,7 @@ export default function ProjectGraphEditor({
               <PreprocessTaskCard key={task.id} index={index} remove={remove} />
             )}
             initialParameters={defaultImgPreprocessParameter}
+            taskType="preprocess"
           />
           {/* <Divider orientation="vertical" />
             <TaskSlot
@@ -151,7 +129,7 @@ export default function ProjectGraphEditor({
         </Box>
       </FormProvider>
     </Box>
-  ) : undefined
+  ) : null
 }
 
 interface TaskSlotProps<T extends Record<string, any>> {
@@ -159,6 +137,7 @@ interface TaskSlotProps<T extends Record<string, any>> {
   name: keyof ProjectGraph
   renderer: (task: TaskData<T>, index: number, remove: UseFieldArrayRemove) => JSX.Element
   initialParameters: T
+  taskType: string
 }
 function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
   const { control } = useFormContext<ProjectGraph>()
@@ -170,7 +149,7 @@ function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
     const id = nanoid()
     const taskData: TaskData<T> = {
       id,
-      task_type: '',
+      task_type: props.taskType,
       parameters: props.initialParameters,
       inPeers: [],
     }
@@ -186,5 +165,99 @@ function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
         添加
       </Button>
     </Stack>
+  )
+}
+
+function Runner({ project, noRestart }: { project: Project; noRestart: boolean }) {
+  const { createTaskGroup } = useProjectTaskGroups(project.id)
+  const [newGroupId, setNewGroupId] = useState<number>()
+  const [tasksToCreate, setTasksToCreate] = useState<TaskData<any>[]>([])
+  const { tasks, createTask, startGroup } = useTaskGroup(newGroupId)
+
+  const [creating, setCreating] = useState(false)
+
+  const navigate = useNavigate()
+
+  const newTasks = useMemo(() => {
+    if (!project) return []
+    return [
+      ...project.config.preProcesses.filter((t) => !t.taskId),
+      ...project.config.algorithms.filter((t) => !t.taskId),
+      ...project.config.analyses.filter((t) => !t.taskId),
+    ]
+  }, [project])
+  const allTasks = useMemo(() => {
+    if (!project) return []
+    return [
+      ...project.config.preProcesses,
+      ...project.config.algorithms,
+      ...project.config.analyses,
+    ]
+  }, [project])
+
+  const startTaskGroup = async () => {
+    const { id } = await createTaskGroup()
+    setNewGroupId(id)
+    setTasksToCreate(newTasks)
+  }
+  const restartTaskGroup = async () => {
+    const { id } = await createTaskGroup()
+    setNewGroupId(id)
+    setTasksToCreate(allTasks)
+  }
+  useEffect(() => {
+    if (!newGroupId || !tasks) return
+    const taskToCreate = tasksToCreate.find(
+      (d) => tasks.find((t) => t.item_id == d.id) == undefined,
+    )
+    if (taskToCreate)
+      createTask({
+        item_id: taskToCreate.id,
+        task_type: taskToCreate.task_type,
+        pre_task_ids: taskToCreate.inPeers
+          .map((id) => tasks.find((t) => t.item_id == id)?.id)
+          .filter((id): id is number => id != undefined),
+        data_config: taskToCreate.parameters,
+      })
+    else startGroup().then(() => navigate(`/task/${newGroupId}`))
+  }, [newGroupId, tasks])
+
+  return noRestart ? (
+    <Button
+      variant="solid"
+      startDecorator={<PlayArrowRoundedIcon />}
+      color="primary"
+      onClick={startTaskGroup}
+    >
+      运行
+    </Button>
+  ) : newTasks.length ? (
+    <>
+      <Button
+        variant="solid"
+        startDecorator={<PlayArrowRoundedIcon />}
+        color="primary"
+        onClick={startTaskGroup}
+      >
+        继续运行
+      </Button>
+      <Button
+        variant="soft"
+        startDecorator={<ReplayRoundedIcon />}
+        color="primary"
+        onClick={restartTaskGroup}
+      >
+        重新运行
+      </Button>
+    </>
+  ) : (
+    <Button
+      variant="solid"
+      startDecorator={<ReplayRoundedIcon />}
+      color="primary"
+      onClick={restartTaskGroup}
+    >
+      重新运行
+    </Button>
   )
 }

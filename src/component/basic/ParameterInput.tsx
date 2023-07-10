@@ -89,6 +89,7 @@ const renderInput = (
       onChange={(_, value) =>
         field.onChange(parameter.type == 'int' ? parseInt(value) : parameter.selections![value])
       }
+      sx={{ my: 0.5 }}
       size="sm"
     >
       {parameter.selections?.map((selection, index) => (

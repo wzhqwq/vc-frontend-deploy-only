@@ -1,6 +1,6 @@
 import { LayerData } from '@/types/config/deepLearning'
 import { QueryFunction } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { baseUrl, wrapAxios } from './network'
 import { useErrorlessQuery, usePost } from './common'
 import { FileInfo } from '@/types/entity/file'
@@ -53,11 +53,11 @@ export function usePlainTextFile(filename: string) {
   return {
     text,
     fetchingFile,
-    uploadFile: (content: string, type = 'text/plain') => {
+    uploadFile: useCallback((content: string, type = 'text/plain') => {
       const blob = new Blob([content], { type })
       const file = new File([blob], filename)
       return uploadFile({ file })
-    },
+    }, []),
     uploadingFile,
   }
 }
@@ -78,8 +78,10 @@ export function useLayerData(filename: string) {
   return {
     layerData,
     fetchingLayer: fetchingFile,
-    uploadLayer: (layerData: LayerData<any>[]) =>
-      uploadFile(JSON.stringify(layerData), 'application/json'),
+    uploadLayer: useCallback(
+      (layerData: LayerData<any>[]) => uploadFile(JSON.stringify(layerData), 'application/json'),
+      [],
+    ),
     uploadingLayer: uploadingFile,
   }
 }

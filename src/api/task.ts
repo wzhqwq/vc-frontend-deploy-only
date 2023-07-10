@@ -1,7 +1,7 @@
 import { useDelete, useErrorlessQuery, usePost, usePut } from './common'
 import { Task, TaskGroup } from '@/types/entity/task'
 import { queryClient } from './queryClient'
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 export interface QueryTaskGroupsResult {
   taskGroups: TaskGroup[]
@@ -28,8 +28,7 @@ export function usePublicTaskGroups(): QueryTaskGroupsResult {
 }
 
 export interface CreateTaskGroupResult {
-  createTaskGroup: () => void
-  creatingTaskGroup: boolean
+  createTaskGroup: () => Promise<TaskGroup>
 }
 export function useProjectTaskGroups(projectId?: number) {
   const {
@@ -43,27 +42,25 @@ export function useProjectTaskGroups(projectId?: number) {
     },
     '获取历史任务失败',
   )
-  const { mutate: createTaskGroup, isLoading: creatingTaskGroup } = usePost<TaskGroup, undefined>(
-    ['private', 'algo', 'projects', projectId, 'task_groups'],
-    '创建任务失败',
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'projects', projectId, 'task_groups'])
-      },
+  const { mutateAsync: createTaskGroup, isLoading: creatingTaskGroup } = usePost<
+    TaskGroup,
+    undefined
+  >(['private', 'algo', 'projects', projectId, 'task_groups'], '创建任务失败', {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['private', 'algo', 'projects', projectId, 'task_groups'])
     },
-  )
+  })
 
   return {
     taskGroups: useMemo(() => taskGroups ?? ([] as TaskGroup[]), [taskGroups]),
     fetchingTaskGroups,
     refetchTaskGroup,
 
-    createTaskGroup: () => createTaskGroup(undefined),
-    creatingTaskGroup,
+    createTaskGroup: useCallback(() => createTaskGroup(undefined), []),
   } as QueryTaskGroupsResult & CreateTaskGroupResult
 }
 
-type TaskCreatingForm = Pick<Task, 'task_type' | 'data_id' | 'pre_task_ids' | 'item_id'>
+type TaskCreatingForm = Pick<Task, 'task_type' | 'pre_task_ids' | 'item_id'> & { data_config: any }
 
 export function useTaskGroup(groupId?: number) {
   const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>(
@@ -80,16 +77,15 @@ export function useTaskGroup(groupId?: number) {
     },
     '获取历史任务子任务失败',
   )
-  const { mutateAsync: createTask } = usePost<Task, TaskCreatingForm>(
-    ['private', 'algo', 'task_groups', groupId, 'tasks'],
-    '创建子任务失败',
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId, 'tasks'])
-      },
+  const { mutateAsync: createTask } = usePost<
+    Task,
+    Omit<TaskCreatingForm, 'data_config'> & { data_config: string }
+  >(['private', 'algo', 'task_groups', groupId, 'tasks'], '创建子任务失败', {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId, 'tasks'])
     },
-  )
-  const { mutate: startGroup, isLoading: startingGroup } = usePut<Task, undefined>(
+  })
+  const { mutateAsync: startGroup } = usePut<Task, undefined>(
     ['private', 'algo', 'task_groups', groupId, 'process'],
     '启动任务失败',
     {
@@ -112,14 +108,19 @@ export function useTaskGroup(groupId?: number) {
     group,
     fetchingGroup,
 
-    tasks: useMemo(() => tasks ?? ([] as Task[]), [tasks]),
+    tasks,
     fetchingTasks,
 
-    createTask,
+    createTask: useCallback(
+      (form: TaskCreatingForm) =>
+        createTask({
+          ...form,
+          data_config: JSON.stringify(form.data_config),
+        }),
+      [],
+    ),
 
-    startGroup,
-    startingGroup,
-
+    startGroup: useCallback(() => startGroup(undefined), []),
     terminateGroup,
     terminatingGroup,
   }

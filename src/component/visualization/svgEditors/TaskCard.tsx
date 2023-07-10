@@ -41,7 +41,7 @@ export function BasicTaskCard({
   showOutput,
 }: BasicTaskCardProps) {
   return (
-    <Card variant="outlined" sx={{ minWidth: 300, p: 0 }}>
+    <Card variant="outlined" sx={{ p: 0 }}>
       <Stack direction="row" alignItems="center">
         {showInput && <TaskConnector type="input" name={`${name}.${index}.id`} />}
         <Stack flexGrow={1} p={2} spacing={2}>
@@ -65,7 +65,7 @@ const TaskIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}.t
   const taskId = useWatch({ control, name })
   const { task } = useTask(taskId)
 
-  return task && taskStatus[task.status]
+  return (task && taskStatus[task.status]) ?? null
 })
 const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) => {
   const { control, resetField } = useFormContext<ProjectGraph>()
@@ -92,7 +92,7 @@ const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}
         已修改
       </Chip>
     </>
-  ) : undefined
+  ) : null
 })
 
 export function PreprocessTaskCard(props: TaskCardProps) {

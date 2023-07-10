@@ -1,6 +1,7 @@
 import { Project } from '@/types/entity/project'
 import { useErrorlessQuery, usePost, usePut, useDelete } from './common'
 import { queryClient } from './queryClient'
+import { useCallback } from 'react'
 
 export type ProjectCreatingForm = Pick<Project, 'name' | 'config' | 'description' | 'private'>
 
@@ -29,8 +30,11 @@ export function useCreateProject() {
   })
 
   return {
-    createProject: (project: ProjectCreatingForm) =>
-      createProject({ ...project, config: JSON.stringify(project.config) }),
+    createProject: useCallback(
+      (project: ProjectCreatingForm) =>
+        createProject({ ...project, config: JSON.stringify(project.config) }),
+      [],
+    ),
     creatingProject,
   }
 }
@@ -65,11 +69,14 @@ export function useProject(projectId?: number) {
     project,
     fetchingProject,
 
-    updateProject: (project: ProjectCreatingForm) =>
-      updateProject({ ...project, config: JSON.stringify(project.config) }),
+    updateProject: useCallback(
+      (project: ProjectCreatingForm) =>
+        updateProject({ ...project, config: JSON.stringify(project.config) }),
+      [],
+    ),
     updatingProject,
 
-    deleteProject: () => deleteProject(undefined),
+    deleteProject: useCallback(() => deleteProject(undefined), []),
     deletingProject,
   }
 }
