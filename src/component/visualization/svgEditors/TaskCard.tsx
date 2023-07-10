@@ -69,12 +69,10 @@ const TaskIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}.t
 })
 const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) => {
   const { control, resetField } = useFormContext<ProjectGraph>()
-  const {
-    fieldState: { isDirty },
-  } = useController({ control, name })
-  const {
-    fieldState: { isDirty: isNew },
-  } = useController({ control, name: `${name}.id` })
+  const { dirtyFields } = useFormState({ control, name })
+  const [slotName, index] = name.split('.') as [keyof ProjectGraph, number]
+  const isDirty = dirtyFields[slotName]?.at(index)
+  const isNew = isDirty?.id
 
   return isNew ? (
     <Chip color="primary" variant="soft">
@@ -101,7 +99,7 @@ export function PreprocessTaskCard(props: TaskCardProps) {
   const { index } = props
   const name = `preProcesses.${index}.parameters` as `${keyof ProjectGraph}.${number}.parameters`
   const { control, setValue } = useFormContext<ProjectGraph>()
-  const { isDirty } = useFormState({ control, name })
+  const { dirtyFields } = useFormState({ control, name })
 
   const dataType = useWatch({
     control: control,
@@ -112,10 +110,11 @@ export function PreprocessTaskCard(props: TaskCardProps) {
     [dataType],
   )
   useEffect(() => {
-    if (!isDirty) return
-    console.log(dataType)
-    setValue(`${name}.data_config`, allPreprocessDefaultParameters[dataType].data_config)
-  }, [dataType, isDirty])
+    if (!dirtyFields.preProcesses?.at(index)) return
+    setValue(`${name}.data_config`, allPreprocessDefaultParameters[dataType].data_config, {
+      shouldDirty: true,
+    })
+  }, [dataType])
 
   return (
     <BasicTaskCard {...props} name="preProcesses" showOutput>
