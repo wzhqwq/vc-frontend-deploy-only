@@ -1,6 +1,20 @@
 import { useProject } from '@/api/project'
 import { ProjectGraphEditor } from '@/component/visualization/svgEditors'
-import { Box, Button, Card, Chip, Divider, Grid, Stack, Typography } from '@mui/joy'
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemContent,
+  ListItemDecorator,
+  Stack,
+  Typography,
+} from '@mui/joy'
 import { Skeleton } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { FakeParagraph } from '@/utils/fake'
@@ -10,6 +24,8 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useProjectTaskGroups } from '@/api/task'
+import { formatTime } from '@/utils/time'
+import { taskStatusIcon, taskStatusText } from '@/component/basic/chips'
 
 export default function ViewProject() {
   const { id: projectId } = useParams<{ id: string }>()
@@ -30,7 +46,9 @@ export default function ViewProject() {
               <Typography component="div" level="h4">
                 {project.name}
               </Typography>
-              <Chip variant='outlined' size='sm'>{project.private ? '私有' : '公开'}</Chip>
+              <Chip variant="outlined" size="sm">
+                {project.private ? '私有' : '公开'}
+              </Chip>
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
             <Button
@@ -75,6 +93,19 @@ export default function ViewProject() {
               <Typography level="h5" gutterBottom>
                 历史任务
               </Typography>
+              <List>
+                {taskGroups?.map((taskGroup) => (
+                  <ListItem>
+                    <ListItemButton component="a" href={`/task/${taskGroup.id}`}>
+                      <ListItemDecorator>{taskStatusIcon[taskGroup.status]}</ListItemDecorator>
+                      <ListItemContent>
+                        <Typography level="body1">{taskStatusText[taskGroup.status]}</Typography>
+                        <Typography level="body2">{formatTime(taskGroup.created_at)}</Typography>
+                      </ListItemContent>
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
               {fetchingTaskGroups && <Skeleton variant="rounded" width="100%" height={200} />}
             </Card>
           </Stack>

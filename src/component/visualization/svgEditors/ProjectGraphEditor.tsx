@@ -174,8 +174,6 @@ function Runner({ project, noRestart }: { project: Project; noRestart: boolean }
   const [tasksToCreate, setTasksToCreate] = useState<TaskData<any>[]>([])
   const { tasks, createTask, startGroup } = useTaskGroup(newGroupId)
 
-  const [creating, setCreating] = useState(false)
-
   const navigate = useNavigate()
 
   const newTasks = useMemo(() => {
