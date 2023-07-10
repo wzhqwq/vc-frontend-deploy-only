@@ -1,7 +1,7 @@
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
-import { Box, Button, Divider, Stack, Typography } from '@mui/joy'
-import { useMemo } from 'react'
+import { Box, Button, Stack, Typography } from '@mui/joy'
+import { useEffect } from 'react'
 import { useTaskGroup } from '@/api/task'
 import { PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
@@ -29,24 +29,24 @@ interface ProjectGraphEditorProps {
 export default function ProjectGraphEditor({ editing, project, groupId }: ProjectGraphEditorProps) {
   const { tasks } = useTaskGroup(groupId)
   const { updateProject, updatingProject } = useProject(project.id)
-
-  const graph = useMemo(() => {
-    const fillInTaskId = (taskData: TaskData<any>) => ({
-      ...taskData,
-      taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
-    })
-    return {
-      preProcesses: project.config.preProcesses.map(fillInTaskId),
-      algorithms: project.config.algorithms.map(fillInTaskId),
-      analyses: project.config.analyses.map(fillInTaskId),
-    } as ProjectGraph
-  }, [project, tasks])
-  const methods = useForm({ values: graph })
+  const methods = useForm<ProjectGraph>()
   const {
     formState: { isDirty, isValid },
     reset,
     handleSubmit,
   } = methods
+
+  useEffect(() => {
+    const fillInTaskId = (taskData: TaskData<any>) => ({
+      ...taskData,
+      taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
+    })
+    reset({
+      preProcesses: project.config.preProcesses.map(fillInTaskId),
+      algorithms: project.config.algorithms.map(fillInTaskId),
+      analyses: project.config.analyses.map(fillInTaskId),
+    } as ProjectGraph)
+  }, [project, tasks])
 
   return (
     <Box>
@@ -85,24 +85,23 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
         )}
       </Stack>
       <FormProvider {...methods}>
-        {graph && (
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto 1fr auto 1fr',
-              gap: 2,
-              mt: 2,
-            }}
-          >
-            <TaskSlot
-              title="预处理"
-              name="preProcesses"
-              renderer={(task, index, remove) => (
-                <PreprocessTaskCard key={task.id} index={index} remove={remove} />
-              )}
-              initialParameters={defaultImgPreprocessParameter}
-            />
-            {/* <Divider orientation="vertical" />
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr auto 1fr',
+            gap: 2,
+            mt: 2,
+          }}
+        >
+          <TaskSlot
+            title="预处理"
+            name="preProcesses"
+            renderer={(task, index, remove) => (
+              <PreprocessTaskCard key={task.id} index={index} remove={remove} />
+            )}
+            initialParameters={defaultImgPreprocessParameter}
+          />
+          {/* <Divider orientation="vertical" />
             <TaskSlot
               title="算法"
               renderer={() => <div>结束</div>}
@@ -114,8 +113,7 @@ export default function ProjectGraphEditor({ editing, project, groupId }: Projec
               renderer={() => <div>结束</div>}
               initialParameters={{}}
             /> */}
-          </Box>
-        )}
+        </Box>
       </FormProvider>
     </Box>
   )

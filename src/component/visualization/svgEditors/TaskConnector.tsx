@@ -1,10 +1,15 @@
+import { ProjectGraph } from '@/types/config/project'
 import { Box } from '@mui/joy'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 export interface TaskConnectorProps {
   type: 'input' | 'output'
-  id: string
+  name: `${keyof ProjectGraph}.${number}.id`
 }
-export function TaskConnector(props: TaskConnectorProps) {
+export function TaskConnector({ type, name }: TaskConnectorProps) {
+  const { control } = useFormContext<ProjectGraph>()
+  const id = useWatch({ control, name })
+
   return (
     <Box
       sx={(theme) => ({
@@ -14,7 +19,7 @@ export function TaskConnector(props: TaskConnectorProps) {
         m: -1,
         borderRadius: 8,
       })}
-      id={`task-connector-${props.id}-${props.type}`}
+      id={`task-connector-${id}-${type}`}
     />
   )
 }

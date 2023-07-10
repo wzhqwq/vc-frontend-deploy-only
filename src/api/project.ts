@@ -47,8 +47,8 @@ export function useProject(projectId?: number) {
     Project,
     Omit<ProjectCreatingForm, 'config'> & { config: string }
   >(['private', 'algo', 'projects', projectId], '更新项目', {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['private', 'algo', 'projects', projectId])
+    onSuccess: (project: Project) => {
+      queryClient.setQueryData(['private', 'algo', 'projects', projectId], project)
     },
   })
   const { mutate: deleteProject, isLoading: deletingProject } = useDelete(
