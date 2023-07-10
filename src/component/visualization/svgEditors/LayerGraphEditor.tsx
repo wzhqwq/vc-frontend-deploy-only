@@ -9,7 +9,7 @@ import {
 import { Box, Button, CircularProgress, Divider, Stack, Typography } from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
 import { Popover } from '@mui/material'
-import { useForm, SubmitHandler } from 'react-hook-form'
+import { useForm, SubmitHandler, FormProvider } from 'react-hook-form'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import SaveIcon from '@mui/icons-material/Save'
@@ -201,9 +201,13 @@ function LayerList() {
 const LayerListMemo = memo(LayerList)
 
 function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
-  const { handleSubmit, formState, control } = useForm<any>({
-    values: layer.parameters,
+  const methods = useForm<any>({
+    defaultValues: layer.parameters,
   })
+  const {
+    formState: { isValid },
+    handleSubmit,
+  } = methods
   const onSubmit: SubmitHandler<any> = (data) => {
     layer.updateParameters(data)
     onClose()
@@ -215,7 +219,7 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
   const parameterList = useMemo(
     () =>
       layer.config.parameters.map((parameter) => (
-        <ParameterInput key={parameter.key as string} parameter={parameter} control={control} />
+        <ParameterInput key={parameter.key as string} parameter={parameter} />
       )),
     [layer.config.parameters],
   )
@@ -224,20 +228,22 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
 
   return (
     <Box sx={{ p: 1, minWidth: 200 }}>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, 200px)`,
-          gap: 2,
-        }}
-      >
-        {parameterList}
-      </Box>
+      <FormProvider {...methods}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columns}, 200px)`,
+            gap: 2,
+          }}
+        >
+          {parameterList}
+        </Box>
+      </FormProvider>
       <Stack direction="row" spacing={1} mt={1}>
-        <Button disabled={!formState.isValid} onClick={handleSubmit(onSubmit)}>
+        <Button disabled={!isValid} onClick={handleSubmit(onSubmit)}>
           <CheckIcon />
         </Button>
-        <Button color="danger" disabled={!formState.isValid} onClick={handleDelete}>
+        <Button color="danger" disabled={!isValid} onClick={handleDelete}>
           <DeleteIcon />
         </Button>
       </Stack>
