@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import Collapse from '@mui/material/Collapse'
 import Fade from '@mui/material/Fade'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
+import { TASK_CREATED } from '@/utils/constants'
 
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
@@ -39,9 +40,9 @@ export default function ProjectGraphEditor({
 }: ProjectGraphEditorProps) {
   const { group, tasks } = useTaskGroup(groupId)
   const { project, updateProject, updatingProject } = useProject(projectId)
-  const methods = useForm<ProjectGraph>()
+  const methods = useForm<ProjectGraph>({ mode: 'onChange' })
   const {
-    formState: { isDirty, isValid },
+    formState: { isDirty, isValid, dirtyFields },
     reset,
     handleSubmit,
   } = methods
@@ -159,18 +160,20 @@ interface TaskSlotProps<T extends Record<string, any>> {
   initialParameters: T
   taskType: string
 }
-function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
-  const { control } = useFormContext<ProjectGraph>()
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: props.name,
-  })
+function TaskSlot<T extends Record<string, any>>({
+  title,
+  name,
+  renderer,
+  initialParameters,
+  taskType,
+}: TaskSlotProps<T>) {
+  const { fields, append, remove } = useFieldArray<ProjectGraph>({ name })
   const handleAdd = () => {
     const id = nanoid()
     const taskData: TaskData<T> = {
       id,
-      task_type: props.taskType,
-      parameters: props.initialParameters,
+      task_type: taskType,
+      parameters: initialParameters,
       inPeers: [],
     }
     append(taskData)
@@ -178,9 +181,9 @@ function TaskSlot<T extends Record<string, any>>(props: TaskSlotProps<T>) {
   return (
     <Stack alignItems="center" spacing={1}>
       <Typography level="h5" sx={{ my: 2 }}>
-        {props.title}
+        {title}
       </Typography>
-      {fields.map((task, index) => props.renderer(task, index, remove))}
+      {fields.map((task, index) => renderer(task, index, remove))}
       <Button variant="soft" size="lg" startDecorator={<AddIcon />} fullWidth onClick={handleAdd}>
         添加
       </Button>
@@ -200,7 +203,7 @@ function Runner({
   const { createTaskGroup } = useProjectTaskGroups(project.id)
   const [newGroupId, setNewGroupId] = useState<number>()
   const [tasksToCreate, setTasksToCreate] = useState<TaskData<any>[]>([])
-  const { tasks, createTask, startGroup } = useTaskGroup(newGroupId)
+  const { group, tasks, createTask, startGroup } = useTaskGroup(newGroupId)
 
   const navigate = useNavigate()
 
@@ -241,7 +244,7 @@ function Runner({
           .filter((id): id is number => id != undefined),
         data_config: taskToCreate.parameters,
       })
-    else startGroup().then(() => navigate(`/task/${newGroupId}`))
+    else if (group?.status == TASK_CREATED) startGroup().then(() => navigate(`/task/${newGroupId}`))
   }, [newGroupId, tasks])
 
   return noRestart ? (

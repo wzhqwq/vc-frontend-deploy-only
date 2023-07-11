@@ -7,8 +7,7 @@ export interface TaskConnectorProps {
   name: `${keyof ProjectGraph}.${number}.id`
 }
 export function TaskConnector({ type, name }: TaskConnectorProps) {
-  const { control } = useFormContext<ProjectGraph>()
-  const id = useWatch({ control, name })
+  const id = useWatch<ProjectGraph>({ name })
 
   return (
     <Box
