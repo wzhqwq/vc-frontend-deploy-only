@@ -5,12 +5,7 @@ import { taskStatus } from '@/component/basic/chips'
 import { memo, useContext, useEffect, useMemo } from 'react'
 import { TaskConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
-import {
-  allPreprocessDataConfigParameters,
-  allPreprocessDefaultParameters,
-  dataFilenameParameter,
-  dataTypeParameter,
-} from '@/config/projectGraph/taskData'
+import { preprocessConfigParameters } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
@@ -94,28 +89,14 @@ const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}
 
 export function PreprocessTaskCard(props: TaskCardProps) {
   const { index } = props
-  const name = `preProcesses.${index}.parameters` as `${keyof ProjectGraph}.${number}.parameters`
-  const { setValue } = useFormContext<ProjectGraph>()
-  const { dirtyFields } = useFormState<ProjectGraph>({ name })
-
-  const dataType = useWatch<ProjectGraph>({ name: `${name}.data_type` })
-  const dataConfigParameters = useMemo(
-    () => allPreprocessDataConfigParameters[dataType],
-    [dataType],
-  )
-  useEffect(() => {
-    if (!dirtyFields.preProcesses?.at(index)?.parameters) return
-    setValue(`${name}.data_config`, allPreprocessDefaultParameters[dataType].data_config, {
-      shouldDirty: true,
-    })
-  }, [dataType])
+  const name = `preProcesses.${index}.parameters`
 
   return (
     <BasicTaskCard {...props} name="preProcesses" showOutput>
-      <ParameterInput prefix={name} parameter={dataTypeParameter} simple />
+      <ParameterInput prefix={name} parameter={preprocessConfigParameters[0]} simple />
       <Stack direction="row" spacing={4}>
-        <ParameterInput prefix={name} parameter={dataFilenameParameter} simple />
-        <ParameterInput prefix={name} parameter={dataConfigParameters} simple />
+        <ParameterInput prefix={name} parameter={preprocessConfigParameters[1]} simple />
+        <ParameterInput prefix={name} parameter={preprocessConfigParameters[2]} simple />
       </Stack>
     </BasicTaskCard>
   )

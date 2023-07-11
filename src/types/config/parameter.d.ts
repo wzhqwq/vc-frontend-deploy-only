@@ -1,6 +1,15 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
-export type ConfigParameterType = 'int' | 'float' | 'str' | 'bool' | 'tuple2' | 'dict' | 'list' | 'file'
+export type ConfigParameterType =
+  | 'int'
+  | 'float'
+  | 'str'
+  | 'file'
+  | 'bool'
+  | 'tuple2'
+  | 'tuple3'
+  | 'dict'
+  | 'list'
 export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int' | 'float'
   ? number
   : T extends 'str' | 'file'
@@ -9,6 +18,8 @@ export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int
   ? boolean
   : T extends 'tuple2'
   ? [number, number]
+  : T extends 'tuple3'
+  ? [number, number, number]
   : T extends 'dict'
   ? undefined
   : T extends 'list'
@@ -18,30 +29,61 @@ export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int
 export type ConfigParameterRecord = Record<string, ConfigParameterValue<ConfigParameterType>>
 
 export interface ConfigParameter<
-  T extends ConfigParameterType,
-  K extends string = string,
-  P = Record<K, any>,
+  Parent extends Record<string | number | symbol, any>,
+  Key extends keyof Parent,
+  Type extends ConfigParameterType,
 > {
-  key: K
-  type: T
+  key: Key
+  type: Type
   description: string
   inShape?: boolean
-  default: ConfigParameterValue<T> /*  | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>) */
+  default: Parent[Key] /*  | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>) */
+  // 如果当前类型是列表，则作为描述availableValues的名字
+  // 否则作为当前值的可选值
   selections?: string[]
-  validator?: (value: ConfigParameterValue<T>) => boolean
-  properties?: ConfigParameterArray<P[K]>
-  shown?: (parameters: P) => boolean
+  validator?: (value: Parent[Key] ) => boolean
+  canShow?: (parameters: P) => boolean
 }
-export type EachTypeOfConfigParameter<K extends string = string, P = Record<K, any>> =
-  | ConfigParameter<'int', K, P>
-  | ConfigParameter<'float', K, P>
-  | ConfigParameter<'str', K, P>
-  | ConfigParameter<'bool', K, P>
-  | ConfigParameter<'tuple2', K, P>
-  | ConfigParameter<'dict', K, P>
-  | ConfigParameter<'list', K, P>
-  | ConfigParameter<'file', K, P>
-export type ConfigParameterArray<P> = EachTypeOfConfigParameter<keyof P, P>[]
+export interface DictConfigParameter<
+  Parent extends Record<string | number | symbol, any>,
+  Key extends keyof Parent,
+> extends ConfigParameter<Parent, Key, 'dict'> {
+  multiChoice: false
+  properties: ConfigParameterArray<P[K]>
+}
+export interface MultiChoiceDictConfigParameter<
+  Parent extends Record<string | number | symbol, any>,
+  Key extends keyof Parent,
+> extends ConfigParameter<Parent, Key, 'dict'> {
+  multiChoice: true
+  // 当前值由boundSelectionKey从availableValues中选择
+  availableValues: Array<DictConfigParameter<Parent, Key>>
+  boundSelectionKey: keyof P
+}
+export interface ListConfigParameter<
+  Parent extends Record<string | number | symbol, any>,
+  Key extends keyof Parent,
+> extends ConfigParameter<Parent, Key, 'list'> {
+  // 里面的值作为插入数组的可选值，
+  availableValues: ConfigParameterArray<P[K]>
+}
+export type EachTypeOfConfigParameter<
+  Parent extends Record<string | number | symbol, any>,
+  Key extends keyof Parent,
+> =
+  | ConfigParameter<Parent, Key, 'int'>
+  | ConfigParameter<Parent, Key, 'float'>
+  | ConfigParameter<Parent, Key, 'str'>
+  | ConfigParameter<Parent, Key, 'bool'>
+  | ConfigParameter<Parent, Key, 'tuple2'>
+  | ConfigParameter<Parent, Key, 'tuple3'>
+  | ConfigParameter<Parent, Key, 'file'>
+  | DictConfigParameter<Parent, Key>
+  | MultiChoiceDictConfigParameter<Parent, Key>
+  | ListConfigParameter<Parent, Key>
+export type ConfigParameterArray<
+  Parent extends Record<string | number | symbol, any>,
+  > = EachTypeOfConfigParameter<Parent, keyof Parent>[]
 
 export type AnyDimPlaceholders = `d${number}`
 export type AllShapePlaceholders =

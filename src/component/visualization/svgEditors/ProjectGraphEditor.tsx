@@ -1,11 +1,10 @@
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
 import { Box, Button, Stack, Typography } from '@mui/joy'
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { useProjectTaskGroups, useTaskGroup } from '@/api/task'
 import { PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
-import { defaultImgPreprocessParameter } from '@/config/projectGraph/taskData'
 import {
   FormProvider,
   UseFieldArrayRemove,
@@ -131,7 +130,6 @@ export default function ProjectGraphEditor({
               renderer={(task, index, remove) => (
                 <PreprocessTaskCard key={task.id} index={index} remove={remove} />
               )}
-              initialParameters={defaultImgPreprocessParameter}
               taskType="preprocess"
             />
             {/* <Divider orientation="vertical" />
@@ -157,23 +155,22 @@ interface TaskSlotProps<T extends Record<string, any>> {
   title: string
   name: keyof ProjectGraph
   renderer: (task: TaskData<T>, index: number, remove: UseFieldArrayRemove) => JSX.Element
-  initialParameters: T
   taskType: string
 }
 function TaskSlot<T extends Record<string, any>>({
   title,
   name,
   renderer,
-  initialParameters,
   taskType,
 }: TaskSlotProps<T>) {
-  const { fields, append, remove } = useFieldArray<ProjectGraph>({ name })
+  const { fields, append, remove } = useFieldArray<ProjectGraph, keyof ProjectGraph>({ name })
+  const readonly = useContext(ReadonlyContext)
   const handleAdd = () => {
     const id = nanoid()
     const taskData: TaskData<T> = {
       id,
       task_type: taskType,
-      parameters: initialParameters,
+      parameters: {} as T,
       inPeers: [],
     }
     append(taskData)
@@ -184,9 +181,11 @@ function TaskSlot<T extends Record<string, any>>({
         {title}
       </Typography>
       {fields.map((task, index) => renderer(task, index, remove))}
-      <Button variant="soft" size="lg" startDecorator={<AddIcon />} fullWidth onClick={handleAdd}>
-        添加
-      </Button>
+      {!readonly && (
+        <Button variant="soft" size="lg" startDecorator={<AddIcon />} fullWidth onClick={handleAdd}>
+          添加
+        </Button>
+      )}
     </Stack>
   )
 }
