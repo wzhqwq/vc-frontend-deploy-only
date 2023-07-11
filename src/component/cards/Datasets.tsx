@@ -2,7 +2,8 @@ import { useDatasets } from '@/api/dataset'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { UserWidget } from '@/component/basic/getters'
 import { formatDate } from '@/utils/time'
-import { Box, Card, CircularProgress, Grid, Link, Stack, Typography } from '@mui/joy'
+import { Box, Card, CircularProgress, Grid, Stack, Typography } from '@mui/joy'
+import InnerLink from '../basic/innerLink/InnerLink'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 
@@ -19,9 +20,9 @@ export default function Datasets({ isPublic }: { isPublic: boolean }) {
             <Card variant="outlined">
               <div>
                 <Typography level="h5">
-                  <Link overlay href={`/datasets/${dataset.id}`} underline='none'>
+                  <InnerLink overlay to={`/datasets/${dataset.id}`} underline='none'>
                     {dataset.title}
-                  </Link>
+                  </InnerLink>
                 </Typography>
                 <Typography level="body2">{dataset.description || '暂无描述'}</Typography>
               </div>

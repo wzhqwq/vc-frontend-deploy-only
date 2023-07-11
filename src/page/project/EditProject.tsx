@@ -43,7 +43,7 @@ export default function EditProject() {
           <>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography component="div" level="h6">
-                <UserWidget />
+                <UserWidget userId={project.user_id} />
               </Typography>
               <ChevronRightIcon color="secondary" />
               <Input

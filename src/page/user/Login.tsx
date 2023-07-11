@@ -1,5 +1,6 @@
 import { LoginForm, useSession } from '@/api/user'
-import { Button, Input, Link, Sheet, Typography } from '@mui/joy'
+import InnerLink from '@/component/basic/innerLink/InnerLink'
+import { Button, Input, Sheet, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -61,9 +62,9 @@ export default function Login() {
         <Button type="submit" loading={loggingIn} disabled={loggingIn || !formState.isValid}>
           登录
         </Button>
-        <Link href="/register" sx={{ alignSelf: 'end' }}>
+        <InnerLink to="/register" sx={{ alignSelf: 'end' }}>
           创建账号
-        </Link>
+        </InnerLink>
       </Sheet>
     </form>
   )

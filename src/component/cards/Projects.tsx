@@ -2,7 +2,8 @@ import { useProjects } from '@/api/project'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { UserWidget } from '@/component/basic/getters'
 import { formatDate } from '@/utils/time'
-import { Box, Button, Card, CircularProgress, Grid, Link, Stack, Typography } from '@mui/joy'
+import { Box, Button, Card, CircularProgress, Grid, Stack, Typography } from '@mui/joy'
+import InnerLink from '../basic/innerLink/InnerLink'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { useNavigate } from 'react-router-dom'
@@ -24,9 +25,9 @@ export default function Projects({ isPublic }: { isPublic: boolean }) {
             <Card variant="outlined">
               <div>
                 <Typography level="h5">
-                  <Link overlay href={`/project/${project.id}`} underline="none">
+                  <InnerLink overlay to={`/project/${project.id}`} underline="none">
                     {project.name}
-                  </Link>
+                  </InnerLink>
                 </Typography>
                 <Typography level="body2">{project.description || '暂无描述'}</Typography>
               </div>

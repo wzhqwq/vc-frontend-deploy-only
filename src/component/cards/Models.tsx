@@ -2,7 +2,8 @@ import { useModels } from '@/api/model'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { UserWidget } from '@/component/basic/getters'
 import { formatDate } from '@/utils/time'
-import { Box, Card, Chip, CircularProgress, Grid, Link, Stack, Typography } from '@mui/joy'
+import { Box, Card, CircularProgress, Grid, Stack, Typography } from '@mui/joy'
+import InnerLink from '../basic/innerLink/InnerLink'
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { modelKinds } from '../basic/chips'
@@ -22,9 +23,9 @@ export default function Models({ isPublic }: { isPublic: boolean }) {
                 <Stack direction="row" alignItems="center" spacing={1}>
                   {modelKinds[model.kind]}
                   <Typography level="h5">
-                    <Link overlay href={`/models/${model.id}`} underline='none'>
+                    <InnerLink overlay to={`/models/${model.id}`} underline='none'>
                       {model.title}
-                    </Link>
+                    </InnerLink>
                   </Typography>
                 </Stack>
                 <Typography level="body2">{model.description || '暂无描述'}</Typography>

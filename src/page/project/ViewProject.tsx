@@ -28,6 +28,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import FileCopyIcon from '@mui/icons-material/FileCopy'
 import { useUser } from '@/api/user'
+import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
+import InnerLinkListItemButton from '@/component/basic/innerLink/InnerLinkListItemButton'
 
 export default function ViewProject() {
   const { id: projectId } = useParams<{ id: string }>()
@@ -44,7 +46,7 @@ export default function ViewProject() {
           <>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography component="div" level="h6">
-                <UserWidget />
+                <UserWidget userId={project.user_id} />
               </Typography>
               <ChevronRightIcon color="secondary" />
               <Typography component="div" level="h4">
@@ -67,28 +69,26 @@ export default function ViewProject() {
                 >
                   删除项目
                 </Button>
-                <Button
+                <InnerLinkButton
                   component="a"
                   color="primary"
                   variant="soft"
                   startDecorator={<EditIcon />}
-                  href={`/project/${projectId}/edit`}
-                  sx={{ boxSizing: 'border-box' }}
+                  to={`/project/${projectId}/edit`}
                 >
                   编辑项目
-                </Button>
+                </InnerLinkButton>
               </>
             )}
-            <Button
+            <InnerLinkButton
               component="a"
               color="primary"
               variant="soft"
               startDecorator={<FileCopyIcon />}
-              href={`/project/new?copy=${projectId}`}
-              sx={{ boxSizing: 'border-box' }}
+              to={`/project/new?copy=${projectId}`}
             >
               复制项目
-            </Button>
+            </InnerLinkButton>
           </>
         )}
       </Stack>
@@ -114,13 +114,13 @@ export default function ViewProject() {
               <List>
                 {taskGroups?.map((taskGroup) => (
                   <ListItem key={taskGroup.id}>
-                    <ListItemButton component="a" href={`/task/${taskGroup.id}`}>
+                    <InnerLinkListItemButton component="a" to={`/task/${taskGroup.id}`}>
                       <ListItemDecorator>{taskStatusIcon[taskGroup.status]}</ListItemDecorator>
                       <ListItemContent>
                         <Typography level="body1">{taskStatusText[taskGroup.status]}</Typography>
                         <Typography level="body2">{formatTime(taskGroup.created_at)}</Typography>
                       </ListItemContent>
-                    </ListItemButton>
+                    </InnerLinkListItemButton>
                   </ListItem>
                 ))}
               </List>

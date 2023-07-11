@@ -1,15 +1,16 @@
 import { ProjectGraphEditor } from '@/component/visualization/svgEditors'
-import { Box, Button, Chip, Divider, FormLabel, Stack, Switch, Typography } from '@mui/joy'
-import { Link, Skeleton } from '@mui/material'
+import { Box, Button, Divider, FormLabel, Stack, Switch, Typography } from '@mui/joy'
+import { Skeleton } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { ProjectName, UserWidget } from '@/component/basic/getters'
 import { useTaskGroup } from '@/api/task'
-
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import DangerousIcon from '@mui/icons-material/Dangerous'
 import { useUser } from '@/api/user'
 import { TASK_FINISHED } from '@/utils/constants'
 import { useState } from 'react'
+import InnerLink from '@/component/basic/innerLink/InnerLink'
+
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import DangerousIcon from '@mui/icons-material/Dangerous'
 
 export default function ViewTask() {
   const { id: groupId } = useParams<{ id: string }>()
@@ -28,13 +29,13 @@ export default function ViewTask() {
           <>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography component="div" level="h6">
-                <UserWidget />
+                <UserWidget userId={group.user_id} />
               </Typography>
               <ChevronRightIcon color="secondary" />
               <Typography component="div" level="h4">
-                <Link href={`/project/${group.project_id}`}>
+                <InnerLink to={`/project/${group.project_id}`}>
                   <ProjectName projectId={group.project_id} />
-                </Link>
+                </InnerLink>
               </Typography>
             </Stack>
             <Box sx={{ flexGrow: 1 }} />

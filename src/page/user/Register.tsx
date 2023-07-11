@@ -1,5 +1,6 @@
 import { UserCreatingForm, useSession } from '@/api/user'
-import { Button, Input, Link, Sheet, Typography } from '@mui/joy'
+import InnerLink from '@/component/basic/innerLink/InnerLink'
+import { Button, Input, Sheet, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -73,7 +74,7 @@ export default function Register() {
         </Button>
         <Typography level="body1" sx={{ textAlign: 'end' }}>
           已有账号？
-          <Link href="/login">登录</Link>
+          <InnerLink to="/login">登录</InnerLink>
         </Typography>
       </Sheet>
     </form>
