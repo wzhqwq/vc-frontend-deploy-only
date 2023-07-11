@@ -85,3 +85,18 @@ export function useLayerData(filename: string) {
     uploadingLayer: uploadingFile,
   }
 }
+
+export function useFileInfo(filename?: string) {
+  const { data: fileInfo, isFetching: fetchingFileInfo } = useErrorlessQuery<FileInfo>(
+    {
+      queryKey: ['public', 'file', 'file_info', { filename }],
+      enabled: !!filename,
+    },
+    '获取文件信息失败',
+  )
+
+  return {
+    fileInfo,
+    fetchingFileInfo,
+  }
+}

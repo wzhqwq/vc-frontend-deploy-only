@@ -2,7 +2,7 @@ import { useTask } from '@/api/task'
 import { ProjectGraph } from '@/types/config/project'
 import { Box, Card, Chip, ChipDelete, IconButton, Stack } from '@mui/joy'
 import { taskStatus } from '@/component/basic/chips'
-import { memo, useEffect, useMemo } from 'react'
+import { memo, useContext, useEffect, useMemo } from 'react'
 import { TaskConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
 import {
@@ -15,6 +15,7 @@ import ParameterInput from '@/component/basic/ParameterInput'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
+import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 
 export interface TaskCardProps {
   index: number
@@ -34,17 +35,22 @@ export function BasicTaskCard({
   showInput,
   showOutput,
 }: BasicTaskCardProps) {
+  const readonly = useContext(ReadonlyContext)
   return (
     <Card variant="outlined" sx={{ p: 0 }}>
       <Stack direction="row" alignItems="center">
         {showInput && <TaskConnector type="input" name={`${name}.${index}.id`} />}
         <Stack flexGrow={1} p={2} spacing={1}>
           <Stack direction="row" alignItems="center" spacing={2}>
-            <ChangeIndicator name={`${name}.${index}`} />
-            <IconButton size="sm" onClick={() => remove(index)} color="danger" variant="plain">
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-            <Box sx={{ flexGrow: 1 }} />
+            {!readonly && (
+              <>
+                <ChangeIndicator name={`${name}.${index}`} />
+                <IconButton size="sm" onClick={() => remove(index)} color="danger" variant="plain">
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+                <Box sx={{ flexGrow: 1 }} />
+              </>
+            )}
             <TaskIndicator name={`${name}.${index}.taskId`} />
           </Stack>
           {children}

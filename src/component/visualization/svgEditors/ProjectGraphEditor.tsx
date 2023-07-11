@@ -17,6 +17,7 @@ import { useProject } from '@/api/project'
 import { useNavigate } from 'react-router-dom'
 import Collapse from '@mui/material/Collapse'
 import Fade from '@mui/material/Fade'
+import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
@@ -114,36 +115,38 @@ export default function ProjectGraphEditor({
         </Stack>
       </Collapse>
       <FormProvider {...methods}>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto 1fr auto 1fr',
-            gap: 2,
-            p: 1,
-          }}
-        >
-          <TaskSlot
-            title="预处理"
-            name="preProcesses"
-            renderer={(task, index, remove) => (
-              <PreprocessTaskCard key={task.id} index={index} remove={remove} />
-            )}
-            initialParameters={defaultImgPreprocessParameter}
-            taskType="preprocess"
-          />
-          {/* <Divider orientation="vertical" />
+        <ReadonlyContext.Provider value={readonly}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: '1fr auto 1fr auto 1fr',
+              gap: 2,
+              p: 1,
+            }}
+          >
             <TaskSlot
-              title="算法"
-              renderer={() => <div>结束</div>}
-              initialParameters={{}}
+              title="预处理"
+              name="preProcesses"
+              renderer={(task, index, remove) => (
+                <PreprocessTaskCard key={task.id} index={index} remove={remove} />
+              )}
+              initialParameters={defaultImgPreprocessParameter}
+              taskType="preprocess"
             />
-            <Divider orientation="vertical" />
-            <TaskSlot
-              title="分析"
-              renderer={() => <div>结束</div>}
-              initialParameters={{}}
-            /> */}
-        </Box>
+            {/* <Divider orientation="vertical" />
+              <TaskSlot
+                title="算法"
+                renderer={() => <div>结束</div>}
+                initialParameters={{}}
+              />
+              <Divider orientation="vertical" />
+              <TaskSlot
+                title="分析"
+                renderer={() => <div>结束</div>}
+                initialParameters={{}}
+              /> */}
+          </Box>
+        </ReadonlyContext.Provider>
       </FormProvider>
     </Box>
   ) : null

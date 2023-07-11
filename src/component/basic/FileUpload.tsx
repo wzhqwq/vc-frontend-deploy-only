@@ -1,22 +1,25 @@
 import { createRef } from 'react'
 
-import { useUploadFile } from '@/api/files'
-import { CircularProgress, IconButton, Sheet, Stack } from '@mui/joy'
+import { useFileInfo, useUploadFile } from '@/api/files'
+import { CircularProgress, IconButton, Sheet, Stack, Typography } from '@mui/joy'
+import { baseUrl } from '@/api/network'
 
 import Description from '@mui/icons-material/Description'
-import Remove from '@mui/icons-material/Remove'
+import Delete from '@mui/icons-material/Delete'
 import AddRounded from '@mui/icons-material/AddRounded'
-import { baseUrl } from '@/api/network'
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark'
 
 export interface FileUploadProps {
   value: string
+  readonly?: boolean
   onChange?: (fileName: string) => void
   onRemove?: () => void
 }
 
-export default function FileUpload({ value, onChange, onRemove }: FileUploadProps) {
+export default function FileUpload({ value, readonly, onChange, onRemove }: FileUploadProps) {
   const formRef = createRef<HTMLFormElement>()
   const { uploadFile, uploadingFile } = useUploadFile()
+  const { fileInfo } = useFileInfo(value)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return
@@ -65,25 +68,35 @@ export default function FileUpload({ value, onChange, onRemove }: FileUploadProp
         {uploadingFile ? (
           <>
             <CircularProgress />
-            <span>上传中</span>
+            <Typography level="body3" color="primary">上传中</Typography>
           </>
         ) : value ? (
           <>
             <Description fontSize="large" onClick={triggerDownload} />
-            <IconButton
-              size="sm"
-              onClick={onRemove}
-              sx={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                transform: 'translate(50%, -50%)',
-              }}
-              color="danger"
-              variant="solid"
-            >
-              <Remove />
-            </IconButton>
+            <Typography level="body2" sx={{ mb: -1 }} color="primary">{fileInfo?.extension.toUpperCase()}</Typography>
+            {!readonly && (
+              <IconButton
+                size="sm"
+                onClick={onRemove}
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  transform: 'translate(30%, -30%)',
+                }}
+                color="danger"
+                variant="solid"
+              >
+                <Delete fontSize='small' />
+              </IconButton>
+            )}
+          </>
+        ) : readonly ? (
+          <>
+            <QuestionMarkIcon fontSize="large" />
+            <Typography level="body3" color="primary">
+              未提供
+            </Typography>
           </>
         ) : (
           <>

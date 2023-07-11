@@ -6,9 +6,10 @@ import ParameterInput from './ParameterInput'
 export interface FormModalProps {
   name: string
   parameters: ConfigParameterArray<any>
+  readonly?: boolean
 }
 
-export default function FormModal({ name, parameters }: FormModalProps) {
+export default function FormModal({ name, parameters, readonly }: FormModalProps) {
   const [open, setOpen] = useState(false)
 
   const columns = Math.max(2, parameters.length / 3).toFixed(0)
@@ -23,7 +24,7 @@ export default function FormModal({ name, parameters }: FormModalProps) {
   return (
     <>
       <Button onClick={() => setOpen(true)} size="sm" sx={{ my: 0.5 }}>
-        点击编辑
+        {readonly ? '点击查看' : '点击编辑'}
       </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalDialog sx={{ p: 2, minWidth: 200 }}>
