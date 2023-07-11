@@ -18,10 +18,12 @@ import {
   useWatch,
 } from 'react-hook-form'
 import { Tuple2Input } from './CustomInput'
+import { ReactElement, useContext, useEffect, useMemo } from 'react'
+import { ReadonlyContext } from '@/component/context/ReadonlyContext'
+import { checkDirty } from '@/utils/form'
+
 import FormModal from './FormModal'
 import FileUpload from './FileUpload'
-import { ReactElement, useContext, useMemo } from 'react'
-import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any, any>
@@ -30,10 +32,9 @@ export interface ParameterInputProps {
 }
 
 export default function ParameterInput({ prefix, parameter, simple = false }: ParameterInputProps) {
-  const { control } = useFormContext()
+  const { unregister, trigger } = useFormContext()
   const readonly = useContext(ReadonlyContext)
   const form = useWatch({
-    control,
     name: prefix ?? '',
     disabled: !parameter.shown,
   })
@@ -138,10 +139,14 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
       </>
     )
     const helperText = !simple && <FormHelperText>{parameter.description}</FormHelperText>
-    return ({ field, fieldState }) => (
-      <Box display={show ? 'block' : 'none'}>
-        <FormLabel>
-          {fieldState.isDirty && (
+    return ({ field, fieldState, formState }) => (
+      <Box>
+        <FormLabel
+          sx={(theme) => ({
+            color: fieldState.invalid ? theme.vars.palette.danger[400] : undefined,
+          })}
+        >
+          {checkDirty(formState.dirtyFields, (prefix ? prefix + '.' : '') + parameter.key) && (
             <Box
               sx={(theme) => ({
                 width: 8,
@@ -159,14 +164,21 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
         {renderInput(field)}
       </Box>
     )
-  }, [show, parameter, prefix, renderInput])
+  }, [parameter, renderInput])
 
-  return (
+  useEffect(() => {
+    if (!show) unregister((prefix ? prefix + '.' : '') + parameter.key)
+    else trigger((prefix ? prefix + '.' : '') + parameter.key)
+  }, [show])
+
+  return show ? (
     <Controller
-      control={control}
       name={(prefix ? prefix + '.' : '') + parameter.key}
       defaultValue={parameter.default}
       render={renderBox}
+      rules={{
+        validate: (v) => v !== '',
+      }}
     />
-  )
+  ) : null
 }

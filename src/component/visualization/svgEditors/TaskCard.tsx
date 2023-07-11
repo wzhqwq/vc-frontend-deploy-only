@@ -12,10 +12,11 @@ import {
   dataTypeParameter,
 } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
+import { ReadonlyContext } from '@/component/context/ReadonlyContext'
+import { checkDirty } from '@/utils/form'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
-import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 
 export interface TaskCardProps {
   index: number
@@ -61,24 +62,20 @@ export function BasicTaskCard({
   )
 }
 const TaskIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}.taskId` }) => {
-  const { control } = useFormContext<ProjectGraph>()
-  const taskId = useWatch({ control, name })
+  const taskId = useWatch<ProjectGraph>({ name })
   const { task } = useTask(taskId)
 
   return (task && taskStatus[task.status]) ?? null
 })
 const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) => {
-  const { control, resetField } = useFormContext<ProjectGraph>()
-  const { dirtyFields } = useFormState({ control, name })
-  const [slotName, index] = name.split('.') as [keyof ProjectGraph, number]
-  const isDirty = dirtyFields[slotName]?.at(index)
-  const isNew = isDirty?.id
+  const { resetField } = useFormContext<ProjectGraph>()
+  const { dirtyFields } = useFormState<ProjectGraph>({ name })
 
-  return isNew ? (
+  return checkDirty(dirtyFields, `${name}.id`) ? (
     <Chip color="primary" variant="soft">
       新添
     </Chip>
-  ) : isDirty ? (
+  ) : checkDirty(dirtyFields, name) ? (
     <>
       <Chip
         color="warning"
@@ -98,19 +95,16 @@ const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}
 export function PreprocessTaskCard(props: TaskCardProps) {
   const { index } = props
   const name = `preProcesses.${index}.parameters` as `${keyof ProjectGraph}.${number}.parameters`
-  const { control, setValue } = useFormContext<ProjectGraph>()
-  const { dirtyFields } = useFormState({ control, name })
+  const { setValue } = useFormContext<ProjectGraph>()
+  const { dirtyFields } = useFormState<ProjectGraph>({ name })
 
-  const dataType = useWatch({
-    control: control,
-    name: `preProcesses.${props.index}.parameters.data_type`,
-  })
+  const dataType = useWatch<ProjectGraph>({ name: `${name}.data_type` })
   const dataConfigParameters = useMemo(
     () => allPreprocessDataConfigParameters[dataType],
     [dataType],
   )
   useEffect(() => {
-    if (!dirtyFields.preProcesses?.at(index)) return
+    if (!dirtyFields.preProcesses?.at(index)?.parameters) return
     setValue(`${name}.data_config`, allPreprocessDefaultParameters[dataType].data_config, {
       shouldDirty: true,
     })
