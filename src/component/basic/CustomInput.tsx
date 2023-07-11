@@ -7,40 +7,35 @@ export const SearchInput = (props: InputProps) => (
   <Input {...props} variant="soft" startDecorator={<SearchRounded />} />
 )
 
-interface Tuple2InputProps extends Omit<InputProps, 'onChange' | 'value'> {
-  readonly value: [number, number]
-  onChange: (value: [number, number]) => void
+interface TupleInputProps extends Omit<InputProps, 'onChange' | 'value'> {
+  readonly value: number[]
+  readonly length: number
+  onChange: (value: number[]) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
 }
-export const Tuple2Input = memo(
-  forwardRef<HTMLElement, Tuple2InputProps>(
-    ({ value, onChange, onBlur, sx, size }: Tuple2InputProps, ref: React.Ref<HTMLElement>) => {
-      const [v1, setV1] = useState('')
-      const [v2, setV2] = useState('')
-      const onChangeRef = useRef<(value: [number, number]) => void>()
+export const TupleInput = memo(
+  forwardRef<HTMLInputElement, TupleInputProps>(
+    (
+      { value, onChange, onBlur, sx, size, length }: TupleInputProps,
+      ref: React.Ref<HTMLInputElement>,
+    ) => {
+      const [values, setValues] = useState<string[]>([])
+      const onChangeRef = useRef<(value: number[]) => void>()
 
       const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        if (name === 'v1') {
-          setV1(value)
-        } else {
-          setV2(value)
-        }
       }, [])
 
       useEffect(() => {
-        setV1(value[0].toString())
-        setV2(value[1].toString())
+        setValues(value.map((v) => v.toString()))
       }, [value])
       useEffect(() => {
         onChangeRef.current = onChange
       }, [onChange])
 
       useEffect(() => {
-        if (v1 !== '' && v2 !== '') {
-          onChangeRef.current?.([Number(v1), Number(v2)])
-        }
-      }, [v1, v2])
+        onChangeRef.current?.(values.map((v) => (v ? Number(v) : 0)))
+      }, [values])
 
       return (
         <Box
@@ -50,24 +45,18 @@ export const Tuple2Input = memo(
             gridTemplateColumns: '1fr 1fr',
             gap: 1,
           }}
-          ref={ref}
         >
-          <Input
-            name="v1"
-            type="number"
-            value={v1}
-            onChange={handleChange}
-            onBlur={onBlur}
-            size={size}
-          />
-          <Input
-            name="v2"
-            type="number"
-            value={v2}
-            onChange={handleChange}
-            onBlur={onBlur}
-            size={size}
-          />
+          {values.map((v, i) => (
+            <Input
+              name={`v${i}`}
+              type="number"
+              value={v}
+              onChange={handleChange}
+              onBlur={onBlur}
+              size={size}
+              ref={!i ? ref : undefined}
+            />
+          ))}
         </Box>
       )
     },

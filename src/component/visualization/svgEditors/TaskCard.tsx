@@ -71,19 +71,17 @@ const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}
       新添
     </Chip>
   ) : checkDirty(dirtyFields, name) ? (
-    <>
-      <Chip
-        color="warning"
-        variant="solid"
-        endDecorator={
-          <ChipDelete onClick={() => resetField(name)}>
-            <ReplayRoundedIcon fontSize="small" />
-          </ChipDelete>
-        }
-      >
-        已修改
-      </Chip>
-    </>
+    <Chip
+      color="warning"
+      variant="solid"
+      endDecorator={
+        <ChipDelete onClick={() => resetField(name)}>
+          <ReplayRoundedIcon fontSize="small" />
+        </ChipDelete>
+      }
+    >
+      已修改
+    </Chip>
   ) : null
 })
 

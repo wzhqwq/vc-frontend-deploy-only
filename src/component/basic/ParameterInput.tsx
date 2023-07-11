@@ -18,7 +18,7 @@ import {
   useFormState,
   useWatch,
 } from 'react-hook-form'
-import { Tuple2Input } from './CustomInput'
+import { TupleInput } from './CustomInput'
 import { useContext, useEffect, useMemo } from 'react'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
@@ -79,7 +79,7 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
                 {field.value ? 'True' : 'False'}
               </Typography>
             )
-          : type == 'tuple2'
+          : type == 'tuple2' || type == 'tuple3'
           ? (field: ControllerRenderProps) => (
               <Typography level="h6" color="primary">
                 {field.value.join(', ')}
@@ -118,7 +118,13 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
             <Switch {...field} onChange={field.onChange} checked={field.value} sx={{ my: 0.5 }} />
           )
         : type == 'tuple2'
-        ? (field: ControllerRenderProps) => <Tuple2Input {...field} sx={{ my: 0.5 }} size="sm" />
+        ? (field: ControllerRenderProps) => (
+            <TupleInput length={2} {...field} sx={{ my: 0.5 }} size="sm" />
+          )
+        : type == 'tuple3'
+        ? (field: ControllerRenderProps) => (
+            <TupleInput length={3} {...field} sx={{ my: 0.5 }} size="sm" />
+          )
         : type == 'dict'
         ? () => (
             <FormModal
