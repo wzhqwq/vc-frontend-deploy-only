@@ -38,7 +38,9 @@
     "start": "vite",
     "build": "tsc && vite build",
     "analyze": "tsc && cross-env VISUALIZER=1 vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "checkType": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json}\""
   },
   "eslintConfig": {
     "extends": [

@@ -1,15 +1,11 @@
 import {
   BioPreprocessParameter,
-  EncodeArgs,
+  EachPreprocessParameter,
   ImgPreprocessParameter,
   OtherPreprocessParameter,
   TextPreprocessParameter,
 } from '@/types/config/details/tasks'
-import {
-  ConfigParameterArray,
-  DictConfigParameter,
-  PreprocessParameter,
-} from '@/types/config/parameter'
+import { ConfigParameterArray, DictConfigParameter } from '@/types/config/parameter'
 
 export const imgDataConfigDict: DictConfigParameter<ImgPreprocessParameter, 'data_config'> = {
   key: 'data_config',
@@ -70,7 +66,7 @@ export const textDataConfigDict: DictConfigParameter<TextPreprocessParameter, 'd
         { key: 'learn_rate', type: 'float', description: '学习率', default: 0.01 },
         { key: 'embedding_size', type: 'int', description: '嵌入维度', default: 100 },
         { key: 'window_size', type: 'int', description: '窗口大小', default: 5 },
-      ] as ConfigParameterArray<EncodeArgs>,
+      ],
       default: {
         epochs: 100,
         learn_rate: 0.01,
@@ -168,8 +164,8 @@ const allPreprocessDataConfigParameters = [
   textDataConfigDict,
   bioDataConfigDict,
   otherDataConfigDict,
-]
-export const preprocessConfigParameters: ConfigParameterArray<PreprocessParameter<any, any>> = [
+] as DictConfigParameter<EachPreprocessParameter, 'data_config'>[]
+export const preprocessConfigParameters: ConfigParameterArray<EachPreprocessParameter> = [
   {
     key: 'data_type',
     type: 'int',

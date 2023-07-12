@@ -41,15 +41,15 @@ export interface ConfigParameter<
   // 如果当前类型是列表，则作为描述availableValues的名字
   // 否则作为当前值的可选值
   selections?: string[]
-  validator?: (value: Parent[Key] ) => boolean
-  canShow?: (parameters: P) => boolean
+  validator?: (value: Exclude<Parent[Key], string | number>) => boolean
+  canShow?: (parameters: Parent) => boolean
 }
 export interface DictConfigParameter<
   Parent extends Record<string | number | symbol, any>,
   Key extends keyof Parent,
 > extends ConfigParameter<Parent, Key, 'dict'> {
   multiChoice: false
-  properties: ConfigParameterArray<P[K]>
+  properties: ConfigParameterArray<Exclude<Parent[Key], string | number>>
 }
 export interface MultiChoiceDictConfigParameter<
   Parent extends Record<string | number | symbol, any>,
@@ -58,14 +58,14 @@ export interface MultiChoiceDictConfigParameter<
   multiChoice: true
   // 当前值由boundSelectionKey从availableValues中选择
   availableValues: Array<DictConfigParameter<Parent, Key>>
-  boundSelectionKey: keyof P
+  boundSelectionKey: keyof Parent
 }
 export interface ListConfigParameter<
   Parent extends Record<string | number | symbol, any>,
   Key extends keyof Parent,
 > extends ConfigParameter<Parent, Key, 'list'> {
   // 里面的值作为插入数组的可选值，
-  availableValues: ConfigParameterArray<P[K]>
+  availableValues: ConfigParameterArray<Parent[Key]>
 }
 export type EachTypeOfConfigParameter<
   Parent extends Record<string | number | symbol, any>,
@@ -81,9 +81,8 @@ export type EachTypeOfConfigParameter<
   | DictConfigParameter<Parent, Key>
   | MultiChoiceDictConfigParameter<Parent, Key>
   | ListConfigParameter<Parent, Key>
-export type ConfigParameterArray<
-  Parent extends Record<string | number | symbol, any>,
-  > = EachTypeOfConfigParameter<Parent, keyof Parent>[]
+export type ConfigParameterArray<Parent extends Record<string | number | symbol, any>> =
+  EachTypeOfConfigParameter<Parent, keyof Parent | any>[]
 
 export type AnyDimPlaceholders = `d${number}`
 export type AllShapePlaceholders =
