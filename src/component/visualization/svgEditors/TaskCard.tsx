@@ -5,7 +5,7 @@ import { taskStatus } from '@/component/basic/chips'
 import { memo, useContext, useMemo } from 'react'
 import { TaskInputConnector, TaskOutputConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
-import { preprocessConfigParameters } from '@/config/projectGraph/taskData'
+import { algorithmConfigParameters, preprocessConfigParameters } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
@@ -104,12 +104,24 @@ export function PreprocessTaskCard(props: TaskCardProps) {
   const name = `preProcesses.${index}.parameters`
 
   return (
-    <BasicTaskCard {...props} name="preProcesses" outputCount={1} inputCount={2}>
+    <BasicTaskCard {...props} name="preProcesses" outputCount={1}>
       <ParameterInput prefix={name} parameter={preprocessConfigParameters[0]} simple />
       <Stack direction="row" spacing={4}>
         <ParameterInput prefix={name} parameter={preprocessConfigParameters[1]} simple />
         <ParameterInput prefix={name} parameter={preprocessConfigParameters[2]} simple />
       </Stack>
+    </BasicTaskCard>
+  )
+}
+
+export function AlgorithmTaskCard(props: TaskCardProps) {
+  const { index } = props
+  const name = `algorithms.${index}.parameters`
+
+  return (
+    <BasicTaskCard {...props} name="algorithms" inputCount={1} outputCount={1}>
+      <ParameterInput prefix={name} parameter={algorithmConfigParameters[0]} simple />
+      <ParameterInput prefix={name} parameter={algorithmConfigParameters[1]} simple />
     </BasicTaskCard>
   )
 }

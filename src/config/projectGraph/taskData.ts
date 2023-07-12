@@ -3,13 +3,21 @@ import {
   BioPreprocessParameter,
   ClipConfig,
   ContrastConfig,
+  DeKmeansAlgorithmParameter,
+  EachAlgorithmParameter,
   EachPreprocessParameter,
   FlipConfig,
   GaussianBlurConfig,
   GaussianNoiseConfig,
+  IMClustesAlgorithmParameter,
   ImgDataConfig,
   ImgPreprocessParameter,
+  MNMFAlgorithmParameter,
+  MNMFConfig,
+  MultiCCAlgorithmParameter,
+  MultiCCConfig,
   NormalizeConfig,
+  OSCAlgorithmParameter,
   OtherPreprocessParameter,
   RotateConfig,
   SaltPepperNoiseConfig,
@@ -350,5 +358,322 @@ export const preprocessConfigParameters: ConfigParameterArray<EachPreprocessPara
       return p.data_type
     },
     default: allPreprocessDataConfigParameters[0].default,
+  },
+]
+
+const multiCCOptionDict: DictConfigParameter<MultiCCConfig, 'options'> = {
+  key: 'options',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'error',
+      type: 'float',
+      description: '损失率，最好为0.0001',
+      default: 0.0001,
+    },
+    {
+      key: 'lambda',
+      type: 'float',
+      description: '控制着质量和差异之间的权衡的值，最好为100',
+      default: 100,
+    },
+    {
+      key: 'maxIter',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 100,
+    },
+    {
+      key: 'mu',
+      type: 'float',
+      description: '控制着质量和差异之间的权衡的值，最好为100',
+      default: 100,
+    },
+  ],
+  default: {
+    error: 0.0001,
+    lambda: 100,
+    maxIter: 100,
+    mu: 100,
+  },
+}
+const multiCCConfigDict: DictConfigParameter<MultiCCAlgorithmParameter, 'algo_config'> = {
+  key: 'algo_config',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'kFea',
+      type: 'int',
+      description: '每个共聚类的特征簇的数量',
+      default: 10,
+    },
+    {
+      key: 'kSample',
+      type: 'int',
+      description: '每个共聚类中的样本簇数',
+      default: 10,
+    },
+    {
+      key: 'num_clusterings',
+      type: 'int',
+      description: '聚类的簇数',
+      default: 10,
+    },
+    multiCCOptionDict,
+  ],
+  default: {
+    kFea: 10,
+    kSample: 10,
+    num_clusterings: 10,
+    options: multiCCOptionDict.default,
+  },
+}
+
+const deKmeansConfigDict: DictConfigParameter<DeKmeansAlgorithmParameter, 'algo_config'> = {
+  key: 'algo_config',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'epochs',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 100,
+    },
+    {
+      key: 'k1',
+      type: 'int',
+      description: '用于设置第一种聚类的类别数',
+      default: 2,
+    },
+    {
+      key: 'k2',
+      type: 'int',
+      description: '用于设置第二种聚类的类别数',
+      default: 2,
+    },
+    {
+      key: 'lambda_val',
+      type: 'float',
+      description: '用于算法对数据进行正则化操作的参数',
+      default: 0.1,
+    },
+    {
+      key: 'num_clusters',
+      type: 'int',
+      description: '聚类的簇数',
+      default: 2,
+    },
+  ],
+  default: {
+    epochs: 100,
+    k1: 2,
+    k2: 2,
+    lambda_val: 0.1,
+    num_clusters: 2,
+  },
+}
+
+const imClustesConfigDict: DictConfigParameter<IMClustesAlgorithmParameter, 'algo_config'> = {
+  key: 'algo_config',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'Epoch',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 100,
+    },
+    {
+      key: 'LR',
+      type: 'float',
+      description: '学习率',
+      default: 0.01,
+    },
+    {
+      key: 'n_clusters',
+      type: 'int',
+      description: '聚类的簇数',
+      default: 2,
+    },
+    {
+      key: 'num_head',
+      type: 'int',
+      description: '注意力机制头数',
+      default: 2,
+    },
+  ],
+  default: {
+    Epoch: 100,
+    LR: 0.01,
+    n_clusters: 2,
+    num_head: 2,
+  },
+}
+
+const oscConfigDict: DictConfigParameter<OSCAlgorithmParameter, 'algo_config'> = {
+  key: 'algo_config',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'epochs',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 100,
+    },
+    {
+      key: 'k',
+      type: 'int',
+      description: '用于设置聚类种数的参数',
+      default: 2,
+    },
+    {
+      key: 'num_clusters',
+      type: 'int',
+      description: '聚类的簇数',
+      default: 2,
+    },
+  ],
+  default: {
+    epochs: 100,
+    k: 2,
+    num_clusters: 2,
+  },
+}
+
+const mnmfOptionDict: DictConfigParameter<MNMFConfig, 'options'> = {
+  key: 'options',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'alpha',
+      type: 'float',
+      description: '正则化系数',
+      default: 0.1,
+    },
+    {
+      key: 'error',
+      type: 'float',
+      description: '误差阈值，若训练误差低于此值则提前终止算法',
+      default: 0.1,
+    },
+    {
+      key: 'minIter',
+      type: 'int',
+      description: '最小迭代次数',
+      default: 10,
+    },
+    {
+      key: 'nReapeat',
+      type: 'int',
+      description: '每种聚类随机初始化的次数',
+      default: 10,
+    },
+    {
+      key: 'stype',
+      type: 'int',
+      description: '选择计算模式2',
+      default: 1,
+    },
+    {
+      key: 'type',
+      type: 'int',
+      description: '选择计算模式1',
+      default: 1,
+    },
+    {
+      key: 'weight',
+      type: 'float',
+      description: '权重参数',
+      default: 0.1,
+    },
+  ],
+  default: {
+    alpha: 0.1,
+    error: 0.1,
+    minIter: 10,
+    nReapeat: 10,
+    stype: 1,
+    type: 1,
+    weight: 0.1,
+  },
+}
+const mnmfConfigDict: DictConfigParameter<MNMFAlgorithmParameter, 'algo_config'> = {
+  key: 'algo_config',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'epochs',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 100,
+    },
+    {
+      key: 'k',
+      type: 'int',
+      description: '用于设置聚类种数的参数',
+      default: 2,
+    },
+    {
+      key: 'num_clusters',
+      type: 'int',
+      description: '聚类的簇数',
+      default: 2,
+    },
+    mnmfOptionDict,
+  ],
+  default: {
+    epochs: 100,
+    k: 2,
+    num_clusters: 2,
+    options: mnmfOptionDict.default,
+  },
+}
+
+const allAlgorithmConfigParameters = [
+  multiCCConfigDict,
+  deKmeansConfigDict,
+  imClustesConfigDict,
+  oscConfigDict,
+  mnmfConfigDict,
+] as DictConfigParameter<EachAlgorithmParameter, 'algo_config'>[]
+const algorithmNames = [
+  'MultiCC',
+  'DeKMeans',
+  'iMClustes',
+  'OSC',
+  'MNMF',
+]
+export const algorithmConfigParameters: ConfigParameterArray<EachAlgorithmParameter> = [
+  {
+    key: 'algo_name',
+    type: 'str',
+    description: '算法名称',
+    default: 'MultiCC',
+    selections: algorithmNames,
+  },
+  {
+    key: 'algo_config',
+    type: 'dict',
+    description: '算法配置',
+    multiChoice: true,
+    availableValues: allAlgorithmConfigParameters,
+    getSelectionIndex(p) {
+      return algorithmNames.indexOf(p.algo_name)
+    },
+    default: allAlgorithmConfigParameters.map((item) => item.default),
   },
 ]

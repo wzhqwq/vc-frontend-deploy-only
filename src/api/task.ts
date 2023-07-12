@@ -101,8 +101,8 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
     ['private', 'algo', 'task_groups', groupId, 'process'],
     '中止任务失败',
     {
-      onSuccess: (group) => {
-        queryClient.setQueryData(['private', 'algo', 'task_groups', groupId], group)
+      onSuccess: () => {
+        queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId])
         queryClient.invalidateQueries(['private', 'algo', 'task_groups'], { exact: true })
       },
     },

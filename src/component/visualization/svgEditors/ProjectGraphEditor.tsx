@@ -1,9 +1,9 @@
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
-import { Box, Button, Stack, Typography } from '@mui/joy'
+import { Box, Button, Divider, Stack, Typography } from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useProjectTaskGroups, useTaskGroup } from '@/api/task'
-import { PreprocessTaskCard } from './TaskCard'
+import { AlgorithmTaskCard, PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
 import { useProject } from '@/api/project'
@@ -131,13 +131,16 @@ export default function ProjectGraphEditor({
                   )}
                   taskType="preprocess"
                 />
-                {/* <Divider orientation="vertical" />
+                <Divider orientation="vertical" />
                 <TaskSlot
                   title="算法"
-                  renderer={() => <div>结束</div>}
-                  initialParameters={{}}
+                  name="algorithms"
+                  renderer={(task, index, remove) => (
+                    <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
+                  )}
+                  taskType="algorithm"
                 />
-                <Divider orientation="vertical" />
+                {/* <Divider orientation="vertical" />
                 <TaskSlot
                   title="分析"
                   renderer={() => <div>结束</div>}

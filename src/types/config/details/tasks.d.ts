@@ -277,11 +277,11 @@ export interface MNMFOptions {
   weight: number
 }
 
-type MultiCCAlgorithmParameter = AlgorithmParameter<MultiCCConfig>
-type DeKmeansAlgorithmParameter = AlgorithmParameter<DeKmeansConfig>
-type IMClustesAlgorithmParameter = AlgorithmParameter<IMClustesConfig>
-type OSCAlgorithmParameter = AlgorithmParameter<OSCConfig>
-type MNMFAlgorithmParameter = AlgorithmParameter<MNMFConfig>
+export type MultiCCAlgorithmParameter = AlgorithmParameter<MultiCCConfig>
+export type DeKmeansAlgorithmParameter = AlgorithmParameter<DeKmeansConfig>
+export type IMClustesAlgorithmParameter = AlgorithmParameter<IMClustesConfig>
+export type OSCAlgorithmParameter = AlgorithmParameter<OSCConfig>
+export type MNMFAlgorithmParameter = AlgorithmParameter<MNMFConfig>
 
 export type EachAlgorithmParameter =
   | MultiCCAlgorithmParameter

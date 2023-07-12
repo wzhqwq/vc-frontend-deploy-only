@@ -96,7 +96,7 @@ export default function ViewProject() {
       <Grid container spacing={4}>
         <Grid sm={12} md={9}>
           {fetchingProject && <Skeleton variant="rounded" width="100%" height={300} />}
-          <ProjectGraphEditor projectId={Number(projectId)} readonly />
+          <ProjectGraphEditor projectId={Number(projectId)} canRun={isOwner} readonly />
         </Grid>
         <Grid sm={12} md={3}>
           <Stack spacing={2} mt={2}>
