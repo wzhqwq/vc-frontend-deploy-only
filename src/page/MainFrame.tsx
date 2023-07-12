@@ -11,17 +11,20 @@ import TaskTwoTone from '@mui/icons-material/TaskTwoTone'
 import ViewInAr from '@mui/icons-material/ViewInAr'
 import AccountTree from '@mui/icons-material/AccountTree'
 import Description from '@mui/icons-material/Description'
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff'
 
 import { useSession, useUser } from '@/api/user'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { NormalMenuButton } from '@/component/basic/CustomMenu'
 import {
+  Badge,
   Box,
   Button,
   CircularProgress,
   Container,
   Divider,
   IconButton,
+  ListItem,
   Menu,
   MenuItem,
   Stack,
@@ -32,6 +35,9 @@ import { memo, useCallback, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 import logo from '@/logo.svg'
+import { useMessage, useMessages } from '@/api/message'
+import { formatTime } from '@/utils/time'
+import { Message } from '@/types/entity/message'
 
 export default function MainFrame() {
   const { loggedIn } = useSession()
@@ -181,6 +187,9 @@ const UserControl = memo(() => {
 })
 
 const MessageControl = memo(() => {
+  const { messages, fetchingMessages } = useMessages(true)
+  const navigate = useNavigate()
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -193,7 +202,9 @@ const MessageControl = memo(() => {
   return (
     <>
       <IconButton onClick={handleClick} variant="plain" color="neutral">
-        <Notifications />
+        <Badge badgeContent={messages?.length} color="danger">
+          <Notifications />
+        </Badge>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -204,17 +215,44 @@ const MessageControl = memo(() => {
           minWidth: 300,
         }}
       >
-        <Stack direction="row" alignItems="center" p={1} pt={0}>
+        <ListItem>
           <Typography level="h6" sx={{ flexGrow: 1 }}>
-            消息中心
+            未读消息
           </Typography>
           <IconButton color="danger" size="sm">
             <DeleteSweep fontSize="small" />
           </IconButton>
-        </Stack>
-        <Divider sx={{ mb: 1 }} />
-        <MenuItem>暂无消息</MenuItem>
+        </ListItem>
+        <Divider sx={{ my: 1 }} />
+        {fetchingMessages && (
+          <MenuItem>
+            <CircularProgress size="sm" />
+          </MenuItem>
+        )}
+        {!!messages?.length &&
+          messages.map((message) => <MessageItem key={message.id} message={message} />)}
+        {messages?.length == 0 && <ListItem>暂无未读消息</ListItem>}
+        <MenuItem onClick={() => navigate('/user/notifications')}>查看全部</MenuItem>
       </Menu>
     </>
+  )
+})
+
+const MessageItem = memo(({ message }: { message: Message }) => {
+  const { setReadMessage, settingReadMessage } = useMessage(message.id)
+  return (
+    <MenuItem key={message.id}>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Box>
+          <Typography level="body1">{message.message}</Typography>
+          <Typography level="body2" color="neutral">
+            {formatTime(message.created_at)}
+          </Typography>
+        </Box>
+        <IconButton size="sm" onClick={setReadMessage} disabled={settingReadMessage}>
+          <NotificationsOffIcon fontSize="small" />
+        </IconButton>
+      </Stack>
+    </MenuItem>
   )
 })

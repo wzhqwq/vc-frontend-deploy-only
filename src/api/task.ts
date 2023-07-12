@@ -93,7 +93,7 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
     '启动任务失败',
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId])
+        queryClient.invalidateQueries(['private', 'algo', 'task_groups'])
       },
     },
   )
@@ -101,8 +101,9 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
     ['private', 'algo', 'task_groups', groupId, 'process'],
     '中止任务失败',
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId])
+      onSuccess: (group) => {
+        queryClient.setQueryData(['private', 'algo', 'task_groups', groupId], group)
+        queryClient.invalidateQueries(['private', 'algo', 'task_groups'], { exact: true })
       },
     },
   )

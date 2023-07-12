@@ -15,6 +15,7 @@ import NewProject from './project/NewProject'
 import ViewProject from './project/ViewProject'
 import EditProject from './project/EditProject'
 import ViewTask from './task/ViewTask'
+import OwnProperty from './user/OwnProperty'
 
 export const mainFrame = {
   Component: MainFrame,
@@ -65,5 +66,10 @@ export const editProject = {
 
 export const viewTask = {
   Component: ViewTask,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+
+export const ownProperty = {
+  Component: OwnProperty,
   ErrorBoundary: SimpleErrorBoundary,
 }

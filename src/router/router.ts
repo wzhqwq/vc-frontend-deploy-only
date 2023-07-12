@@ -24,6 +24,15 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'task/:id', lazy: () => import('@/page/AllPages').then((m) => m.viewTask) },
+      {
+        path: 'user',
+        children: [
+          {
+            path: ':type',
+            lazy: () => import('@/page/AllPages').then((m) => m.ownProperty),
+          },
+        ],
+      },
     ],
   },
 ])

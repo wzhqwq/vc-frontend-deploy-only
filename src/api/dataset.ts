@@ -40,8 +40,9 @@ export function useDataset(datasetId: number) {
     Dataset,
     DatasetCreatingForm
   >(['private', 'algo', 'datasets', datasetId], '更新数据集', {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['private', 'algo', 'datasets', datasetId])
+    onSuccess: (dataset) => {
+      queryClient.setQueryData(['private', 'algo', 'datasets', datasetId], dataset)
+      queryClient.invalidateQueries(['private', 'algo', 'datasets'], { exact: true })
     },
   })
   const { mutate: deleteDataset, isLoading: deletingDataset } = useDelete(
@@ -49,7 +50,7 @@ export function useDataset(datasetId: number) {
     '删除数据集',
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'datasets', datasetId])
+        queryClient.invalidateQueries(['private', 'algo', 'datasets'])
       },
     },
   )

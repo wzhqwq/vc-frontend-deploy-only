@@ -8,7 +8,7 @@ import ViewInAr from '@mui/icons-material/ViewInAr'
 import AccountTree from '@mui/icons-material/AccountTree'
 import Description from '@mui/icons-material/Description'
 
-export default function ExploreFrame() {
+export default function OwnProperty() {
   const { type } = useParams<{ type: string }>()
   const navigate = useNavigate()
 
@@ -17,7 +17,7 @@ export default function ExploreFrame() {
       <Tabs
         orientation="vertical"
         value={type}
-        onChange={(_, value) => navigate(`/explore/${value}`)}
+        onChange={(_, value) => navigate(`/user/${value}`)}
         sx={{ gap: 2 }}
       >
         <TabList variant="soft">
@@ -41,13 +41,13 @@ export default function ExploreFrame() {
           </Tab>
         </TabList>
         <TabPanel value="projects">
-          <Projects isPublic />
+          <Projects isPublic={false} />
         </TabPanel>
         <TabPanel value="datasets">
-          <Datasets isPublic />
+          <Datasets isPublic={false} />
         </TabPanel>
         <TabPanel value="models">
-          <Models isPublic />
+          <Models isPublic={false} />
         </TabPanel>
       </Tabs>
     </Box>

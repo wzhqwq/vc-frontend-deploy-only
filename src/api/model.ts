@@ -41,8 +41,9 @@ export function useModel(modelId: number) {
     ['private', 'algo', 'models', modelId],
     '更新算法',
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'models', modelId])
+      onSuccess: (model) => {
+        queryClient.setQueryData(['private', 'algo', 'models', modelId], model)
+        queryClient.invalidateQueries(['private', 'algo', 'models'], { exact: true })
       },
     },
   )
@@ -51,7 +52,7 @@ export function useModel(modelId: number) {
     '删除算法',
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'models', modelId])
+        queryClient.invalidateQueries(['private', 'algo', 'models'])
       },
     },
   )
