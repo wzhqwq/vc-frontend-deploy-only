@@ -25,6 +25,7 @@ import { checkDirty } from '@/utils/form'
 
 import FormModal from './FormModal'
 import FileUpload from './FileUpload'
+import ListModal from './ListModal'
 
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any, any>
@@ -33,7 +34,7 @@ export interface ParameterInputProps {
 }
 
 export default function ParameterInput({ prefix, parameter, simple = false }: ParameterInputProps) {
-  const { unregister, trigger, resetField } = useFormContext()
+  const { unregister, trigger, setValue } = useFormContext()
   const readonly = useContext(ReadonlyContext)
   const name = (prefix ? prefix + '.' : '') + parameter.key
 
@@ -44,12 +45,11 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
   })
   const { dirtyFields } = useFormState({ name: prefix ?? '' })
   const show = parameter.canShow ? parameter.canShow(form) : true
-  const selection = multiChoice ? form[parameter.boundSelectionKey] : undefined
+  const selection = multiChoice ? parameter.getSelectionIndex(form) : undefined
   useEffect(() => {
-    if (!multiChoice) return
+    if (!multiChoice || selection == undefined) return
     if (!checkDirty(dirtyFields, prefix ?? '')) return
-    // console.log(parameter.availableValues[selection].default)
-    resetField(name, { defaultValue: parameter.availableValues[selection].default })
+    setValue(name, parameter.availableValues[selection].default, { shouldDirty: true })
   }, [selection])
 
   useEffect(() => {
@@ -72,106 +72,121 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
     )
     const renderInput = (() => {
       const { type, selections, key } = parameter
-      if (readonly)
-        return type == 'bool'
-          ? (field: ControllerRenderProps) => (
-              <Typography level="h6" color="primary">
-                {field.value ? 'True' : 'False'}
-              </Typography>
-            )
-          : type == 'tuple2' || type == 'tuple3'
-          ? (field: ControllerRenderProps) => (
-              <Typography level="h6" color="primary">
-                {field.value.join(', ')}
-              </Typography>
-            )
-          : type == 'dict'
-          ? () => (
-              <FormModal
-                name={(prefix ? prefix + '.' : '') + key}
-                parameters={
-                  (multiChoice ? parameter.availableValues[selection] : parameter).properties
-                }
-                readonly
-              />
-            )
-          : type == 'file'
-          ? (field: ControllerRenderProps) => (
-              <FileUpload
-                value={field.value}
-                readonly={readonly}
-                onChange={field.onChange}
-                onRemove={() => field.onChange('')}
-              />
-            )
-          : selections
+      if (selections) {
+        return readonly
           ? (field: ControllerRenderProps) => (
               <Chip sx={{ my: 0.5 }}>{type == 'int' ? selections[field.value] : field.value}</Chip>
             )
           : (field: ControllerRenderProps) => (
-              <Typography level="h6" color="primary">
-                {field.value}
-              </Typography>
+              <Select
+                {...field}
+                value={type == 'int' ? field.value : selections!.indexOf(field.value)}
+                onChange={(_, value) =>
+                  field.onChange(type == 'int' ? parseInt(value) : selections![value])
+                }
+                sx={{ my: 0.5 }}
+                size="sm"
+              >
+                {selections?.map((selection, index) => (
+                  <Option value={index} key={selection}>
+                    {selection}
+                  </Option>
+                ))}
+              </Select>
             )
-      return type == 'bool'
-        ? (field: ControllerRenderProps) => (
-            <Switch {...field} onChange={field.onChange} checked={field.value} sx={{ my: 0.5 }} />
-          )
-        : type == 'tuple2'
-        ? (field: ControllerRenderProps) => (
-            <TupleInput length={2} {...field} sx={{ my: 0.5 }} size="sm" />
-          )
-        : type == 'tuple3'
-        ? (field: ControllerRenderProps) => (
-            <TupleInput length={3} {...field} sx={{ my: 0.5 }} size="sm" />
-          )
-        : type == 'dict'
-        ? () => (
+      }
+      switch (type) {
+        case 'bool':
+          return readonly
+            ? (field: ControllerRenderProps) => (
+                <Typography level="h6" color="primary">
+                  {field.value ? 'True' : 'False'}
+                </Typography>
+              )
+            : (field: ControllerRenderProps) => (
+                <Switch
+                  {...field}
+                  onChange={field.onChange}
+                  checked={field.value}
+                  sx={{ my: 0.5 }}
+                />
+              )
+        case 'tuple2':
+        case 'tuple3':
+          return readonly
+            ? (field: ControllerRenderProps) => (
+                <Typography level="h6" color="primary">
+                  {'(' + field.value.join(', ') + ')'}
+                </Typography>
+              )
+            : (field: ControllerRenderProps) => (
+                <TupleInput
+                  length={parseInt(type.at(-1) ?? '2')}
+                  {...field}
+                  sx={{ my: 0.5 }}
+                  size="sm"
+                />
+              )
+        case 'dict':
+          return () => (
             <FormModal
               name={(prefix ? prefix + '.' : '') + key}
-              parameters={
-                (multiChoice ? parameter.availableValues[selection] : parameter).properties
-              }
+              parameter={multiChoice ? parameter.availableValues[selection!] : parameter}
+              readonly={readonly}
             />
           )
-        : type == 'file'
-        ? (field: ControllerRenderProps) => (
-            <FileUpload
-              value={field.value}
-              onChange={field.onChange}
-              onRemove={() => field.onChange('')}
+        case 'list':
+          return () => (
+            <ListModal
+              name={(prefix ? prefix + '.' : '') + key}
+              parameter={parameter}
+              readonly={readonly}
             />
           )
-        : selections
-        ? (field: ControllerRenderProps) => (
-            <Select
-              {...field}
-              value={type == 'int' ? field.value : selections!.indexOf(field.value)}
-              onChange={(_, value) =>
-                field.onChange(type == 'int' ? parseInt(value) : selections![value])
-              }
-              sx={{ my: 0.5 }}
-              size="sm"
-            >
-              {selections?.map((selection, index) => (
-                <Option value={index} key={selection}>
-                  {selection}
-                </Option>
-              ))}
-            </Select>
-          )
-        : type == 'int' || type == 'float'
-        ? (field: ControllerRenderProps) => (
-            <Input
-              type="number"
-              onChange={(e) => field.onChange(Number(e.target.value))}
-              value={field.value}
-              ref={field.ref}
-              sx={{ my: 0.5 }}
-              size="sm"
-            />
-          )
-        : (field: ControllerRenderProps) => <Input {...field} sx={{ my: 0.5 }} size="sm" />
+        case 'file':
+          return readonly
+            ? (field: ControllerRenderProps) => (
+                <FileUpload
+                  value={field.value}
+                  readonly={readonly}
+                  onChange={field.onChange}
+                  onRemove={() => field.onChange('')}
+                />
+              )
+            : (field: ControllerRenderProps) => (
+                <FileUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                  onRemove={() => field.onChange('')}
+                />
+              )
+        case 'int':
+        case 'float':
+          return readonly
+            ? (field: ControllerRenderProps) => (
+                <Typography level="h6" color="primary">
+                  {field.value}
+                </Typography>
+              )
+            : (field: ControllerRenderProps) => (
+                <Input
+                  type="number"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  value={field.value}
+                  ref={field.ref}
+                  sx={{ my: 0.5 }}
+                  size="sm"
+                />
+              )
+        default:
+          return readonly
+            ? (field: ControllerRenderProps) => (
+                <Typography level="h6" color="primary">
+                  {field.value}
+                </Typography>
+              )
+            : (field: ControllerRenderProps) => <Input {...field} sx={{ my: 0.5 }} size="sm" />
+      }
     })()
     const helperText = !simple && <FormHelperText>{parameter.description}</FormHelperText>
     return ({ field, fieldState, formState }) => (

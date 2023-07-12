@@ -1,11 +1,178 @@
 import {
+  AllImagePreprocessType,
   BioPreprocessParameter,
+  ClipConfig,
+  ContrastConfig,
+  EachImagePreprocessConfig,
   EachPreprocessParameter,
+  FlipConfig,
+  GaussianBlurConfig,
+  GaussianNoiseConfig,
+  ImagePreprocessConfig,
+  ImgDataConfig,
   ImgPreprocessParameter,
+  NormalizeConfig,
   OtherPreprocessParameter,
+  RotateConfig,
+  SaltPepperNoiseConfig,
   TextPreprocessParameter,
 } from '@/types/config/details/tasks'
-import { ConfigParameterArray, DictConfigParameter } from '@/types/config/parameter'
+import {
+  ConfigParameterArray,
+  DictConfigParameter,
+  MultiChoiceDictConfigParameter,
+} from '@/types/config/parameter'
+
+export const clipArgs: DictConfigParameter<ClipConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '裁剪参数',
+  multiChoice: false,
+  properties: [
+    { key: 'x', type: 'int', description: '裁剪起始点x', default: 0 },
+    { key: 'y', type: 'int', description: '裁剪起始点y', default: 0 },
+    { key: 'width', type: 'int', description: '裁剪宽度', default: 0 },
+    { key: 'height', type: 'int', description: '裁剪高度', default: 0 },
+  ],
+  default: { x: 0, y: 0, width: 0, height: 0 },
+}
+export const meanNormalizeArgs: DictConfigParameter<NormalizeConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '归一化参数',
+  multiChoice: false,
+  properties: [
+    { key: 'mean', type: 'tuple3', description: '均值', default: [0.485, 0.456, 0.406] },
+    { key: 'std', type: 'tuple3', description: '标准差', default: [0.229, 0.224, 0.225] },
+  ],
+  default: { mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225] },
+}
+export const gaussianNoiseArgs: DictConfigParameter<GaussianNoiseConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '高斯噪声参数',
+  multiChoice: false,
+  properties: [
+    { key: 'mean', type: 'float', description: '均值', default: 0 },
+    { key: 'sigma', type: 'float', description: '标准差', default: 0 },
+  ],
+  default: { mean: 0, sigma: 0 },
+}
+export const gaussianBlurArgs: DictConfigParameter<GaussianBlurConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '高斯模糊参数',
+  multiChoice: false,
+  properties: [
+    { key: 'ksize', type: 'tuple2', description: '卷积核大小', default: [0, 0] },
+    { key: 'sigmaX', type: 'float', description: '标准差', default: 0 },
+  ],
+  default: { ksize: [0, 0], sigmaX: 0 },
+}
+export const rotateArgs: DictConfigParameter<RotateConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '旋转参数',
+  multiChoice: false,
+  properties: [
+    { key: 'x', type: 'int', description: '旋转中心x', default: 0 },
+    { key: 'y', type: 'int', description: '旋转中心y', default: 0 },
+    { key: 'angle', type: 'float', description: '旋转角度', default: 0 },
+  ],
+  default: { x: 0, y: 0, angle: 0 },
+}
+export const saltPepperNoiseArgs: DictConfigParameter<SaltPepperNoiseConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '椒盐噪声参数',
+  multiChoice: false,
+  properties: [
+    { key: 'occupy_rate', type: 'float', description: '占比', default: 0 },
+    { key: 'salt_pepper_rate', type: 'float', description: '椒盐比例', default: 0 },
+  ],
+  default: { occupy_rate: 0, salt_pepper_rate: 0 },
+}
+export const contrastArgs: DictConfigParameter<ContrastConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '对比度亮度参数',
+  multiChoice: false,
+  properties: [
+    { key: 'alpha', type: 'float', description: '对比度', default: 0 },
+    { key: 'beta', type: 'float', description: '亮度', default: 0 },
+  ],
+  default: { alpha: 0, beta: 0 },
+}
+export const flipArgs: DictConfigParameter<FlipConfig, 'args'> = {
+  key: 'args',
+  type: 'dict',
+  description: '翻转参数',
+  multiChoice: false,
+  properties: [{ key: 'flipCode', type: 'int', description: '翻转方式', default: 0 }],
+  default: { flipCode: 0 },
+}
+const imgPreprocessTypes: AllImagePreprocessType[] = [
+  'clip',
+  'normalize',
+  'Gaussian_noise',
+  'GaussianBlur',
+  'rotate',
+  'salt_pepper_noise',
+  'contrast',
+  'flip',
+]
+export const imgPreprocessConfigDict: DictConfigParameter<ImgDataConfig, 'preprocess_config'> = {
+  key: 'preprocess_config',
+  type: 'dict',
+  description: '',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'type',
+      type: 'str',
+      description: '预处理类型',
+      default: 'clip',
+      selections: imgPreprocessTypes,
+    },
+    {
+      key: 'isRandom',
+      type: 'bool',
+      description: '是否随机参数',
+      default: false,
+      canShow: (p) => p.type != 'normalize',
+    },
+    {
+      key: 'method',
+      type: 'str',
+      description: '归一化方法',
+      default: 'mean',
+      selections: ['min_max', 'mean'],
+      canShow: (p) => p.type == 'normalize',
+    },
+    {
+      key: 'args',
+      type: 'dict',
+      description: '参数',
+      multiChoice: true,
+      availableValues: [
+        clipArgs,
+        meanNormalizeArgs,
+        gaussianNoiseArgs,
+        gaussianBlurArgs,
+        rotateArgs,
+        saltPepperNoiseArgs,
+        contrastArgs,
+        flipArgs,
+      ] as DictConfigParameter<EachImagePreprocessConfig, 'args'>[],
+      canShow: (p) => (p.type == 'normalize' ? p.method == 'mean' : !p.isRandom),
+      getSelectionIndex(parameters) {
+        return imgPreprocessTypes.indexOf(parameters.type)
+      },
+      default: clipArgs.default,
+    } as MultiChoiceDictConfigParameter<EachImagePreprocessConfig, 'args'>,
+  ],
+  default: { type: 'clip', isRandom: false, args: clipArgs.default },
+}
 
 export const imgDataConfigDict: DictConfigParameter<ImgPreprocessParameter, 'data_config'> = {
   key: 'data_config',
@@ -29,8 +196,8 @@ export const imgDataConfigDict: DictConfigParameter<ImgPreprocessParameter, 'dat
       key: 'preprocess_config',
       type: 'list',
       description: '预处理配置',
+      model: imgPreprocessConfigDict,
       default: [],
-      availableValues: [],
     },
   ],
   default: {
@@ -185,7 +352,9 @@ export const preprocessConfigParameters: ConfigParameterArray<EachPreprocessPara
     description: '数据配置',
     multiChoice: true,
     availableValues: allPreprocessDataConfigParameters,
-    boundSelectionKey: 'data_type',
+    getSelectionIndex(p) {
+      return p.data_type
+    },
     default: allPreprocessDataConfigParameters[0].default,
   },
 ]

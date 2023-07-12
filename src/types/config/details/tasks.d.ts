@@ -54,29 +54,24 @@ export type AllImagePreprocessType =
   | 'salt_pepper_noise'
   | 'contrast'
   | 'flip'
-export type RandomizedImagePreprocessType = Omit<AllImagePreprocessType, 'normalize'>
-export interface RandomImagePreprocessConfig<
-  T extends RandomizedImagePreprocessType,
+export interface ImagePreprocessConfig<
+  T extends AllImagePreprocessType,
   A extends Record<string, any>,
 > {
   type: T
-  isRandom: boolean
+  isRandom: T extends 'normalize' ? undefined : boolean
+  method: T extends 'normalize' ? 'min_max' | 'mean' : undefined
   args?: A
-}
-export interface NormalizeImagePreprocessConfig {
-  type: 'normalize'
-  method: 'min_max' | 'mean'
-  args?: MeanNormalizeArgs
-}
-export interface MeanNormalizeArgs {
-  mean: [number, number, number]
-  std: [number, number, number]
 }
 export interface ClipRandomArgs {
   x: number
   y: number
   width: number
   height: number
+}
+export interface MeanNormalizeArgs {
+  mean: [number, number, number]
+  std: [number, number, number]
 }
 export interface GaussianNoiseRandomArgs {
   mean: number
@@ -103,12 +98,24 @@ export interface FlipRandomArgs {
   flipCode: number
 }
 
-export type ImagePreprocessConfig =
-  | RandomImagePreprocessConfig<'clip', ClipRandomArgs>
-  | NormalizeImagePreprocessConfig
-  | RandomImagePreprocessConfig<'Gaussian_noise', GaussianNoiseRandomArgs>
-  | RandomImagePreprocessConfig<'GaussianBlur', GaussianBlurRandomArgs>
-  | RandomImagePreprocessConfig<'rotate', RotateRandomArgs>
-  | RandomImagePreprocessConfig<'salt_pepper_noise', SaltPepperNoiseRandomArgs>
-  | RandomImagePreprocessConfig<'contrast', ContrastRandomArgs>
-  | RandomImagePreprocessConfig<'flip', FlipRandomArgs>
+export type ClipConfig = ImagePreprocessConfig<'clip', ClipRandomArgs>
+export type NormalizeConfig = ImagePreprocessConfig<'normalize', MeanNormalizeArgs>
+export type GaussianNoiseConfig = ImagePreprocessConfig<'Gaussian_noise', GaussianNoiseRandomArgs>
+export type GaussianBlurConfig = ImagePreprocessConfig<'GaussianBlur', GaussianBlurRandomArgs>
+export type RotateConfig = ImagePreprocessConfig<'rotate', RotateRandomArgs>
+export type SaltPepperNoiseConfig = ImagePreprocessConfig<
+  'salt_pepper_noise',
+  SaltPepperNoiseRandomArgs
+>
+export type ContrastConfig = ImagePreprocessConfig<'contrast', ContrastRandomArgs>
+export type FlipConfig = ImagePreprocessConfig<'flip', FlipRandomArgs>
+
+export type EachImagePreprocessConfig =
+  | ClipConfig
+  | NormalizeConfig
+  | GaussianNoiseConfig
+  | GaussianBlurConfig
+  | RotateConfig
+  | SaltPepperNoiseConfig
+  | ContrastConfig
+  | FlipConfig

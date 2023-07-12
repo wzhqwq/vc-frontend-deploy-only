@@ -42,7 +42,7 @@ export const TupleInput = memo(
           sx={{
             ...sx,
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: `repeat(${length}, 1fr)`,
             gap: 1,
           }}
         >

@@ -1,5 +1,7 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
+type ArrayElement<ArrayType extends readonly unknown[]> =
+  ArrayType extends readonly (infer ElementType)[] ? ElementType : never
 export type ConfigParameterType =
   | 'int'
   | 'float'
@@ -37,9 +39,8 @@ export interface ConfigParameter<
   type: Type
   description: string
   inShape?: boolean
-  default: Parent[Key] /*  | ((parameters: ConfigParameterRecord) => ConfigParameterValue<T>) */
-  // 如果当前类型是列表，则作为描述availableValues的名字
-  // 否则作为当前值的可选值
+  default: Parent[Key] extends Array ? ArrayElement<Parent[Key]> : Parent[Key]
+  // 当前值的可选值
   selections?: string[]
   validator?: (value: Exclude<Parent[Key], string | number>) => boolean
   canShow?: (parameters: Parent) => boolean
@@ -49,7 +50,9 @@ export interface DictConfigParameter<
   Key extends keyof Parent,
 > extends ConfigParameter<Parent, Key, 'dict'> {
   multiChoice: false
-  properties: ConfigParameterArray<Exclude<Parent[Key], string | number>>
+  properties: ConfigParameterArray<
+    Parent[Key] extends Array ? ArrayElement<Parent[Key]> : Exclude<Parent[Key], string | number>
+  >
 }
 export interface MultiChoiceDictConfigParameter<
   Parent extends Record<string | number | symbol, any>,
@@ -58,14 +61,13 @@ export interface MultiChoiceDictConfigParameter<
   multiChoice: true
   // 当前值由boundSelectionKey从availableValues中选择
   availableValues: Array<DictConfigParameter<Parent, Key>>
-  boundSelectionKey: keyof Parent
+  getSelectionIndex: (parameters: Parent) => number
 }
 export interface ListConfigParameter<
   Parent extends Record<string | number | symbol, any>,
   Key extends keyof Parent,
 > extends ConfigParameter<Parent, Key, 'list'> {
-  // 里面的值作为插入数组的可选值，
-  availableValues: ConfigParameterArray<Parent[Key]>
+  model: DictConfigParameter<Parent, Key>
 }
 export type EachTypeOfConfigParameter<
   Parent extends Record<string | number | symbol, any>,
