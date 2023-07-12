@@ -3,12 +3,10 @@ import {
   BioPreprocessParameter,
   ClipConfig,
   ContrastConfig,
-  EachImagePreprocessConfig,
   EachPreprocessParameter,
   FlipConfig,
   GaussianBlurConfig,
   GaussianNoiseConfig,
-  ImagePreprocessConfig,
   ImgDataConfig,
   ImgPreprocessParameter,
   NormalizeConfig,
@@ -17,11 +15,7 @@ import {
   SaltPepperNoiseConfig,
   TextPreprocessParameter,
 } from '@/types/config/details/tasks'
-import {
-  ConfigParameterArray,
-  DictConfigParameter,
-  MultiChoiceDictConfigParameter,
-} from '@/types/config/parameter'
+import { ConfigParameterArray, DictConfigParameter } from '@/types/config/parameter'
 
 export const clipArgs: DictConfigParameter<ClipConfig, 'args'> = {
   key: 'args',
@@ -163,13 +157,13 @@ export const imgPreprocessConfigDict: DictConfigParameter<ImgDataConfig, 'prepro
         saltPepperNoiseArgs,
         contrastArgs,
         flipArgs,
-      ] as DictConfigParameter<EachImagePreprocessConfig, 'args'>[],
+      ],
       canShow: (p) => (p.type == 'normalize' ? p.method == 'mean' : !p.isRandom),
       getSelectionIndex(parameters) {
         return imgPreprocessTypes.indexOf(parameters.type)
       },
       default: clipArgs.default,
-    } as MultiChoiceDictConfigParameter<EachImagePreprocessConfig, 'args'>,
+    },
   ],
   default: { type: 'clip', isRandom: false, args: clipArgs.default },
 }

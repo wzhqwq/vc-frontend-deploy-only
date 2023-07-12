@@ -1,7 +1,5 @@
 import { DynamicShape, VirtualValue } from './deepLearning'
 
-type ArrayElement<ArrayType extends readonly unknown[]> =
-  ArrayType extends readonly (infer ElementType)[] ? ElementType : never
 export type ConfigParameterType =
   | 'int'
   | 'float'
@@ -39,7 +37,7 @@ export interface ConfigParameter<
   type: Type
   description: string
   inShape?: boolean
-  default: Parent[Key] extends Array ? ArrayElement<Parent[Key]> : Parent[Key]
+  default: Parent[Key] extends readonly (infer ElementType)[] ? ElementType : Parent[Key]
   // 当前值的可选值
   selections?: string[]
   validator?: (value: Exclude<Parent[Key], string | number>) => boolean
@@ -51,7 +49,9 @@ export interface DictConfigParameter<
 > extends ConfigParameter<Parent, Key, 'dict'> {
   multiChoice: false
   properties: ConfigParameterArray<
-    Parent[Key] extends Array ? ArrayElement<Parent[Key]> : Exclude<Parent[Key], string | number>
+    Parent[Key] extends readonly (infer ElementType)[]
+      ? ElementType
+      : Exclude<Parent[Key], string | number>
   >
 }
 export interface MultiChoiceDictConfigParameter<
