@@ -1,9 +1,5 @@
 import { ConnectorConfig, DynamicShape, VirtualValue } from '@/types/config/deepLearning'
-import {
-  AllShapePlaceholders,
-  ConfigParameterRecord,
-  ShapeGetter,
-} from '@/types/config/parameter'
+import { AllShapePlaceholders, ConfigParameterRecord, ShapeGetter } from '@/types/config/parameter'
 import {
   Base1DKernelParameters,
   Base2DKernelParameters,

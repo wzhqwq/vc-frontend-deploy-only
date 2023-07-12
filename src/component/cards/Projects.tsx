@@ -16,7 +16,9 @@ export default function Projects({ isPublic }: { isPublic: boolean }) {
     <Box>
       <Stack direction="row" spacing={1}>
         <SearchInput placeholder="搜索项目" sx={{ flexGrow: 1 }} />
-        <Button variant="solid" onClick={() => navigate('/project/new')}>创建项目</Button>
+        <Button variant="solid" onClick={() => navigate('/project/new')}>
+          创建项目
+        </Button>
       </Stack>
       {fetchingProjects && <CircularProgress sx={{ mx: 'auto', mt: 2, display: 'block' }} />}
       <Grid container spacing={2} py={2}>

@@ -10,7 +10,11 @@ export class Scene {
   private activeLayer: Layer | null = null
   private moving = false
 
-  constructor(private layers: Layer[], private parent: HTMLElement, private onLayerClick: (layer: Layer) => void) {
+  constructor(
+    private layers: Layer[],
+    private parent: HTMLElement,
+    private onLayerClick: (layer: Layer) => void,
+  ) {
     this.layout = new Layout(layers)
     layers.forEach((layer) => {
       layer.scene = this

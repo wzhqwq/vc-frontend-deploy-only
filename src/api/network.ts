@@ -28,8 +28,7 @@ export async function wrapAxios(config: AxiosRequestConfig<any>) {
       throw new Error(msg)
     }
     return respData
-  }
-  catch (e) {
+  } catch (e) {
     if ((e as AxiosError).response?.data) {
       const { msg } = (e as AxiosError).response?.data as StandardResponse
       throw new Error(msg)

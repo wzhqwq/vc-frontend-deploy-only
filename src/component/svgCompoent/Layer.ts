@@ -62,7 +62,10 @@ export class Layer<P extends ConfigParameterRecord = any> {
   private inputShapes: DynamicShape[]
   public parameters: P
 
-  constructor(public readonly config: LayerConfig<P>, data?: LayerData<P>) {
+  constructor(
+    public readonly config: LayerConfig<P>,
+    data?: LayerData<P>,
+  ) {
     this.el = new G().addClass('layer')
     this.parameters = data?.parameters ?? config.defaultParameters
     this.id = data?.id ?? nanoid()
@@ -115,10 +118,10 @@ export class Layer<P extends ConfigParameterRecord = any> {
 
   public initializeConnectors(data: LayerData<P>) {
     let i = 0
-    this.connectors.forEach(c => {
+    this.connectors.forEach((c) => {
       c.update(this.inputShapes, this.parameters)
       if (c.type != 'input') return
-      
+
       if (data.inputs[i].peer) {
         c.connectById(data.inputs[i].peer!)
       }
@@ -230,22 +233,34 @@ export class Layer<P extends ConfigParameterRecord = any> {
     this.width = innerWidth + this.offsetX + getWidthOfVerticalConnectors(rightConnectors)
     this.height = innerHeight + this.offsetY + getHeightOfHorizontalConnectors(bottomConnectors)
 
-    topConnectors.reduce((x, c) => {
-      c.move(x, 0)
-      return x + c.pillWidth + CONNECTOR_GAP_X
-    }, (innerWidth - topWidth) / 2 + (topConnectors.at(0)?.pillWidth ?? 0) / 2)
-    bottomConnectors.reduce((x, c) => {
-      c.move(x, innerHeight)
-      return x + c.pillWidth + CONNECTOR_GAP_X
-    }, (innerWidth - bottomWidth) / 2 + (bottomConnectors.at(0)?.pillWidth ?? 0) / 2)
-    leftConnectors.reduce((y, c) => {
-      c.move(0, y)
-      return y + CONNECTOR_PILL_HEIGHT + CONNECTOR_GAP_Y
-    }, (innerHeight - leftHeight) / 2 + CONNECTOR_PILL_HEIGHT / 2)
-    rightConnectors.reduce((y, c) => {
-      c.move(innerWidth, y)
-      return y + CONNECTOR_PILL_HEIGHT + CONNECTOR_GAP_Y
-    }, (innerHeight - rightHeight) / 2 + CONNECTOR_PILL_HEIGHT / 2)
+    topConnectors.reduce(
+      (x, c) => {
+        c.move(x, 0)
+        return x + c.pillWidth + CONNECTOR_GAP_X
+      },
+      (innerWidth - topWidth) / 2 + (topConnectors.at(0)?.pillWidth ?? 0) / 2,
+    )
+    bottomConnectors.reduce(
+      (x, c) => {
+        c.move(x, innerHeight)
+        return x + c.pillWidth + CONNECTOR_GAP_X
+      },
+      (innerWidth - bottomWidth) / 2 + (bottomConnectors.at(0)?.pillWidth ?? 0) / 2,
+    )
+    leftConnectors.reduce(
+      (y, c) => {
+        c.move(0, y)
+        return y + CONNECTOR_PILL_HEIGHT + CONNECTOR_GAP_Y
+      },
+      (innerHeight - leftHeight) / 2 + CONNECTOR_PILL_HEIGHT / 2,
+    )
+    rightConnectors.reduce(
+      (y, c) => {
+        c.move(innerWidth, y)
+        return y + CONNECTOR_PILL_HEIGHT + CONNECTOR_GAP_Y
+      },
+      (innerHeight - rightHeight) / 2 + CONNECTOR_PILL_HEIGHT / 2,
+    )
 
     this.boundary.size(innerWidth, innerHeight)
     this.text.center(innerWidth / 2, innerHeight / 2)

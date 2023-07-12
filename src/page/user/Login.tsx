@@ -15,8 +15,7 @@ export default function Login() {
     try {
       await logIn(data)
       navigate('/')
-    }
-    catch (e) {
+    } catch (e) {
       setErrorMsg((e as Error).message)
     }
   }
@@ -54,7 +53,7 @@ export default function Login() {
           autoComplete="current-password"
         />
         {errorMsg && (
-          <Typography color="danger" level='body2' sx={{ mt: -2 }}>
+          <Typography color="danger" level="body2" sx={{ mt: -2 }}>
             {errorMsg}
           </Typography>
         )}

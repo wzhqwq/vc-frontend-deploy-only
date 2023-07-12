@@ -20,7 +20,7 @@ export default function Datasets({ isPublic }: { isPublic: boolean }) {
             <Card variant="outlined">
               <div>
                 <Typography level="h5">
-                  <InnerLink overlay to={`/datasets/${dataset.id}`} underline='none'>
+                  <InnerLink overlay to={`/datasets/${dataset.id}`} underline="none">
                     {dataset.title}
                   </InnerLink>
                 </Typography>

@@ -103,11 +103,11 @@ export const copyRenderer: LayerRenderer = {
     const y = box.y + box.h / 2 - size / 2
     return new Path()
       .plot(
-        `M ${x} ${y} h ${size * 2 / 3} v ${size * 2 / 3} ` +
-        `h ${-size * 2 / 3} v ${-size * 2 / 3} ` +
-        `M ${x + size * 5 / 6} ${y + size / 3} h ${size / 6} v ${size * 2 / 3} ` +
-        `h ${-size * 2 / 3} v ${-size / 6} ` +
-        `h ${size / 2} v ${-size / 3} `,
+        `M ${x} ${y} h ${(size * 2) / 3} v ${(size * 2) / 3} ` +
+          `h ${(-size * 2) / 3} v ${(-size * 2) / 3} ` +
+          `M ${x + (size * 5) / 6} ${y + size / 3} h ${size / 6} v ${(size * 2) / 3} ` +
+          `h ${(-size * 2) / 3} v ${-size / 6} ` +
+          `h ${size / 2} v ${-size / 3} `,
       )
       .fill({ color: darkPrimary, rule: 'evenodd' })
   },

@@ -15,8 +15,7 @@ export default function Register() {
     try {
       await registerUser(data)
       navigate('/login')
-    }
-    catch (e) {
+    } catch (e) {
       setErrorMsg((e as Error).message)
     }
   }
@@ -64,7 +63,7 @@ export default function Register() {
           autoComplete="new-password"
         />
         {errorMsg && (
-          <Typography color="danger" level='body2' sx={{ mt: -2 }}>
+          <Typography color="danger" level="body2" sx={{ mt: -2 }}>
             {errorMsg}
           </Typography>
         )}

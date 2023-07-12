@@ -79,14 +79,13 @@ export function useTaskConnecting(self: string, type: 'input' | 'output') {
     }
   }, [self, type])
   const addPair = useCallback((input: string, output: string) => {
-    setPairs(pairs => {
-      if (pairs.some(p => p.input === input)) return pairs
+    setPairs((pairs) => {
+      if (pairs.some((p) => p.input === input)) return pairs
       return [...pairs, { input, output }]
     })
-  }
-  , [])
+  }, [])
   const removePair = useCallback((input: string) => {
-    setPairs(pairs => pairs.filter(p => p.input !== input))
+    setPairs((pairs) => pairs.filter((p) => p.input !== input))
   }, [])
 
   return {

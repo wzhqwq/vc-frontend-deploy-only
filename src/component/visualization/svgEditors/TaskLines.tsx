@@ -1,10 +1,10 @@
-import { useTaskPairs } from "@/component/context/TaskConnectingContext";
-import { joyTheme } from "@/theme";
-import { Box } from "@mui/joy";
-import { SVG, Svg } from "@svgdotjs/svg.js";
-import { useEffect, useRef } from "react";
+import { useTaskPairs } from '@/component/context/TaskConnectingContext'
+import { joyTheme } from '@/theme'
+import { Box } from '@mui/joy'
+import { SVG, Svg } from '@svgdotjs/svg.js'
+import { useEffect, useRef } from 'react'
 
-const lineStroke = { color: joyTheme.vars.palette.primary[500], width: 2 };
+const lineStroke = { color: joyTheme.vars.palette.primary[500], width: 2 }
 
 export default function TaskLines() {
   const pairs = useTaskPairs()
@@ -37,7 +37,5 @@ export default function TaskLines() {
     })
   }, [pairs])
 
-  return (
-    <Box sx={{ position: 'absolute', width: '100%', height: '100%' }} ref={containerRef} />
-  )
+  return <Box sx={{ position: 'absolute', width: '100%', height: '100%' }} ref={containerRef} />
 }

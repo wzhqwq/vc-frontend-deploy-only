@@ -8,13 +8,11 @@ import logo from '@/logo.svg'
 export default function Welcome() {
   const navigate = useNavigate()
   return (
-    <Stack alignItems='center' justifyContent='center' height='100%'>
-      <Stack alignItems='center'>
+    <Stack alignItems="center" justifyContent="center" height="100%">
+      <Stack alignItems="center">
         <img src={logo} alt="logo" width="200" />
-        <Typography level="h4" >
-          多模态可视化平台
-        </Typography>
-        <Stack direction='row' alignItems='center' spacing={0.5} mt={4}>
+        <Typography level="h4">多模态可视化平台</Typography>
+        <Stack direction="row" alignItems="center" spacing={0.5} mt={4}>
           <StepBlock step={1} title="上传数据集" badgeContent="xxx个在线公开数据集">
             <ul>
               <li>生物数据</li>
@@ -90,7 +88,7 @@ const StepBlock = memo(({ step, title, badgeContent, children }: StepBlockProps)
         },
       }}
     >
-      <Sheet variant='soft' sx={{ p: 2 }}>
+      <Sheet variant="soft" sx={{ p: 2 }}>
         <Typography level="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Chip color="neutral">{'Step ' + step}</Chip>
           {title}

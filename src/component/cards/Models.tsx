@@ -23,7 +23,7 @@ export default function Models({ isPublic }: { isPublic: boolean }) {
                 <Stack direction="row" alignItems="center" spacing={1}>
                   {modelKinds[model.kind]}
                   <Typography level="h5">
-                    <InnerLink overlay to={`/models/${model.id}`} underline='none'>
+                    <InnerLink overlay to={`/models/${model.id}`} underline="none">
                       {model.title}
                     </InnerLink>
                   </Typography>

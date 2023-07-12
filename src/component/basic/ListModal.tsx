@@ -72,7 +72,8 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
                       })
                   }
                   disabled={!methods.formState.isValid}
-                  variant="soft" sx={{ ml: 2 }}
+                  variant="soft"
+                  sx={{ ml: 2 }}
                 >
                   <Box sx={{ flexShrink: 0 }}>保存</Box>
                 </Button>

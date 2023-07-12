@@ -68,12 +68,16 @@ export default function FileUpload({ value, readonly, onChange, onRemove }: File
         {uploadingFile ? (
           <>
             <CircularProgress />
-            <Typography level="body3" color="primary">上传中</Typography>
+            <Typography level="body3" color="primary">
+              上传中
+            </Typography>
           </>
         ) : value ? (
           <>
             <Description fontSize="large" onClick={triggerDownload} />
-            <Typography level="body2" sx={{ mb: -1 }} color="primary">{fileInfo?.extension.toUpperCase()}</Typography>
+            <Typography level="body2" sx={{ mb: -1 }} color="primary">
+              {fileInfo?.extension.toUpperCase()}
+            </Typography>
             {!readonly && (
               <IconButton
                 size="sm"
@@ -87,7 +91,7 @@ export default function FileUpload({ value, readonly, onChange, onRemove }: File
                 color="danger"
                 variant="solid"
               >
-                <Delete fontSize='small' />
+                <Delete fontSize="small" />
               </IconButton>
             )}
           </>

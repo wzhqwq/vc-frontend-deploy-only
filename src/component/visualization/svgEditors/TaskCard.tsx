@@ -49,7 +49,7 @@ export function BasicTaskCard({
   return (
     <Card variant="outlined" sx={{ p: 0 }}>
       <Stack direction="row">
-        <Stack justifyContent='space-evenly'>{inputConnectors}</Stack>
+        <Stack justifyContent="space-evenly">{inputConnectors}</Stack>
         <Stack flexGrow={1} p={2} spacing={1}>
           <Stack direction="row" alignItems="center" spacing={2}>
             {!readonly && (
@@ -65,7 +65,7 @@ export function BasicTaskCard({
           </Stack>
           {children}
         </Stack>
-        <Stack justifyContent='space-evenly'>{outputConnectors}</Stack>
+        <Stack justifyContent="space-evenly">{outputConnectors}</Stack>
       </Stack>
     </Card>
   )

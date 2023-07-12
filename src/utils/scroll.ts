@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react'
 
-const calcOffset = (el: HTMLElement | null) => el ? el.scrollHeight - el.clientHeight - 300 : 0
+const calcOffset = (el: HTMLElement | null) => (el ? el.scrollHeight - el.clientHeight - 300 : 0)
 
 export function useReachBottomTrigger() {
   const [isBottom, setIsBottom] = useState(false)

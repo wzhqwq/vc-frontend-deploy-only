@@ -21,12 +21,12 @@ export default function FormModal({
   const {
     field: { value, onChange },
   } = useController({ name })
-  const methods = useForm<{ dict: any }>({ values: { dict: value} })
+  const methods = useForm<{ dict: any }>({ values: { dict: value } })
   const columns = properties.length > 3 ? Math.max(2, properties.length / 3).toFixed(0) : 1
   const parameterList = useMemo(
     () =>
       properties.map((parameter) => (
-        <ParameterInput key={parameter.key as string} parameter={parameter} prefix='dict' />
+        <ParameterInput key={parameter.key as string} parameter={parameter} prefix="dict" />
       )),
     [properties],
   )

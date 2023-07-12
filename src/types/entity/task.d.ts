@@ -1,4 +1,4 @@
-import { ProjectGraph } from "../config/project"
+import { ProjectGraph } from '../config/project'
 
 export interface TaskGroup {
   /**

@@ -13,7 +13,10 @@ export class Label<P extends ConfigParameterRecord> {
   public static virtualValueMap: Record<string, Map<string, string>> = {}
 
   public readonly label: Text
-  constructor(container: Container, private readonly shapeParameter: ShapeParameter<P>) {
+  constructor(
+    container: Container,
+    private readonly shapeParameter: ShapeParameter<P>,
+  ) {
     this.label = container.text('').font({ size: 18 }).fill('#FFF')
   }
 

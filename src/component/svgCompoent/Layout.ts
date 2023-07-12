@@ -207,7 +207,11 @@ export class LayoutRow {
   private itemsDirty: boolean = true
   private lines: LayoutLine[] = []
 
-  constructor(private _index: number, public layout: Layout, layers: Layer[] = []) {
+  constructor(
+    private _index: number,
+    public layout: Layout,
+    layers: Layer[] = [],
+  ) {
     this.el = new G().addClass('layout-row')
     this.dropZone = this.el
       .rect()
@@ -252,10 +256,13 @@ export class LayoutRow {
       ) +
       ROW_PAD * 2
 
-    this.items.reduce((offset, i) => {
-      i.updateX(offset)
-      return offset + i.width + ITEM_GAP
-    }, -this.width / 2 + ROW_PAD)
+    this.items.reduce(
+      (offset, i) => {
+        i.updateX(offset)
+        return offset + i.width + ITEM_GAP
+      },
+      -this.width / 2 + ROW_PAD,
+    )
 
     this.dropZone.width(this.width).x(-this.width / 2)
 
@@ -359,7 +366,11 @@ export class LayoutItem {
   protected _y: number = NaN
   protected _order: number = 0
 
-  constructor(public row: LayoutRow, public width: number, public height = 0) {}
+  constructor(
+    public row: LayoutRow,
+    public width: number,
+    public height = 0,
+  ) {}
 
   public updateX(x: number) {
     this._x = x
@@ -388,7 +399,10 @@ export class LayoutLayer extends LayoutItem {
   public inputs: LayoutEndPoint[]
   public outputs: LayoutEndPoint[]
 
-  constructor(row: LayoutRow, public readonly layer: Layer) {
+  constructor(
+    row: LayoutRow,
+    public readonly layer: Layer,
+  ) {
     super(row, layer.width, layer.height)
     row.el.add(layer.el)
     layer.layout = this
@@ -516,7 +530,10 @@ export class LayoutEndPoint extends LayoutLine {
   public targetRow: number
   public farthestLine: LayoutLine | null = null
 
-  constructor(row: LayoutRow, public c: Connector) {
+  constructor(
+    row: LayoutRow,
+    public c: Connector,
+  ) {
     super(row)
     this.targetRow = c.peer?.layer.row ?? -1
     c.endPoint = this

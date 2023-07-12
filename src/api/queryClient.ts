@@ -21,7 +21,7 @@ export const queryClient = new QueryClient({
               ...(pageParam ?? {}),
             })
           : queryKey.slice(1).join('/')
-        
+
         return await request(path, 'GET', useAuth)
       },
     },

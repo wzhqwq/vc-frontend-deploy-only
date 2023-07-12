@@ -40,7 +40,7 @@ function LayerItem({ config }: LayerItemProps) {
   }
 
   return (
-    <Stack direction='row' alignItems='center' justifyContent='center'>
+    <Stack direction="row" alignItems="center" justifyContent="center">
       {src ? (
         <Box
           component="img"

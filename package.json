@@ -63,6 +63,7 @@
     "@types/qs": "^6.9.7",
     "@vitejs/plugin-react": "^4.0.1",
     "cross-env": "^7.0.3",
+    "prettier": "^3.0.0",
     "rollup-plugin-visualizer": "^5.9.2",
     "vite": "^4.3.9",
     "vite-plugin-svgr": "^3.2.0",

@@ -1,9 +1,9 @@
-import { EachPreprocessParameter } from "./details/tasks"
+import { EachPreprocessParameter } from './details/tasks'
 
 export interface ProjectGraph {
-  preProcesses: PreprocessTaskData[],
-  algorithms: TaskData<any>[],
-  analyses: TaskData<any>[],
+  preProcesses: PreprocessTaskData[]
+  algorithms: TaskData<any>[]
+  analyses: TaskData<any>[]
 }
 
 export interface TaskData<T extends Record<string, any>> {

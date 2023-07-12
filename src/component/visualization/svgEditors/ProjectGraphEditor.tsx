@@ -48,7 +48,7 @@ export default function ProjectGraphEditor({
       ({
         ...taskData,
         taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
-      } as TaskData<any>)
+      }) as TaskData<any>
     return {
       preProcesses: c.preProcesses.map(fillInTaskId),
       algorithms: c.algorithms.map(fillInTaskId),
@@ -131,7 +131,7 @@ export default function ProjectGraphEditor({
                   )}
                   taskType="preprocess"
                 />
-                  {/* <Divider orientation="vertical" />
+                {/* <Divider orientation="vertical" />
                 <TaskSlot
                   title="算法"
                   renderer={() => <div>结束</div>}

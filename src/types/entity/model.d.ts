@@ -2,33 +2,33 @@ export interface Model {
   /**
    * 模型id
    */
-  id: number;
+  id: number
   /**
    * 所有者用户id
    */
-  user_id: number;
+  user_id: number
   /**
    * 模型文件id
    */
-  file_id: number;
+  file_id: number
   /**
    * 模型类型
    */
-  kind: number;
+  kind: number
   /**
    * 模型标题
    */
-  title: string;
+  title: string
   /**
    * 模型描述
    */
-  description: string;
+  description: string
   /**
    * 是否私有
    */
-  private: boolean;
+  private: boolean
   /**
    * 创建时间
    */
-  created_at: string;
+  created_at: string
 }
