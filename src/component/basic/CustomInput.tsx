@@ -24,10 +24,16 @@ export const TupleInput = memo(
 
       const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
+        setValues((values) => values.map((v, i) => (i === Number(name.slice(1)) ? value : v)))
       }, [])
 
       useEffect(() => {
-        setValues(value.map((v) => v.toString()))
+        setValues((values) => {
+          let newValues = value.map((v) => v.toString())
+          if (newValues.length == values.length && newValues.every((v, i) => v === values[i]))
+            return values
+          return newValues
+        })
       }, [value])
       useEffect(() => {
         onChangeRef.current = onChange
@@ -55,6 +61,7 @@ export const TupleInput = memo(
               onBlur={onBlur}
               size={size}
               ref={!i ? ref : undefined}
+              key={i}
             />
           ))}
         </Box>

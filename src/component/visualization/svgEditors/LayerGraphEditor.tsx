@@ -201,15 +201,15 @@ function LayerList() {
 const LayerListMemo = memo(LayerList)
 
 function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
-  const methods = useForm<any>({
-    defaultValues: layer.parameters,
+  const methods = useForm<{ parameters: any }>({
+    defaultValues: { parameters: layer.parameters },
   })
   const {
     formState: { isValid },
     handleSubmit,
   } = methods
-  const onSubmit: SubmitHandler<any> = (data) => {
-    layer.updateParameters(data)
+  const onSubmit: SubmitHandler<{ parameters: any }> = (data) => {
+    layer.updateParameters(data.parameters)
     onClose()
   }
   const handleDelete = () => {
@@ -219,7 +219,7 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
   const parameterList = useMemo(
     () =>
       layer.config.parameters.map((parameter) => (
-        <ParameterInput key={parameter.key as string} parameter={parameter} />
+        <ParameterInput key={parameter.key as string} parameter={parameter} prefix="parameters" />
       )),
     [layer.config.parameters],
   )

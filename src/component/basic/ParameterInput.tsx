@@ -29,33 +29,35 @@ import ListModal from './ListModal'
 
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any, any>
-  prefix?: string
+  prefix: string
   simple?: boolean
 }
 
 export default function ParameterInput({ prefix, parameter, simple = false }: ParameterInputProps) {
   const { unregister, trigger, setValue } = useFormContext()
   const readonly = useContext(ReadonlyContext)
-  const name = (prefix ? prefix + '.' : '') + parameter.key
+  const name = prefix + '.' + parameter.key
 
   const multiChoice = parameter.type == 'dict' && parameter.multiChoice
   const form = useWatch({
-    name: prefix ?? '',
+    name: prefix,
     disabled: !parameter.canShow && !multiChoice,
   })
-  const { dirtyFields } = useFormState({ name: prefix ?? '' })
+  const { dirtyFields } = useFormState({ name: prefix })
   const show = parameter.canShow ? parameter.canShow(form) : true
   const selection = multiChoice ? parameter.getSelectionIndex(form) : undefined
   useEffect(() => {
+    // console.log(multiChoice, selection)
     if (!multiChoice || selection == undefined) return
-    if (!checkDirty(dirtyFields, prefix ?? '')) return
+    if (!checkDirty(dirtyFields, prefix)) return
+    // console.log('setValue', name, parameter.availableValues[selection].default)
     setValue(name, parameter.availableValues[selection].default, { shouldDirty: true })
   }, [selection])
 
   useEffect(() => {
-    console.log(parameter.key, show, form)
-    if (!show) unregister((prefix ? prefix + '.' : '') + parameter.key)
-    else trigger((prefix ? prefix + '.' : '') + parameter.key)
+    // console.log(parameter.key, show)
+    if (!show) unregister(name)
+    else trigger(name)
   }, [show])
   // console.log(parameter.key, field.value)
 
@@ -71,7 +73,7 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
       </>
     )
     const renderInput = (() => {
-      const { type, selections, key } = parameter
+      const { type, selections } = parameter
       if (selections) {
         return readonly
           ? (field: ControllerRenderProps) => (
@@ -130,19 +132,13 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
         case 'dict':
           return () => (
             <FormModal
-              name={(prefix ? prefix + '.' : '') + key}
+              name={name}
               parameter={multiChoice ? parameter.availableValues[selection!] : parameter}
               readonly={readonly}
             />
           )
         case 'list':
-          return () => (
-            <ListModal
-              name={(prefix ? prefix + '.' : '') + key}
-              parameter={parameter}
-              readonly={readonly}
-            />
-          )
+          return () => <ListModal name={name} parameter={parameter} readonly={readonly} />
         case 'file':
           return readonly
             ? (field: ControllerRenderProps) => (
@@ -196,7 +192,7 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
             color: fieldState.invalid ? theme.vars.palette.danger[400] : undefined,
           })}
         >
-          {checkDirty(formState.dirtyFields, (prefix ? prefix + '.' : '') + parameter.key) && (
+          {checkDirty(formState.dirtyFields, name) && (
             <Box
               sx={(theme) => ({
                 width: 8,
@@ -214,11 +210,11 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
         {renderInput(field)}
       </Box>
     )
-  }, [parameter, prefix, readonly, multiChoice, selection])
+  }, [parameter, name, readonly, multiChoice, selection])
 
   return show ? (
     <Controller
-      name={(prefix ? prefix + '.' : '') + parameter.key}
+      name={name}
       defaultValue={parameter.default}
       render={renderBox}
       rules={{

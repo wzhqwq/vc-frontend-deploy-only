@@ -2,7 +2,16 @@ import { DictConfigParameter, ListConfigParameter } from '@/types/config/paramet
 import { Box, Button, Card, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
 import { useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
-import { UseFieldArrayRemove, useFieldArray } from 'react-hook-form'
+import {
+  FormProvider,
+  UseFieldArrayRemove,
+  useController,
+  useFieldArray,
+  useForm,
+} from 'react-hook-form'
+
+import AddIcon from '@mui/icons-material/Add'
+import Collapse from '@mui/material/Collapse'
 
 export interface ListModalProps {
   name: string
@@ -12,7 +21,11 @@ export interface ListModalProps {
 
 export default function ListModal({ name, parameter, readonly }: ListModalProps) {
   const [open, setOpen] = useState(false)
-  const { append, fields, remove } = useFieldArray({ name })
+  const {
+    field: { value, onChange },
+  } = useController({ name })
+  const methods = useForm<{ list: any[] }>({ values: { list: value } })
+  const { append, fields, remove } = useFieldArray({ name: 'list', control: methods.control })
 
   return (
     <>
@@ -21,20 +34,49 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
       </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalDialog sx={{ p: 2, minWidth: 200 }}>
-          <Stack spacing={2}>
-            {fields.map((item, index) => (
-              <ListItemCard
-                key={item.id}
-                name={name}
-                index={index}
-                remove={remove}
-                parameter={parameter.model}
-              />
-            ))}
+          <Typography level="h5" sx={{ mb: 2 }}>
+            编辑{parameter.key}列表
+          </Typography>
+          <FormProvider {...methods}>
+            <Stack spacing={2}>
+              {fields.map((item, index) => (
+                <ListItemCard
+                  key={item.id}
+                  name="list"
+                  index={index}
+                  remove={remove}
+                  parameter={parameter.model}
+                />
+              ))}
+              {!readonly && (
+                <Button onClick={() => append(parameter.model.default)} variant="soft" fullWidth>
+                  <AddIcon />
+                  添加元素
+                </Button>
+              )}
+            </Stack>
+          </FormProvider>
+          <Stack direction="row" mt={2}>
+            <Box sx={{ flexGrow: 1 }} />
+            <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
+              关闭
+            </Button>
             {!readonly && (
-              <Button onClick={() => append(parameter.model.default)} variant="soft" fullWidth>
-                添加
-              </Button>
+              <Collapse in={methods.formState.isDirty} orientation="horizontal">
+                <Button
+                  onClick={(e) =>
+                    methods
+                      .handleSubmit((data) => onChange(data.list))(e)
+                      .then(() => {
+                        setOpen(false)
+                      })
+                  }
+                  disabled={!methods.formState.isValid}
+                  variant="soft" sx={{ ml: 2 }}
+                >
+                  <Box sx={{ flexShrink: 0 }}>保存</Box>
+                </Button>
+              </Collapse>
             )}
           </Stack>
         </ModalDialog>
