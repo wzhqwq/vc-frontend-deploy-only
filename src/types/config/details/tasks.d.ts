@@ -119,3 +119,160 @@ export type EachImagePreprocessConfig =
   | SaltPepperNoiseConfig
   | ContrastConfig
   | FlipConfig
+
+/**
+ * MultiCC
+ */
+export interface MultiCCConfig {
+  /**
+   * 每个共聚类的特征簇的数量
+   */
+  kFea: number;
+  /**
+   * 每个共聚类中的样本簇数
+   */
+  kSample: number;
+  /**
+   * 聚类的簇数
+   */
+  num_clusterings: number;
+  options: MultiCCOptions;
+}
+
+export interface MultiCCOptions {
+  /**
+   * 损失率，最好为0.0001
+   */
+  error: number;
+  /**
+   * 控制着质量和差异之间的权衡的值，最好为100
+   */
+  lambda: number;
+  /**
+   * 最大迭代次数
+   */
+  maxIter: number;
+  /**
+   * 控制着质量和差异之间的权衡的值，最好为100
+   */
+  mu: number;
+}
+
+/**
+ * DeKmeansConfig
+ */
+export interface DeKmeansConfig {
+  /**
+   * 最大迭代次数
+   */
+  epochs: number;
+  /**
+   * 用于设置第一种聚类的类别数
+   */
+  k1: number;
+  /**
+   * 用于设置第二种聚类的类别数
+   */
+  k2: number;
+  /**
+   * 用于算法对数据进行正则化操作的参数
+   */
+  lambda_val: number;
+  /**
+   * 聚类数，只能为2
+   */
+  num_clusters: number;
+}
+
+/**
+ * iMClustesConfig
+ */
+export interface IMClustesConfig {
+  /**
+   * 迭代次数
+   */
+  Epoch: number;
+  /**
+   * 学习率
+   */
+  LR: number;
+  /**
+   * 聚类的簇数
+   */
+  n_clusters: number;
+  /**
+   * 注意力机制头数
+   */
+  num_head: number;
+}
+
+/**
+ * OSCConfig
+ */
+export interface OSCConfig {
+  /**
+   * 最大迭代次数
+   */
+  epochs: number;
+  /**
+   * 用于设置聚类种数的参数
+   */
+  k: number;
+  num_clusters: number;
+}
+
+/**
+ * MNMFConfig
+ */
+export interface MNMFConfig {
+  /**
+   * 最大迭代次数
+   */
+  epochs: number;
+  /**
+   * 用于设置聚类种数的参数
+   */
+  k: number[] | number;
+  /**
+   * 聚类数，k若为数组，k的长度应与num_clusterings相等
+   */
+  num_clusters: number;
+  /**
+   * 一个字典，包含一些参数
+   */
+  options: Options;
+}
+
+/**
+* 一个字典，包含一些参数
+*/
+export interface Options {
+  /**
+   * 正则化系数
+   */
+  alpha: number;
+  /**
+   * 误差阈值，若训练误差低于此值则提前终止算法
+   */
+  error: number;
+  /**
+   * 最小迭代次数
+   */
+  minIter: number;
+  /**
+   * 每种聚类随机初始化的次数
+   */
+  nReapeat: number;
+  /**
+   * 选择计算模式2
+   */
+  stype: number;
+  /**
+   * 选择计算模式1
+   */
+  type: number;
+  /**
+   * 权重参数
+   */
+  weight: number;
+}

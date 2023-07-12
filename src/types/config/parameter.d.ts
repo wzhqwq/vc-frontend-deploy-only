@@ -125,3 +125,8 @@ export interface PreprocessParameter<T extends Record<string, any>, N extends nu
   data_type: N
   data_file_name: string
 }
+
+export interface AlgorithmParameter<T extends Record<string, any>> {
+  algo_config: T
+  algo_name: string
+}
