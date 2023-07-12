@@ -2,8 +2,8 @@ import { useTask } from '@/api/task'
 import { ProjectGraph } from '@/types/config/project'
 import { Box, Card, Chip, ChipDelete, IconButton, Stack } from '@mui/joy'
 import { taskStatus } from '@/component/basic/chips'
-import { memo, useContext, useEffect, useMemo } from 'react'
-import { TaskConnector } from './TaskConnector'
+import { memo, useContext, useMemo } from 'react'
+import { TaskInputConnector, TaskOutputConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { preprocessConfigParameters } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
@@ -20,22 +20,36 @@ export interface TaskCardProps {
 export interface BasicTaskCardProps extends TaskCardProps {
   children: React.ReactNode
   name: keyof ProjectGraph
-  showInput?: boolean
-  showOutput?: boolean
+  inputCount?: number
+  outputCount?: number
 }
 export function BasicTaskCard({
   name,
   index,
   remove,
   children,
-  showInput,
-  showOutput,
+  inputCount = 0,
+  outputCount = 0,
 }: BasicTaskCardProps) {
   const readonly = useContext(ReadonlyContext)
+  const inputConnectors = useMemo(
+    () =>
+      new Array(inputCount)
+        .fill(0)
+        .map((_, i) => <TaskInputConnector key={i} index={i} name={`${name}.${index}`} />),
+    [inputCount],
+  )
+  const outputConnectors = useMemo(
+    () =>
+      new Array(outputCount)
+        .fill(0)
+        .map((_, i) => <TaskOutputConnector key={i} index={i} name={`${name}.${index}`} />),
+    [outputCount],
+  )
   return (
     <Card variant="outlined" sx={{ p: 0 }}>
-      <Stack direction="row" alignItems="center">
-        {showInput && <TaskConnector type="input" name={`${name}.${index}.id`} />}
+      <Stack direction="row">
+        <Stack justifyContent='space-evenly'>{inputConnectors}</Stack>
         <Stack flexGrow={1} p={2} spacing={1}>
           <Stack direction="row" alignItems="center" spacing={2}>
             {!readonly && (
@@ -51,7 +65,7 @@ export function BasicTaskCard({
           </Stack>
           {children}
         </Stack>
-        {showOutput && <TaskConnector type="output" name={`${name}.${index}.id`} />}
+        <Stack justifyContent='space-evenly'>{outputConnectors}</Stack>
       </Stack>
     </Card>
   )
@@ -90,7 +104,7 @@ export function PreprocessTaskCard(props: TaskCardProps) {
   const name = `preProcesses.${index}.parameters`
 
   return (
-    <BasicTaskCard {...props} name="preProcesses" showOutput>
+    <BasicTaskCard {...props} name="preProcesses" outputCount={1} inputCount={2}>
       <ParameterInput prefix={name} parameter={preprocessConfigParameters[0]} simple />
       <Stack direction="row" spacing={4}>
         <ParameterInput prefix={name} parameter={preprocessConfigParameters[1]} simple />
