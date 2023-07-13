@@ -18,7 +18,6 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
 import { TaskConnectingContextProvider } from '@/component/context/TaskConnectingContext'
-import TaskLines from './TaskLines'
 
 interface ProjectGraphEditorProps {
   readonly?: boolean
@@ -113,40 +112,37 @@ export default function ProjectGraphEditor({
       <FormProvider {...methods}>
         <ReadonlyContext.Provider value={readonly}>
           <TaskConnectingContextProvider>
-            <Box sx={{ position: 'relative' }}>
-              <TaskLines />
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto 1fr auto 1fr',
-                  gap: 2,
-                  p: 1,
-                }}
-              >
-                <TaskSlot
-                  title="预处理"
-                  name="preProcesses"
-                  renderer={(task, index, remove) => (
-                    <PreprocessTaskCard key={task.id} index={index} remove={remove} />
-                  )}
-                  taskType="preprocess"
-                />
-                <Divider orientation="vertical" />
-                <TaskSlot
-                  title="算法"
-                  name="algorithms"
-                  renderer={(task, index, remove) => (
-                    <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
-                  )}
-                  taskType="algorithm"
-                />
-                {/* <Divider orientation="vertical" />
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto 1fr auto 1fr',
+                gap: 2,
+                p: 1,
+              }}
+            >
+              <TaskSlot
+                title="预处理"
+                name="preProcesses"
+                renderer={(task, index, remove) => (
+                  <PreprocessTaskCard key={task.id} index={index} remove={remove} />
+                )}
+                taskType="preprocess"
+              />
+              <Divider orientation="vertical" />
+              <TaskSlot
+                title="算法"
+                name="algorithms"
+                renderer={(task, index, remove) => (
+                  <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
+                )}
+                taskType="algorithm"
+              />
+              {/* <Divider orientation="vertical" />
                 <TaskSlot
                   title="分析"
                   renderer={() => <div>结束</div>}
                   initialParameters={{}}
                 /> */}
-              </Box>
             </Box>
           </TaskConnectingContextProvider>
         </ReadonlyContext.Provider>

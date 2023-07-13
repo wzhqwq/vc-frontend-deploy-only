@@ -2,7 +2,7 @@ import { useTask } from '@/api/task'
 import { ProjectGraph } from '@/types/config/project'
 import { Box, Card, Chip, ChipDelete, IconButton, Stack } from '@mui/joy'
 import { taskStatus } from '@/component/basic/chips'
-import { memo, useContext, useMemo } from 'react'
+import { memo, useContext, useEffect, useMemo, useRef } from 'react'
 import { TaskInputConnector, TaskOutputConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { algorithmConfigParameters, preprocessConfigParameters } from '@/config/projectGraph/taskData'
@@ -12,6 +12,7 @@ import { checkDirty } from '@/utils/form'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
+import { useResizeObserver } from '@/component/context/TaskConnectingContext'
 
 export interface TaskCardProps {
   index: number
@@ -31,7 +32,9 @@ export function BasicTaskCard({
   inputCount = 0,
   outputCount = 0,
 }: BasicTaskCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
   const readonly = useContext(ReadonlyContext)
+  const observer = useResizeObserver()
   const inputConnectors = useMemo(
     () =>
       new Array(inputCount)
@@ -46,8 +49,16 @@ export function BasicTaskCard({
         .map((_, i) => <TaskOutputConnector key={i} index={i} name={`${name}.${index}`} />),
     [outputCount],
   )
+  useEffect(() => {
+    if (!cardRef.current || !observer) return
+    observer.observe(cardRef.current)
+    return () => {
+      if (cardRef.current) observer.unobserve(cardRef.current)
+    }
+  }, [observer])
+
   return (
-    <Card variant="outlined" sx={{ p: 0 }}>
+    <Card variant="outlined" sx={{ p: 0 }} ref={cardRef}>
       <Stack direction="row">
         <Stack justifyContent="space-evenly">{inputConnectors}</Stack>
         <Stack flexGrow={1} p={2} spacing={1}>
