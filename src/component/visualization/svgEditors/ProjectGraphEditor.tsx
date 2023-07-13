@@ -59,7 +59,7 @@ export default function ProjectGraphEditor({
     const fillInTaskId = (taskData: TaskData<any>) =>
       ({
         ...taskData,
-        taskId: tasks?.find((t) => t.item_id == taskData.id)?.id ?? taskData.taskId,
+        taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
       }) as TaskData<any>
     const groupConfigWithTaskId = {
       preProcesses: groupConfig.preProcesses.map(fillInTaskId),
@@ -100,24 +100,18 @@ export default function ProjectGraphEditor({
     reset(config)
   }, [config])
 
-  const tasksMustCreate = useMemo(() => {
-    const isTaskMustRun = (t: TaskData<any>) => {
-      if (!t.taskId) return true
-      const task = tasks?.find((t2) => t2.id == t.taskId)
-      if (!task) return false
-      return task.status != TASK_FINISHED
-    }
-    return config
-      ? [
-          ...config.preProcesses.filter(isTaskMustRun),
-          ...config.algorithms.filter(isTaskMustRun),
-          ...config.analyses.filter(isTaskMustRun),
-        ]
-      : []
+  const allTasks = useMemo<TaskData<any>[]>(() => {
+    if (!config) return []
+    const pureTasks = [...config.preProcesses, ...config.algorithms, ...config.analyses]
+    const keepFinishedTask = (data: TaskData<any>) => ({
+      ...data,
+      taskId:
+        data.taskId && tasks?.find((task) => task.id == data.taskId)?.status == TASK_FINISHED
+          ? data.taskId
+          : undefined,
+    })
+    return pureTasks.map(keepFinishedTask)
   }, [config, tasks])
-  const allTasks = useMemo(() => {
-    return config ? [...config.preProcesses, ...config.algorithms, ...config.analyses] : []
-  }, [config])
 
   return project ? (
     <Box>
@@ -181,16 +175,8 @@ export default function ProjectGraphEditor({
                 </Button>
               </Stack>
             </Fade>
-            <Collapse in={canRun && !!config} orientation="horizontal">
-              {config && (
-                <Runner
-                  project={project}
-                  noRestart={!groupId}
-                  allTasks={allTasks}
-                  tasksMustCreate={tasksMustCreate}
-                  config={config}
-                />
-              )}
+            <Collapse in={canRun && allTasks.length > 0} orientation="horizontal">
+              <Runner project={project} noRestart={!groupId} allTasks={allTasks} />
             </Collapse>
           </Stack>
         </Collapse>
@@ -288,14 +274,10 @@ function Runner({
   project,
   noRestart,
   allTasks,
-  tasksMustCreate,
-  config,
 }: {
   project: Project
   noRestart: boolean
   allTasks: TaskData<any>[]
-  tasksMustCreate: TaskData<any>[]
-  config: ProjectGraph
 }) {
   const { createTaskGroup } = useCreateTaskGroup(project.id)
   const [newGroupId, setNewGroupId] = useState<number>()
@@ -304,35 +286,46 @@ function Runner({
 
   const navigate = useNavigate()
 
+  const finishedTaskIds = useMemo(
+    () => allTasks.map((d) => d.taskId).filter((id): id is number => id != undefined),
+    [allTasks],
+  )
   const startTaskGroup = async () => {
-    const { id } = await createTaskGroup({ config })
+    const { id } = await createTaskGroup({
+      finished_task_ids: finishedTaskIds,
+    })
     setNewGroupId(id)
-    setTasksToCreate(tasksMustCreate)
+    setTasksToCreate(allTasks.filter((d) => !d.taskId))
   }
   const restartTaskGroup = async () => {
-    const { id } = await createTaskGroup({ config })
+    const { id } = await createTaskGroup({ finished_task_ids: [] })
     setNewGroupId(id)
     setTasksToCreate(allTasks)
   }
-  console.log(tasksMustCreate)
   useEffect(() => {
-    if (!newGroupId || !tasks) return
-    const taskToCreate = tasksToCreate.find(
-      (d) => tasks.find((t) => t.item_id == d.id) == undefined,
+    if (!tasks) return
+    setTasksToCreate((tasksToCreate) =>
+      tasksToCreate.filter((d) => tasks.find((t) => t.item_id == d.id) == undefined),
     )
-    if (taskToCreate)
+  }, [tasks])
+  useEffect(() => {
+    if (!tasks) return
+    if (tasksToCreate.length) {
+      const taskToCreate = tasksToCreate[0]
+      console.log('do create')
       createTask({
         item_id: taskToCreate.id,
         task_type: taskToCreate.task_type,
         pre_task_ids: taskToCreate.inPeers
-          .map((id) => allTasks.find((t) => t.id == id)?.taskId)
+          .map((id) => tasks.find((t) => t.item_id == id)?.id)
           .filter((id): id is number => id != undefined),
         data_config: taskToCreate.parameters,
       })
-    else if (group?.status == TASK_CREATED) startGroup().then(() => navigate(`/task/${newGroupId}`))
-  }, [newGroupId, tasks])
+    } else if (group?.status == TASK_CREATED)
+      startGroup().then(() => navigate(`/task/${newGroupId}`))
+  }, [tasksToCreate])
 
-  return noRestart || tasksMustCreate.length == allTasks.length ? (
+  return noRestart ? (
     <Button
       variant="solid"
       startDecorator={<PlayArrowRoundedIcon />}
@@ -341,7 +334,7 @@ function Runner({
     >
       运行
     </Button>
-  ) : tasksMustCreate.length ? (
+  ) : finishedTaskIds.length ? (
     <>
       <Button
         variant="solid"

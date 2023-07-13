@@ -48,13 +48,13 @@ export function useProjectTaskGroups(projectId?: number) {
   } as QueryTaskGroupsResult
 }
 
-export type GroupCreatingForm = Pick<Project, 'config'>
+export type GroupCreatingForm = { finished_task_ids: number[] }
 export interface CreateTaskGroupResult {
   createTaskGroup: (form: GroupCreatingForm) => Promise<TaskGroup>
 }
 
 export function useCreateTaskGroup(projectId?: number) {
-  const { mutateAsync: createTaskGroup } = usePost<TaskGroup, { config: string }>(
+  const { mutateAsync: createTaskGroup } = usePost<TaskGroup, { finished_task_ids: string }>(
     ['private', 'algo', 'projects', projectId, 'task_groups'],
     '创建任务失败',
     {
@@ -65,7 +65,10 @@ export function useCreateTaskGroup(projectId?: number) {
   )
   return {
     createTaskGroup: useCallback(
-      ({ config }: GroupCreatingForm) => createTaskGroup({ config: JSON.stringify(config) }),
+      (form: GroupCreatingForm) =>
+        createTaskGroup({
+          finished_task_ids: form.finished_task_ids.join(','),
+        }),
       [],
     ),
   }
@@ -126,7 +129,7 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
         queryClient.setQueryData(['private', 'algo', 'tasks', task.id], task)
       })
     }
-  })
+  }, [tasks])
 
   return {
     group,

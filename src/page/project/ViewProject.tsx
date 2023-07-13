@@ -111,7 +111,7 @@ export default function ViewProject() {
               <Typography level="h5" gutterBottom>
                 历史任务
               </Typography>
-              <List>
+              <List sx={{ maxHeight: 500, overflow: 'auto' }}>
                 {taskGroups?.map((taskGroup) => (
                   <ListItem key={taskGroup.id}>
                     <InnerLinkListItemButton component="a" to={`/task/${taskGroup.id}`}>

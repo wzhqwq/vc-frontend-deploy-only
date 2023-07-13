@@ -22,7 +22,7 @@ export const taskStatus = [
   <Chip
     color="primary"
     variant="soft"
-    startDecorator={<CircularProgress size="sm" color="neutral" />}
+    startDecorator={<CircularProgress size="sm" variant="plain" />}
   >
     运行中
   </Chip>,
@@ -39,11 +39,12 @@ export const taskStatus = [
 
 export const taskStatusIcon = [
   undefined,
-  <CropDinIcon fontSize="small" />,
-  <HourglassTopRoundedIcon fontSize="small" className="hourglass-spinning" />,
-  <CircularProgress size="sm" color="neutral" />,
-  <CheckRoundedIcon fontSize="small" />,
-  <StopCircleRoundedIcon fontSize="small" />,
+  <CropDinIcon />,
+  <HourglassTopRoundedIcon className="hourglass-spinning" />,
+  <CircularProgress color="neutral" variant="plain" />,
+  <CheckRoundedIcon />,
+  <StopCircleRoundedIcon />,
+  <ReportRoundedIcon />,
 ]
 export const taskStatusText = [
   undefined,
