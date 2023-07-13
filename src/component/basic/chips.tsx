@@ -41,7 +41,7 @@ export const taskStatusIcon = [
   undefined,
   <CropDinIcon />,
   <HourglassTopRoundedIcon className="hourglass-spinning" />,
-  <CircularProgress color="neutral" variant="plain" />,
+  <CircularProgress size='sm' color="neutral" variant="plain" />,
   <CheckRoundedIcon />,
   <StopCircleRoundedIcon />,
   <ReportRoundedIcon />,

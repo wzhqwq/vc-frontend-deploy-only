@@ -12,6 +12,8 @@ import InnerLink from '@/component/basic/innerLink/InnerLink'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DangerousIcon from '@mui/icons-material/Dangerous'
 import { RefreshContext } from '@/component/context/RefreshContext'
+import { formatTime } from '@/utils/time'
+import { taskStatus } from '@/component/basic/chips'
 
 export default function ViewTask() {
   const { id: groupId } = useParams<{ id: string }>()
@@ -25,7 +27,7 @@ export default function ViewTask() {
 
   useEffect(() => {
     if ((group?.status ?? 0) >= TASK_FINISHED) {
-      setTimeout(() => setAutoUpdate(false), 1000)
+      setTimeout(() => setAutoUpdate(false), 2000)
     }
   }, [group?.status])
 
@@ -34,16 +36,27 @@ export default function ViewTask() {
       <Stack direction="row" alignItems="center" spacing={2}>
         {group ? (
           <>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack direction="row" alignItems="center" spacing={2}>
               <Typography component="div" level="h6">
                 <UserWidget userId={group.user_id} />
               </Typography>
-              <ChevronRightIcon color="secondary" />
-              <Typography component="div" level="h4">
+              <Divider orientation="vertical" />
+              <Box>
+                <Typography level='body2'>所在项目</Typography>
                 <InnerLink to={`/project/${group.project_id}`}>
                   <ProjectName projectId={group.project_id} />
                 </InnerLink>
-              </Typography>
+              </Box>
+              <Divider orientation="vertical" />
+              <Box>
+                <Typography level='body2'>创建时间</Typography>
+                <Typography level='body1'>{formatTime(group.created_at)}</Typography>
+              </Box>
+              <Divider orientation="vertical" />
+              <Box>
+                <Typography level='body2'>任务状态</Typography>
+                {taskStatus[group.status]}
+              </Box>
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
             <FormLabel>自动更新</FormLabel>

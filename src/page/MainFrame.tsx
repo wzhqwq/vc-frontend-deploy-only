@@ -216,6 +216,7 @@ const MessageControl = memo(() => {
         placement="bottom-end"
         sx={{
           minWidth: 300,
+          maxHeight: 400,
         }}
       >
         <ListItem>

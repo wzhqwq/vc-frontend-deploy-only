@@ -2,7 +2,6 @@ import { useDelete, useErrorlessQuery, usePost, usePut } from './common'
 import { Task, TaskGroup } from '@/types/entity/task'
 import { queryClient } from './queryClient'
 import { useCallback, useEffect, useMemo } from 'react'
-import { Project } from '@/types/entity/project'
 
 export interface QueryTaskGroupsResult {
   taskGroups: TaskGroup[]
@@ -81,7 +80,7 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
     {
       queryKey: ['private', 'algo', 'task_groups', groupId],
       enabled: groupId !== undefined,
-      refetchInterval: autoUpdate ? 4000 : false,
+      refetchInterval: autoUpdate ? 3700 : false,
     },
     '获取历史任务失败',
   )
@@ -158,7 +157,7 @@ export function useTask(taskId?: number, autoUpdate = false) {
     {
       queryKey: ['private', 'algo', 'tasks', taskId],
       enabled: taskId !== undefined,
-      refetchInterval: autoUpdate ? 4000 : false,
+      refetchInterval: autoUpdate ? 1100 : false,
     },
     '获取任务详情失败',
   )
