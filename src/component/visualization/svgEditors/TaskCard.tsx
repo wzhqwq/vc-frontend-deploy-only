@@ -35,18 +35,19 @@ export function BasicTaskCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const readonly = useContext(ReadonlyContext)
   const observer = useResizeObserver()
+  const self = `${name}.${index}` as `${keyof ProjectGraph}.${number}`
   const inputConnectors = useMemo(
     () =>
       new Array(inputCount)
         .fill(0)
-        .map((_, i) => <TaskInputConnector key={i} index={i} name={`${name}.${index}`} />),
-    [inputCount],
+        .map((_, i) => <TaskInputConnector key={i} index={i} name={self} />),
+    [inputCount, self],
   )
   const outputConnectors = useMemo(
     () =>
       new Array(outputCount)
         .fill(0)
-        .map((_, i) => <TaskOutputConnector key={i} index={i} name={`${name}.${index}`} />),
+        .map((_, i) => <TaskOutputConnector key={i} index={i} name={self} />),
     [outputCount],
   )
   useEffect(() => {
@@ -65,14 +66,14 @@ export function BasicTaskCard({
           <Stack direction="row" alignItems="center" spacing={2}>
             {!readonly && (
               <>
-                <ChangeIndicator name={`${name}.${index}`} />
+                <ChangeIndicator name={self} />
                 <IconButton size="sm" onClick={() => remove(index)} color="danger" variant="plain">
                   <DeleteIcon fontSize="small" />
                 </IconButton>
                 <Box sx={{ flexGrow: 1 }} />
               </>
             )}
-            <TaskIndicator name={`${name}.${index}.taskId`} />
+            <TaskIndicator name={`${self}.taskId`} />
           </Stack>
           {children}
         </Stack>

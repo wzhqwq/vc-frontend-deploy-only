@@ -674,6 +674,6 @@ export const algorithmConfigParameters: ConfigParameterArray<EachAlgorithmParame
     getSelectionIndex(p) {
       return algorithmNames.indexOf(p.algo_name)
     },
-    default: allAlgorithmConfigParameters.map((item) => item.default),
+    default: allAlgorithmConfigParameters[0].default,
   },
 ]

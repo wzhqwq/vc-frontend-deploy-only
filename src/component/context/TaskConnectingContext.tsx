@@ -92,6 +92,7 @@ export function TaskConnectingContextProvider({ children }: { children: ReactNod
   useEffect(() => {
     pairsRef.current = pairs
     updateLines()
+    console.log(pairs)
   }, [pairs])
 
   return (
