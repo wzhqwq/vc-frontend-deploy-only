@@ -46,8 +46,8 @@ export const router = createBrowserRouter([
                 path: ':id',
                 lazy: () => import('@/page/AllPages').then((m) => m.notificationDetail),
               },
-            ]
-          }
+            ],
+          },
         ],
       },
     ],

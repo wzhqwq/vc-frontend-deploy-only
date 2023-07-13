@@ -57,12 +57,7 @@ export default function EditProject() {
                 name="private"
                 defaultValue={project.private}
                 render={({ field }) => (
-                  <BigSwitch
-                    {...field}
-                    checked={field.value}
-                    onLabel='私有'
-                    offLabel='公开'
-                  />
+                  <BigSwitch {...field} checked={field.value} onLabel="私有" offLabel="公开" />
                 )}
               />
             </Stack>

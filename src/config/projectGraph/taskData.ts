@@ -662,13 +662,7 @@ const allAlgorithmConfigParameters = [
   oscConfigDict,
   mnmfConfigDict,
 ] as DictConfigParameter<EachAlgorithmParameter, 'algo_config'>[]
-const algorithmNames = [
-  'MultiCC',
-  'DeKMeans',
-  'iMClustes',
-  'OSC',
-  'MNMF',
-]
+const algorithmNames = ['MultiCC', 'DeKMeans', 'iMClustes', 'OSC', 'MNMF']
 export const algorithmConfigDict: DictConfigParameter<AlgorithmTaskData, 'parameters'> = {
   key: 'parameters',
   type: 'dict',
@@ -697,5 +691,5 @@ export const algorithmConfigDict: DictConfigParameter<AlgorithmTaskData, 'parame
   default: {
     algo_name: 'MultiCC',
     algo_config: allAlgorithmConfigParameters[0].default,
-  } as AlgorithmTaskData['parameters']
+  } as AlgorithmTaskData['parameters'],
 }

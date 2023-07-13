@@ -1,4 +1,4 @@
-import { baseUrl } from "@/api/network"
+import { baseUrl } from '@/api/network'
 
 export function download(filename: string, ext: string) {
   const a = document.createElement('a')
