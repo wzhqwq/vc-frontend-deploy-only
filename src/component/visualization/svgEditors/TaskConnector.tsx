@@ -42,7 +42,11 @@ export function TaskInputConnector({ name, index }: TaskConnectorProps) {
   const id = useWatch<ProjectGraph>({ name: `${name}.id` })
   const {
     field: { value, onChange },
-  } = useController<ProjectGraph>({ name: `${name}.inPeers.${index}`, defaultValue: '' })
+  } = useController<ProjectGraph>({
+    name: `${name}.inPeers.${index}`,
+    defaultValue: '',
+    rules: { required: true },
+  })
   const self = `${id}.${index}`
   const {
     outputToConnect,

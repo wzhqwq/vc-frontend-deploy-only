@@ -82,7 +82,10 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
   )
   const { mutateAsync: createTask } = usePost<
     Task,
-    Omit<TaskCreatingForm, 'data_config'> & { data_config: string }
+    Omit<TaskCreatingForm, 'data_config' | 'pre_task_ids'> & {
+      data_config: string
+      pre_task_ids: string
+    }
   >(['private', 'algo', 'task_groups', groupId, 'tasks'], '创建子任务失败', {
     onSuccess: () => {
       queryClient.invalidateQueries(['private', 'algo', 'task_groups', groupId, 'tasks'])
@@ -127,6 +130,7 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
         createTask({
           ...form,
           data_config: JSON.stringify(form.data_config),
+          pre_task_ids: form.pre_task_ids.join(','),
         }),
       [],
     ),
