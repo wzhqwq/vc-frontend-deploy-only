@@ -1,6 +1,12 @@
+import AddIcon from '@mui/icons-material/Add'
+import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
+import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
+import SaveIcon from '@mui/icons-material/Save'
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
-import { Box, Button, Divider, Stack, Typography } from '@mui/joy'
+import { Box, Button, Divider, FormLabel, Stack, Typography } from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useProjectTaskGroups, useTaskGroup } from '@/api/task'
 import { AlgorithmTaskCard, PreprocessTaskCard } from './TaskCard'
@@ -12,13 +18,9 @@ import Collapse from '@mui/material/Collapse'
 import Fade from '@mui/material/Fade'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { TASK_CREATED } from '@/utils/constants'
-
-import AddIcon from '@mui/icons-material/Add'
-import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
-import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
-import SaveIcon from '@mui/icons-material/Save'
 import { TaskConnectingContextProvider } from '@/component/context/TaskConnectingContext'
 import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
+import { BigSwitch } from '@/component/basic/CustomInput'
 
 interface ProjectGraphEditorProps {
   readonly?: boolean
@@ -41,75 +43,131 @@ export default function ProjectGraphEditor({
     reset,
     handleSubmit,
   } = methods
+  const [useGroupConfig, setUseGroupConfig] = useState(true)
   const config = useMemo(() => {
-    const c = group?.config ?? project?.config
-    if (!c) return
+    const projectConfig = project?.config
+    // 必须有项目配置
+    if (!projectConfig) return
+    // 如果没有参考组，直接返回项目配置，也不可能对应上taskId
+    if (!groupId) return projectConfig
+
+    const groupConfig = group?.config
+    // 如果有参考组，则必须有组配置和任务列表
+    if (!tasks || !groupConfig) return
+    // 先将所有任务对应到组配置所有任务数据的taskId上
     const fillInTaskId = (taskData: TaskData<any>) =>
       ({
         ...taskData,
         taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
       }) as TaskData<any>
-    return {
-      preProcesses: c.preProcesses.map(fillInTaskId),
-      algorithms: c.algorithms.map(fillInTaskId),
-      analyses: c.analyses.map(fillInTaskId),
+    const groupConfigWithTaskId = {
+      preProcesses: groupConfig.preProcesses.map(fillInTaskId),
+      algorithms: groupConfig.algorithms.map(fillInTaskId),
+      analyses: groupConfig.analyses.map(fillInTaskId),
     } as ProjectGraph
-  }, [group, project, tasks])
+    // 如果用户选择查看组配置，直接返回
+    if (useGroupConfig) return groupConfigWithTaskId
+
+    // 如果用户选择查看项目配置，需要确定哪些任务卡片可以继续使用现有的任务id（配置完全相同）
+    const checkAndFillInTaskId = (taskData: TaskData<any>, groupSlot: TaskData<any>[]) => {
+      const groupTaskData = groupSlot.find((t) => t.id == taskData.id)
+      // 找到id相同的组配置任务，且配置完全相同，直接使用组配置的taskId
+      if (groupTaskData) {
+        const filledTaskData = {
+          ...taskData,
+          taskId: groupTaskData.taskId,
+        }
+        if (JSON.stringify(groupTaskData) == JSON.stringify(filledTaskData)) return filledTaskData
+      }
+      // 否则，没有对应的taskId
+      return taskData
+    }
+    return {
+      preProcesses: projectConfig.preProcesses.map((taskData) =>
+        checkAndFillInTaskId(taskData, groupConfigWithTaskId.preProcesses),
+      ),
+      algorithms: projectConfig.algorithms.map((taskData) =>
+        checkAndFillInTaskId(taskData, groupConfigWithTaskId.algorithms),
+      ),
+      analyses: projectConfig.analyses.map((taskData) =>
+        checkAndFillInTaskId(taskData, groupConfigWithTaskId.analyses),
+      ),
+    }
+  }, [group, project, tasks, useGroupConfig])
 
   useEffect(() => {
     reset(config)
+    console.log(config)
   }, [config])
 
   return project ? (
     <Box>
-      <Collapse in={(!readonly && isDirty) || canRun}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={2}
-          p={1}
-          sx={(theme) => ({
-            position: 'sticky',
-            top: 0,
-            bgcolor: theme.vars.palette.background.surface,
-            borderBottom: 'solid 1px',
-            borderColor: theme.vars.palette.divider,
-            zIndex: 100,
-          })}
-        >
-          <Box sx={{ flexGrow: 1 }} />
-          <Fade in={!readonly && isDirty}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={2}
-              sx={{ '.MuiButton-root': { flexShrink: 0 } }}
-            >
-              <Button
-                variant="solid"
-                startDecorator={<SaveIcon />}
-                color="primary"
-                onClick={handleSubmit((data) => updateProject({ ...project, config: data }))}
-                disabled={!isValid || updatingProject}
-                loading={updatingProject}
+      <Box
+        sx={(theme) => ({
+          position: 'sticky',
+          top: 0,
+          bgcolor: theme.vars.palette.background.surface,
+          zIndex: 200,
+        })}
+      >
+        <Collapse in={(!readonly && isDirty) || canRun}>
+          <Stack direction="row" alignItems="center" spacing={2} p={1}>
+            {groupId && (
+              <>
+                <FormLabel>配置图来源</FormLabel>
+                <BigSwitch
+                  checked={useGroupConfig}
+                  onChange={(e) => setUseGroupConfig(e.target.checked)}
+                  onLabel="任务"
+                  offLabel="项目"
+                />
+              </>
+            )}
+            <Box sx={{ flexGrow: 1 }} />
+            <Fade in={!readonly && isDirty}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={2}
+                sx={{ '.MuiButton-root': { flexShrink: 0 } }}
               >
-                保存
-              </Button>
-              <Button
-                variant="soft"
-                startDecorator={<ReplayRoundedIcon />}
-                color="primary"
-                onClick={() => reset()}
-              >
-                重置
-              </Button>
-            </Stack>
-          </Fade>
-          <Collapse in={canRun && !!config} orientation="horizontal">
-            {config && <Runner project={project} noRestart={!groupId} config={config} />}
-          </Collapse>
-        </Stack>
-      </Collapse>
+                <Button
+                  variant="solid"
+                  startDecorator={<SaveIcon />}
+                  color="primary"
+                  onClick={handleSubmit((data) =>
+                    updateProject({
+                      ...project,
+                      config: {
+                        preProcesses: data.preProcesses.map(({ taskId: _, ...rest }) => rest),
+                        algorithms: data.algorithms.map(({ taskId: _, ...rest }) => rest),
+                        analyses: data.analyses.map(({ taskId: _, ...rest }) => rest),
+                      },
+                    }).then(() => {
+                      if (groupId) setUseGroupConfig(false)
+                    }),
+                  )}
+                  disabled={!isValid || updatingProject}
+                  loading={updatingProject}
+                >
+                  保存
+                </Button>
+                <Button
+                  variant="soft"
+                  startDecorator={<ReplayRoundedIcon />}
+                  color="primary"
+                  onClick={() => reset()}
+                >
+                  重置
+                </Button>
+              </Stack>
+            </Fade>
+            <Collapse in={canRun && !!config} orientation="horizontal">
+              {config && <Runner project={project} noRestart={!groupId} config={config} />}
+            </Collapse>
+          </Stack>
+        </Collapse>
+      </Box>
       <FormProvider {...methods}>
         <ReadonlyContext.Provider value={readonly}>
           <TaskConnectingContextProvider>
@@ -216,17 +274,15 @@ function Runner({
   const navigate = useNavigate()
 
   const newTasks = useMemo(() => {
-    if (!project) return []
     return [
       ...config.preProcesses.filter((t) => !t.taskId),
       ...config.algorithms.filter((t) => !t.taskId),
       ...config.analyses.filter((t) => !t.taskId),
     ]
-  }, [project])
+  }, [config])
   const allTasks = useMemo(() => {
-    if (!project) return []
     return [...config.preProcesses, ...config.algorithms, ...config.analyses]
-  }, [project])
+  }, [config])
 
   const startTaskGroup = async () => {
     const { id } = await createTaskGroup()
@@ -271,12 +327,13 @@ function Runner({
         startDecorator={<PlayArrowRoundedIcon />}
         color="primary"
         onClick={startTaskGroup}
+        sx={{ mr: 2 }}
       >
         继续运行
       </Button>
       <Button
         variant="soft"
-        startDecorator={<ReplayRoundedIcon />}
+        startDecorator={<RestartAltIcon />}
         color="primary"
         onClick={restartTaskGroup}
       >
@@ -286,7 +343,7 @@ function Runner({
   ) : (
     <Button
       variant="solid"
-      startDecorator={<ReplayRoundedIcon />}
+      startDecorator={<RestartAltIcon />}
       color="primary"
       onClick={restartTaskGroup}
     >

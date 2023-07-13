@@ -21,6 +21,7 @@ import SaveIcon from '@mui/icons-material/Save'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useUser } from '@/api/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import { BigSwitch } from '@/component/basic/CustomInput'
 
 export default function EditProject() {
   const { id: projectId } = useParams<{ id: string }>()
@@ -56,29 +57,11 @@ export default function EditProject() {
                 name="private"
                 defaultValue={project.private}
                 render={({ field }) => (
-                  <Switch
+                  <BigSwitch
                     {...field}
                     checked={field.value}
-                    slotProps={{
-                      track: {
-                        children: (
-                          <>
-                            <Typography component="span" level="inherit" sx={{ ml: '10px' }}>
-                              私有
-                            </Typography>
-                            <Typography component="span" level="inherit" sx={{ mr: '10px' }}>
-                              公开
-                            </Typography>
-                          </>
-                        ),
-                      },
-                    }}
-                    sx={{
-                      '--Switch-thumbSize': '30px',
-                      '--Switch-thumbWidth': '36px',
-                      '--Switch-trackWidth': '80px',
-                      '--Switch-trackHeight': '36px',
-                    }}
+                    onLabel='私有'
+                    offLabel='公开'
                   />
                 )}
               />

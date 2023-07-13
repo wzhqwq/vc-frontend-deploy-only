@@ -1,18 +1,33 @@
+import DeleteIcon from '@mui/icons-material/Delete'
+import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import ErrorIcon from '@mui/icons-material/Error'
+
 import { useTask } from '@/api/task'
 import { ProjectGraph } from '@/types/config/project'
-import { Box, Card, Chip, ChipDelete, IconButton, Stack } from '@mui/joy'
+import {
+  Box,
+  Card,
+  Chip,
+  ChipDelete,
+  Divider,
+  IconButton,
+  Menu,
+  MenuItem,
+  Modal,
+  ModalDialog,
+  Stack,
+} from '@mui/joy'
 import { taskStatus } from '@/component/basic/chips'
-import { memo, useContext, useEffect, useMemo, useRef } from 'react'
+import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { TaskInputConnector, TaskOutputConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
-
-import DeleteIcon from '@mui/icons-material/Delete'
-import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import { useResizeObserver } from '@/component/context/TaskConnectingContext'
+import { TASK_ERROR_TERMINATED, TASK_FINISHED } from '@/utils/constants'
 
 export interface TaskCardProps {
   index: number
@@ -63,17 +78,16 @@ export function BasicTaskCard({
       <Stack direction="row">
         <Stack justifyContent="space-evenly">{inputConnectors}</Stack>
         <Stack flexGrow={1} p={2} spacing={1}>
-          <Stack direction="row" alignItems="center" spacing={2}>
+          <Stack direction="row" alignItems="center">
             {!readonly && (
-              <>
+              <Stack direction="row" alignItems="center" spacing={1}>
                 <ChangeIndicator name={self} />
                 <IconButton size="sm" onClick={() => remove(index)} color="danger" variant="plain">
                   <DeleteIcon fontSize="small" />
                 </IconButton>
-                <Box sx={{ flexGrow: 1 }} />
-              </>
+              </Stack>
             )}
-            <TaskIndicator name={`${self}.taskId`} />
+            <TaskInfo name={self} />
           </Stack>
           {children}
         </Stack>
@@ -82,11 +96,58 @@ export function BasicTaskCard({
     </Card>
   )
 }
-const TaskIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}.taskId` }) => {
-  const taskId = useWatch<ProjectGraph>({ name })
+const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) => {
+  const taskId = useWatch<ProjectGraph>({ name: `${name}.taskId` })
   const { task } = useTask(taskId)
+  const { dirtyFields } = useFormState<ProjectGraph>({ name })
+  const readonly = useContext(ReadonlyContext)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [showLogs, setShowLogs] = useState(false)
 
-  return (task && taskStatus[task.status]) ?? null
+  return task && !checkDirty(dirtyFields, name) ? (
+    <>
+      {!readonly && (
+        <>
+          <Box sx={{ flexGrow: 1 }} />
+          <Divider orientation="vertical" sx={{ mx: 1 }} />
+          <Box sx={{ flexGrow: 1 }} />
+        </>
+      )}
+      <Stack direction="row" alignItems="center" spacing={1}>
+        {taskStatus[task.status]}
+        <IconButton
+          size="sm"
+          color={task.status == TASK_ERROR_TERMINATED ? 'danger' : 'neutral'}
+          variant={task.status == TASK_ERROR_TERMINATED ? 'soft' : 'plain'}
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+        >
+          {task.status == TASK_ERROR_TERMINATED ? (
+            <ErrorIcon fontSize="small" />
+          ) : (
+            <MoreHorizIcon fontSize="small" />
+          )}
+        </IconButton>
+      </Stack>
+      <Menu
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+        onClose={() => setAnchorEl(null)}
+        placement="right-start"
+        size="sm"
+      >
+        <MenuItem onClick={() => setShowLogs(true)}>查看日志</MenuItem>
+        {task.status == TASK_ERROR_TERMINATED && task.exception && <MenuItem>查看问题</MenuItem>}
+        {task.status == TASK_FINISHED && task.result_id && <MenuItem>下载输出数据</MenuItem>}
+      </Menu>
+      <Modal open={showLogs} onClose={() => setShowLogs(false)}>
+        <ModalDialog>
+          <Box component="pre" sx={{ maxHeight: '80vh', overflow: 'auto' }}>
+            <code>{task.log || '暂无日志'}</code>
+          </Box>
+        </ModalDialog>
+      </Modal>
+    </>
+  ) : null
 })
 const ChangeIndicator = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) => {
   const { resetField } = useFormContext<ProjectGraph>()

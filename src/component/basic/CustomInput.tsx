@@ -1,13 +1,13 @@
 import SearchRounded from '@mui/icons-material/SearchRounded'
 
-import { Box, Input, InputProps } from '@mui/joy'
+import { Box, Input, InputProps, Switch, SwitchProps, Typography } from '@mui/joy'
 import { forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react'
 
 export const SearchInput = (props: InputProps) => (
   <Input {...props} variant="soft" startDecorator={<SearchRounded />} />
 )
 
-interface TupleInputProps extends Omit<InputProps, 'onChange' | 'value'> {
+export interface TupleInputProps extends Omit<InputProps, 'onChange' | 'value'> {
   readonly value: number[]
   readonly length: number
   onChange: (value: number[]) => void
@@ -65,6 +65,43 @@ export const TupleInput = memo(
             />
           ))}
         </Box>
+      )
+    },
+  ),
+)
+
+export interface BigSwitchProps extends SwitchProps {
+  onLabel: string
+  offLabel: string
+}
+export const BigSwitch = memo(
+  forwardRef<HTMLDivElement, BigSwitchProps>(
+    ({ onLabel, offLabel, ...rest }: BigSwitchProps, ref) => {
+      return (
+        <Switch
+          {...rest}
+          slotProps={{
+            track: {
+              children: (
+                <>
+                  <Typography component="span" level="inherit" sx={{ ml: '10px' }}>
+                    {onLabel}
+                  </Typography>
+                  <Typography component="span" level="inherit" sx={{ mr: '10px' }}>
+                    {offLabel}
+                  </Typography>
+                </>
+              ),
+            },
+          }}
+          sx={{
+            '--Switch-thumbSize': '30px',
+            '--Switch-thumbWidth': '36px',
+            '--Switch-trackWidth': '80px',
+            '--Switch-trackHeight': '36px',
+          }}
+          ref={ref}
+        />
       )
     },
   ),
