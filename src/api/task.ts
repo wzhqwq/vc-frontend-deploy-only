@@ -2,6 +2,7 @@ import { useDelete, useErrorlessQuery, usePost, usePut } from './common'
 import { Task, TaskGroup } from '@/types/entity/task'
 import { queryClient } from './queryClient'
 import { useCallback, useEffect, useMemo } from 'react'
+import { Project } from '@/types/entity/project'
 
 export interface QueryTaskGroupsResult {
   taskGroups: TaskGroup[]
@@ -27,9 +28,11 @@ export function usePublicTaskGroups(): QueryTaskGroupsResult {
   } as QueryTaskGroupsResult
 }
 
+export type GroupCreatingForm = Pick<Project, 'config'>
 export interface CreateTaskGroupResult {
-  createTaskGroup: () => Promise<TaskGroup>
+  createTaskGroup: (form: GroupCreatingForm) => Promise<TaskGroup>
 }
+
 export function useProjectTaskGroups(projectId?: number) {
   const {
     data: taskGroups,
@@ -42,7 +45,7 @@ export function useProjectTaskGroups(projectId?: number) {
     },
     '获取历史任务失败',
   )
-  const { mutateAsync: createTaskGroup } = usePost<TaskGroup, undefined>(
+  const { mutateAsync: createTaskGroup } = usePost<TaskGroup, { config: string }>(
     ['private', 'algo', 'projects', projectId, 'task_groups'],
     '创建任务失败',
     {
@@ -57,7 +60,10 @@ export function useProjectTaskGroups(projectId?: number) {
     fetchingTaskGroups,
     refetchTaskGroup,
 
-    createTaskGroup: useCallback(() => createTaskGroup(undefined), []),
+    createTaskGroup: useCallback(
+      ({ config }: GroupCreatingForm) => createTaskGroup({ config: JSON.stringify(config) }),
+      [],
+    ),
   } as QueryTaskGroupsResult & CreateTaskGroupResult
 }
 
@@ -68,7 +74,7 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
     {
       queryKey: ['private', 'algo', 'task_groups', groupId],
       enabled: groupId !== undefined,
-      refetchInterval: autoUpdate ? 1000 : false,
+      refetchInterval: autoUpdate ? 4000 : false,
     },
     '获取历史任务失败',
   )
@@ -76,7 +82,7 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
     {
       queryKey: ['private', 'algo', 'task_groups', groupId, 'tasks'],
       enabled: groupId !== undefined,
-      refetchInterval: autoUpdate ? 1000 : false,
+      refetchInterval: autoUpdate ? 4000 : false,
     },
     '获取历史任务子任务失败',
   )

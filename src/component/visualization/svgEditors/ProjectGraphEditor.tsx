@@ -2,7 +2,7 @@ import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import Collapse from '@mui/material/Collapse'
 import Fade from '@mui/material/Fade'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
-import { TASK_CREATED } from '@/utils/constants'
+import { TASK_CREATED, TASK_FINISHED } from '@/utils/constants'
 import { TaskConnectingContextProvider } from '@/component/context/TaskConnectingContext'
 import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
 import { BigSwitch } from '@/component/basic/CustomInput'
@@ -58,7 +58,7 @@ export default function ProjectGraphEditor({
     const fillInTaskId = (taskData: TaskData<any>) =>
       ({
         ...taskData,
-        taskId: tasks?.find((t) => t.item_id == taskData.id)?.id,
+        taskId: tasks?.find((t) => t.item_id == taskData.id)?.id ?? taskData.taskId,
       }) as TaskData<any>
     const groupConfigWithTaskId = {
       preProcesses: groupConfig.preProcesses.map(fillInTaskId),
@@ -97,7 +97,21 @@ export default function ProjectGraphEditor({
 
   useEffect(() => {
     reset(config)
-    console.log(config)
+  }, [config])
+
+  const tasksMustCreate = useMemo(() => {
+    const isTaskMustRun = (t: TaskData<any>) =>
+      !t.taskId || tasks?.find((t2) => t2.id == t.taskId)?.status != TASK_FINISHED
+    return config
+      ? [
+          ...config.preProcesses.filter(isTaskMustRun),
+          ...config.algorithms.filter(isTaskMustRun),
+          ...config.analyses.filter(isTaskMustRun),
+        ]
+      : []
+  }, [config])
+  const allTasks = useMemo(() => {
+    return config ? [...config.preProcesses, ...config.algorithms, ...config.analyses] : []
   }, [config])
 
   return project ? (
@@ -150,7 +164,7 @@ export default function ProjectGraphEditor({
                   disabled={!isValid || updatingProject}
                   loading={updatingProject}
                 >
-                  保存
+                  {groupId ? '保存至项目' : '保存'}
                 </Button>
                 <Button
                   variant="soft"
@@ -163,7 +177,15 @@ export default function ProjectGraphEditor({
               </Stack>
             </Fade>
             <Collapse in={canRun && !!config} orientation="horizontal">
-              {config && <Runner project={project} noRestart={!groupId} config={config} />}
+              {config && (
+                <Runner
+                  project={project}
+                  noRestart={!groupId}
+                  allTasks={allTasks}
+                  tasksMustCreate={tasksMustCreate}
+                  config={config}
+                />
+              )}
             </Collapse>
           </Stack>
         </Collapse>
@@ -196,7 +218,7 @@ export default function ProjectGraphEditor({
                 renderer={(task, index, remove) => (
                   <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
                 )}
-                taskType="algorithm"
+                taskType="algo"
                 initialParameters={algorithmConfigDict.default}
                 inCount={1}
               />
@@ -260,10 +282,14 @@ function TaskSlot<T extends Record<string, any>>({
 function Runner({
   project,
   noRestart,
+  allTasks,
+  tasksMustCreate,
   config,
 }: {
   project: Project
   noRestart: boolean
+  allTasks: TaskData<any>[]
+  tasksMustCreate: TaskData<any>[]
   config: ProjectGraph
 }) {
   const { createTaskGroup } = useProjectTaskGroups(project.id)
@@ -273,24 +299,13 @@ function Runner({
 
   const navigate = useNavigate()
 
-  const newTasks = useMemo(() => {
-    return [
-      ...config.preProcesses.filter((t) => !t.taskId),
-      ...config.algorithms.filter((t) => !t.taskId),
-      ...config.analyses.filter((t) => !t.taskId),
-    ]
-  }, [config])
-  const allTasks = useMemo(() => {
-    return [...config.preProcesses, ...config.algorithms, ...config.analyses]
-  }, [config])
-
   const startTaskGroup = async () => {
-    const { id } = await createTaskGroup()
+    const { id } = await createTaskGroup({ config })
     setNewGroupId(id)
-    setTasksToCreate(newTasks)
+    setTasksToCreate(tasksMustCreate)
   }
   const restartTaskGroup = async () => {
-    const { id } = await createTaskGroup()
+    const { id } = await createTaskGroup({ config })
     setNewGroupId(id)
     setTasksToCreate(allTasks)
   }
@@ -320,7 +335,7 @@ function Runner({
     >
       运行
     </Button>
-  ) : newTasks.length ? (
+  ) : tasksMustCreate.length ? (
     <>
       <Button
         variant="solid"
