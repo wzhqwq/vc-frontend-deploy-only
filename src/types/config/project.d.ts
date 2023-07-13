@@ -16,3 +16,8 @@ export interface TaskData<T extends Record<string, any>> {
 
 export type PreprocessTaskData = TaskData<EachPreprocessParameter>
 export type AlgorithmTaskData = TaskData<EachAlgorithmParameter>
+
+export interface BasicResult {
+  extension: string
+  filename: string
+}

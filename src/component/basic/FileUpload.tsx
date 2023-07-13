@@ -8,6 +8,7 @@ import Description from '@mui/icons-material/Description'
 import Delete from '@mui/icons-material/Delete'
 import AddRounded from '@mui/icons-material/AddRounded'
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark'
+import { download } from '@/utils/action'
 
 export interface FileUploadProps {
   value: string
@@ -30,12 +31,8 @@ export default function FileUpload({ value, readonly, onChange, onRemove }: File
   }
 
   const triggerDownload = () => {
-    if (!value) return
-    const a = document.createElement('a')
-    a.href = baseUrl + `file/files/${value}`
-    a.target = '_blank'
-    a.download = value
-    a.click()
+    if (!value || !fileInfo) return
+    download(value, fileInfo.extension)
   }
 
   return (
@@ -63,6 +60,7 @@ export default function FileUpload({ value, readonly, onChange, onRemove }: File
       }}
       variant="soft"
       color="primary"
+      onClick={triggerDownload}
     >
       <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
         {uploadingFile ? (
@@ -74,7 +72,7 @@ export default function FileUpload({ value, readonly, onChange, onRemove }: File
           </>
         ) : value ? (
           <>
-            <Description fontSize="large" onClick={triggerDownload} />
+            <Description fontSize="large" />
             <Typography level="body2" sx={{ mb: -1 }} color="primary">
               {fileInfo?.extension.toUpperCase()}
             </Typography>

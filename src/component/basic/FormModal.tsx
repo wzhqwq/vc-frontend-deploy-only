@@ -30,7 +30,6 @@ export default function FormModal({
       )),
     [properties],
   )
-  console.log('render', properties)
 
   return (
     <>

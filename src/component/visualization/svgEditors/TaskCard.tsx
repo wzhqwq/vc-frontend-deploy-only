@@ -28,6 +28,8 @@ import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
 import { useResizeObserver } from '@/component/context/TaskConnectingContext'
 import { TASK_ERROR_TERMINATED, TASK_FINISHED } from '@/utils/constants'
+import { useRefreshEnabled } from '@/component/context/RefreshContext'
+import { download } from '@/utils/action'
 
 export interface TaskCardProps {
   index: number
@@ -97,12 +99,20 @@ export function BasicTaskCard({
   )
 }
 const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) => {
+  const refreshEnabled = useRefreshEnabled()
+  const [autoUpdate, setAutoUpdate] = useState(refreshEnabled)
   const taskId = useWatch<ProjectGraph>({ name: `${name}.taskId` })
-  const { task } = useTask(taskId)
+  const { task } = useTask(taskId, autoUpdate)
   const { dirtyFields } = useFormState<ProjectGraph>({ name })
   const readonly = useContext(ReadonlyContext)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [showLogs, setShowLogs] = useState(false)
+
+  useEffect(() => {
+    if ((task?.status ?? 0) >= TASK_FINISHED) {
+      setAutoUpdate(false)
+    }
+  }, [task?.status])
 
   return task && !checkDirty(dirtyFields, name) ? (
     <>
@@ -137,7 +147,11 @@ const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) =>
       >
         <MenuItem onClick={() => setShowLogs(true)}>查看日志</MenuItem>
         {task.status == TASK_ERROR_TERMINATED && task.exception && <MenuItem>查看问题</MenuItem>}
-        {task.status == TASK_FINISHED && task.result_id && <MenuItem>下载输出数据</MenuItem>}
+        {task.status == TASK_FINISHED && task.task_type == 'preprocess' && task.result && (
+          <MenuItem onClick={() => download(task.result!.filename, task.result!.extension)}>
+            下载输出数据
+          </MenuItem>
+        )}
       </Menu>
       <Modal open={showLogs} onClose={() => setShowLogs(false)}>
         <ModalDialog>

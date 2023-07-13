@@ -6,21 +6,28 @@ import { ProjectName, UserWidget } from '@/component/basic/getters'
 import { useTaskGroup } from '@/api/task'
 import { useUser } from '@/api/user'
 import { TASK_FINISHED } from '@/utils/constants'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import InnerLink from '@/component/basic/innerLink/InnerLink'
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DangerousIcon from '@mui/icons-material/Dangerous'
+import { RefreshContext } from '@/component/context/RefreshContext'
 
 export default function ViewTask() {
   const { id: groupId } = useParams<{ id: string }>()
-  const [autoUpdate, setAutoUpdate] = useState(false)
-  const { group, fetchingGroup, tasks, terminateGroup, terminatingGroup } = useTaskGroup(
+  const [autoUpdate, setAutoUpdate] = useState(true)
+  const { group, fetchingGroup, terminateGroup, terminatingGroup } = useTaskGroup(
     Number(groupId),
     autoUpdate,
   )
   const { user } = useUser()
   const isOwner = !!user && user.id === group?.user_id
+
+  useEffect(() => {
+    if ((group?.status ?? 0) >= TASK_FINISHED) {
+      setTimeout(() => setAutoUpdate(false), 1000)
+    }
+  }, [group?.status])
 
   return (
     <Box mt={4}>
@@ -60,12 +67,14 @@ export default function ViewTask() {
       </Stack>
       <Divider sx={{ mt: 2 }} />
       {group ? (
-        <ProjectGraphEditor
-          projectId={group.project_id}
-          groupId={Number(groupId)}
-          readonly={!isOwner || group.status < TASK_FINISHED}
-          canRun={isOwner && group.status >= TASK_FINISHED}
-        />
+        <RefreshContext.Provider value={autoUpdate}>
+          <ProjectGraphEditor
+            projectId={group.project_id}
+            groupId={Number(groupId)}
+            readonly={!isOwner || group.status < TASK_FINISHED}
+            canRun={isOwner && group.status >= TASK_FINISHED}
+          />
+        </RefreshContext.Provider>
       ) : (
         fetchingGroup && <Skeleton variant="rounded" width="100%" height={300} />
       )}

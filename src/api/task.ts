@@ -89,7 +89,6 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
     {
       queryKey: ['private', 'algo', 'task_groups', groupId, 'tasks'],
       enabled: groupId !== undefined,
-      refetchInterval: autoUpdate ? 4000 : false,
     },
     '获取历史任务子任务失败',
   )
@@ -154,11 +153,12 @@ export function useTaskGroup(groupId?: number, autoUpdate = false) {
   }
 }
 
-export function useTask(taskId?: number) {
+export function useTask(taskId?: number, autoUpdate = false) {
   const { data: task, isFetching: fetchingTask } = useErrorlessQuery<Task>(
     {
       queryKey: ['private', 'algo', 'tasks', taskId],
       enabled: taskId !== undefined,
+      refetchInterval: autoUpdate ? 4000 : false,
     },
     '获取任务详情失败',
   )

@@ -1,4 +1,4 @@
-import { ProjectGraph } from '../config/project'
+import { BasicResult, ProjectGraph } from '../config/project'
 
 export interface TaskGroup {
   /**
@@ -59,7 +59,7 @@ export interface Task {
   /**
    * 结果描述项id
    */
-  result_id: number
+  result: BasicResult | null
   /**
    * 任务运行状态
    */
