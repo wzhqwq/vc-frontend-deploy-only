@@ -2,7 +2,7 @@ import { DictConfigParameter } from '@/types/config/parameter'
 import { Box, Button, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
 import { useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
-import { FormProvider, useController, useForm } from 'react-hook-form'
+import { FormProvider, useController, useForm, useFormContext, useFormState } from 'react-hook-form'
 import { Collapse } from '@mui/material'
 
 export interface FormModalProps {
@@ -30,6 +30,7 @@ export default function FormModal({
       )),
     [properties],
   )
+  console.log('render', properties)
 
   return (
     <>
@@ -41,41 +42,53 @@ export default function FormModal({
           <Typography level="h5" sx={{ mb: 2 }}>
             编辑{key}字典
           </Typography>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${columns}, 240px)`,
-              gap: 2,
-            }}
-          >
-            <FormProvider {...methods}>{parameterList}</FormProvider>
-          </Box>
-          <Stack direction="row" mt={2}>
-            <Box sx={{ flexGrow: 1 }} />
-            <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
-              关闭
-            </Button>
-            {!readonly && (
-              <Collapse in={methods.formState.isDirty} orientation="horizontal">
-                <Button
-                  onClick={(e) =>
-                    methods
-                      .handleSubmit((data) => onChange(data.dict))(e)
-                      .then(() => {
-                        setOpen(false)
-                      })
-                  }
-                  disabled={!methods.formState.isValid}
-                  variant="soft"
-                  sx={{ ml: 2 }}
-                >
-                  <Box sx={{ flexShrink: 0 }}>保存</Box>
-                </Button>
-              </Collapse>
-            )}
-          </Stack>
+          <FormProvider {...methods}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${columns}, 240px)`,
+                gap: 2,
+              }}
+            >
+              {parameterList}
+            </Box>
+            <Stack direction="row" mt={2}>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
+                关闭
+              </Button>
+              {!readonly && <SaveIndicator onChange={onChange} onClose={() => setOpen(false)} />}
+            </Stack>
+          </FormProvider>
         </ModalDialog>
       </Modal>
     </>
+  )
+}
+
+function SaveIndicator({
+  onChange,
+  onClose,
+}: {
+  onChange: (value: any) => void
+  onClose: () => void
+}) {
+  const { isDirty, isValid } = useFormState()
+  const { handleSubmit } = useFormContext()
+  return (
+    <Collapse in={isDirty} orientation="horizontal">
+      <Button
+        onClick={(e) =>
+          handleSubmit((data) => onChange(data.dict))(e).then(() => {
+            onClose()
+          })
+        }
+        disabled={!isValid}
+        variant="soft"
+        sx={{ ml: 2 }}
+      >
+        <Box sx={{ flexShrink: 0 }}>保存</Box>
+      </Button>
+    </Collapse>
   )
 }

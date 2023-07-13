@@ -8,6 +8,8 @@ import {
   useController,
   useFieldArray,
   useForm,
+  useFormContext,
+  useFormState,
 } from 'react-hook-form'
 
 import AddIcon from '@mui/icons-material/Add'
@@ -61,24 +63,7 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
             <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
               关闭
             </Button>
-            {!readonly && (
-              <Collapse in={methods.formState.isDirty} orientation="horizontal">
-                <Button
-                  onClick={(e) =>
-                    methods
-                      .handleSubmit((data) => onChange(data.list))(e)
-                      .then(() => {
-                        setOpen(false)
-                      })
-                  }
-                  disabled={!methods.formState.isValid}
-                  variant="soft"
-                  sx={{ ml: 2 }}
-                >
-                  <Box sx={{ flexShrink: 0 }}>保存</Box>
-                </Button>
-              </Collapse>
-            )}
+            {!readonly && <SaveIndicator onChange={onChange} onClose={() => setOpen(false)} />}
           </Stack>
         </ModalDialog>
       </Modal>
@@ -141,5 +126,32 @@ function ListItemCard({
         {parameterList}
       </Box>
     </Card>
+  )
+}
+
+function SaveIndicator({
+  onChange,
+  onClose,
+}: {
+  onChange: (value: any) => void
+  onClose: () => void
+}) {
+  const { isDirty, isValid } = useFormState()
+  const { handleSubmit } = useFormContext()
+  return (
+    <Collapse in={isDirty} orientation="horizontal">
+      <Button
+        onClick={(e) =>
+          handleSubmit((data) => onChange(data.list))(e).then(() => {
+            onClose()
+          })
+        }
+        disabled={!isValid}
+        variant="soft"
+        sx={{ ml: 2 }}
+      >
+        <Box sx={{ flexShrink: 0 }}>保存</Box>
+      </Button>
+    </Collapse>
   )
 }
