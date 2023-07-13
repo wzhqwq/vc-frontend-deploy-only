@@ -24,6 +24,7 @@ import {
   TextPreprocessParameter,
 } from '@/types/config/details/tasks'
 import { ConfigParameterArray, DictConfigParameter } from '@/types/config/parameter'
+import { AlgorithmTaskData, PreprocessTaskData } from '@/types/config/project'
 
 export const clipArgs: DictConfigParameter<ClipConfig, 'args'> = {
   key: 'args',
@@ -334,32 +335,43 @@ const allPreprocessDataConfigParameters = [
   bioDataConfigDict,
   otherDataConfigDict,
 ] as DictConfigParameter<EachPreprocessParameter, 'data_config'>[]
-export const preprocessConfigParameters: ConfigParameterArray<EachPreprocessParameter> = [
-  {
-    key: 'data_type',
-    type: 'int',
-    description: '数据类型',
-    default: 0,
-    selections: ['图片', '文本', '生物序列', '其他'],
-  },
-  {
-    key: 'data_file_name',
-    type: 'file',
-    description: '数据文件',
-    default: '',
-  },
-  {
-    key: 'data_config',
-    type: 'dict',
-    description: '数据配置',
-    multiChoice: true,
-    availableValues: allPreprocessDataConfigParameters,
-    getSelectionIndex(p) {
-      return p.data_type
+export const preprocessConfigDict: DictConfigParameter<PreprocessTaskData, 'parameters'> = {
+  key: 'parameters',
+  type: 'dict',
+  description: '预处理配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'data_type',
+      type: 'int',
+      description: '数据类型',
+      default: 0,
+      selections: ['图片', '文本', '生物序列', '其他'],
     },
-    default: allPreprocessDataConfigParameters[0].default,
-  },
-]
+    {
+      key: 'data_file_name',
+      type: 'file',
+      description: '数据文件',
+      default: '',
+    },
+    {
+      key: 'data_config',
+      type: 'dict',
+      description: '数据配置',
+      multiChoice: true,
+      availableValues: allPreprocessDataConfigParameters,
+      getSelectionIndex(p) {
+        return p.data_type
+      },
+      default: allPreprocessDataConfigParameters[0].default,
+    },
+  ],
+  default: {
+    data_type: 0,
+    data_file_name: '',
+    data_config: allPreprocessDataConfigParameters[0].default,
+  } as PreprocessTaskData['parameters'],
+}
 
 const multiCCOptionDict: DictConfigParameter<MultiCCConfig, 'options'> = {
   key: 'options',
@@ -657,23 +669,33 @@ const algorithmNames = [
   'OSC',
   'MNMF',
 ]
-export const algorithmConfigParameters: ConfigParameterArray<EachAlgorithmParameter> = [
-  {
-    key: 'algo_name',
-    type: 'str',
-    description: '算法名称',
-    default: 'MultiCC',
-    selections: algorithmNames,
-  },
-  {
-    key: 'algo_config',
-    type: 'dict',
-    description: '算法配置',
-    multiChoice: true,
-    availableValues: allAlgorithmConfigParameters,
-    getSelectionIndex(p) {
-      return algorithmNames.indexOf(p.algo_name)
+export const algorithmConfigDict: DictConfigParameter<AlgorithmTaskData, 'parameters'> = {
+  key: 'parameters',
+  type: 'dict',
+  description: '算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'algo_name',
+      type: 'str',
+      description: '算法名称',
+      default: 'MultiCC',
+      selections: algorithmNames,
     },
-    default: allAlgorithmConfigParameters[0].default,
-  },
-]
+    {
+      key: 'algo_config',
+      type: 'dict',
+      description: '算法配置',
+      multiChoice: true,
+      availableValues: allAlgorithmConfigParameters,
+      getSelectionIndex(p) {
+        return algorithmNames.indexOf(p.algo_name)
+      },
+      default: allAlgorithmConfigParameters[0].default,
+    },
+  ],
+  default: {
+    algo_name: 'MultiCC',
+    algo_config: allAlgorithmConfigParameters[0].default,
+  } as AlgorithmTaskData['parameters']
+}

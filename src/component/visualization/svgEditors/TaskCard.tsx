@@ -5,7 +5,7 @@ import { taskStatus } from '@/component/basic/chips'
 import { memo, useContext, useEffect, useMemo, useRef } from 'react'
 import { TaskInputConnector, TaskOutputConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
-import { algorithmConfigParameters, preprocessConfigParameters } from '@/config/projectGraph/taskData'
+import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
@@ -117,10 +117,10 @@ export function PreprocessTaskCard(props: TaskCardProps) {
 
   return (
     <BasicTaskCard {...props} name="preProcesses" outputCount={1}>
-      <ParameterInput prefix={name} parameter={preprocessConfigParameters[0]} simple />
+      <ParameterInput prefix={name} parameter={preprocessConfigDict.properties[0]} simple />
       <Stack direction="row" spacing={4}>
-        <ParameterInput prefix={name} parameter={preprocessConfigParameters[1]} simple />
-        <ParameterInput prefix={name} parameter={preprocessConfigParameters[2]} simple />
+        <ParameterInput prefix={name} parameter={preprocessConfigDict.properties[1]} simple />
+        <ParameterInput prefix={name} parameter={preprocessConfigDict.properties[2]} simple />
       </Stack>
     </BasicTaskCard>
   )
@@ -132,8 +132,8 @@ export function AlgorithmTaskCard(props: TaskCardProps) {
 
   return (
     <BasicTaskCard {...props} name="algorithms" inputCount={1} outputCount={1}>
-      <ParameterInput prefix={name} parameter={algorithmConfigParameters[0]} simple />
-      <ParameterInput prefix={name} parameter={algorithmConfigParameters[1]} simple />
+      <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[0]} simple />
+      <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[1]} simple />
     </BasicTaskCard>
   )
 }

@@ -18,6 +18,7 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
 import { TaskConnectingContextProvider } from '@/component/context/TaskConnectingContext'
+import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
 
 interface ProjectGraphEditorProps {
   readonly?: boolean
@@ -127,6 +128,8 @@ export default function ProjectGraphEditor({
                   <PreprocessTaskCard key={task.id} index={index} remove={remove} />
                 )}
                 taskType="preprocess"
+                initialParameters={preprocessConfigDict.default}
+                inCount={0}
               />
               <Divider orientation="vertical" />
               <TaskSlot
@@ -136,6 +139,8 @@ export default function ProjectGraphEditor({
                   <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
                 )}
                 taskType="algorithm"
+                initialParameters={algorithmConfigDict.default}
+                inCount={1}
               />
               {/* <Divider orientation="vertical" />
                 <TaskSlot
@@ -156,12 +161,16 @@ interface TaskSlotProps<T extends Record<string, any>> {
   name: keyof ProjectGraph
   renderer: (task: TaskData<T>, index: number, remove: UseFieldArrayRemove) => JSX.Element
   taskType: string
+  initialParameters: T
+  inCount: number
 }
 function TaskSlot<T extends Record<string, any>>({
   title,
   name,
   renderer,
   taskType,
+  initialParameters,
+  inCount,
 }: TaskSlotProps<T>) {
   const { fields, append, remove } = useFieldArray<ProjectGraph, keyof ProjectGraph>({ name })
   const readonly = useContext(ReadonlyContext)
@@ -170,8 +179,8 @@ function TaskSlot<T extends Record<string, any>>({
     const taskData: TaskData<T> = {
       id,
       task_type: taskType,
-      parameters: {} as T,
-      inPeers: [],
+      parameters: initialParameters,
+      inPeers: Array(inCount).fill(''),
     }
     append(taskData)
   }

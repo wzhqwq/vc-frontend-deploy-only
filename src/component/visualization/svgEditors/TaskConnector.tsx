@@ -72,6 +72,11 @@ export function TaskInputConnector({ name, index }: TaskConnectorProps) {
       onChange(outputToConnect)
     }
   }, [paired])
+  useEffect(() => {
+    return () => {
+      removePair(self)
+    }
+  }, [])
 
   return (
     <ConnectingPoint
