@@ -327,7 +327,7 @@ function Runner({
     else if (group?.status == TASK_CREATED) startGroup().then(() => navigate(`/task/${newGroupId}`))
   }, [newGroupId, tasks])
 
-  return noRestart ? (
+  return noRestart || tasksMustCreate.length == allTasks.length ? (
     <Button
       variant="solid"
       startDecorator={<PlayArrowRoundedIcon />}

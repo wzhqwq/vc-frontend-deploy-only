@@ -193,8 +193,10 @@ export function AlgorithmTaskCard(props: TaskCardProps) {
 
   return (
     <BasicTaskCard {...props} name="algorithms" inputCount={1} outputCount={1}>
-      <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[0]} simple />
-      <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[1]} simple />
+      <Stack direction="row" spacing={4}>
+        <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[0]} simple />
+        <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[1]} simple />
+      </Stack>
     </BasicTaskCard>
   )
 }
