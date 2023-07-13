@@ -31,6 +31,23 @@ export const router = createBrowserRouter([
             path: ':type',
             lazy: () => import('@/page/AllPages').then((m) => m.ownProperty),
           },
+          {
+            path: 'tasks',
+            lazy: () => import('@/page/AllPages').then((m) => m.ownTasks),
+          },
+          {
+            path: 'notifications',
+            children: [
+              {
+                index: true,
+                lazy: () => import('@/page/AllPages').then((m) => m.notifications),
+              },
+              {
+                path: ':id',
+                lazy: () => import('@/page/AllPages').then((m) => m.notificationDetail),
+              },
+            ]
+          }
         ],
       },
     ],

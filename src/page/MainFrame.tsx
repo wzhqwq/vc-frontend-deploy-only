@@ -25,6 +25,7 @@ import {
   Divider,
   IconButton,
   ListItem,
+  ListItemContent,
   Menu,
   MenuItem,
   Stack,
@@ -38,6 +39,7 @@ import logo from '@/logo.svg'
 import { useMessage, useMessages } from '@/api/message'
 import { formatTime } from '@/utils/time'
 import { Message } from '@/types/entity/message'
+import { markdown2plain } from '@/utils/string'
 
 export default function MainFrame() {
   const { loggedIn } = useSession()
@@ -187,7 +189,8 @@ const UserControl = memo(() => {
 })
 
 const MessageControl = memo(() => {
-  const { messages, fetchingMessages } = useMessages(true)
+  const { messages, fetchingMessages, setReadAllMessages, settingReadAllMessages } =
+    useMessages(true)
   const navigate = useNavigate()
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -219,7 +222,12 @@ const MessageControl = memo(() => {
           <Typography level="h6" sx={{ flexGrow: 1 }}>
             未读消息
           </Typography>
-          <IconButton color="danger" size="sm">
+          <IconButton
+            color="danger"
+            size="sm"
+            onClick={setReadAllMessages}
+            disabled={settingReadAllMessages}
+          >
             <DeleteSweep fontSize="small" />
           </IconButton>
         </ListItem>
@@ -239,20 +247,20 @@ const MessageControl = memo(() => {
 })
 
 const MessageItem = memo(({ message }: { message: Message }) => {
-  const { setReadMessage, settingReadMessage } = useMessage(message.id)
+  const { setReadMessage, settingReadMessage } = useMessage(message.id, false)
   return (
-    <MenuItem key={message.id}>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <Box>
-          <Typography level="body1">{message.message}</Typography>
-          <Typography level="body2" color="neutral">
-            {formatTime(message.created_at)}
-          </Typography>
-        </Box>
-        <IconButton size="sm" onClick={setReadMessage} disabled={settingReadMessage}>
-          <NotificationsOffIcon fontSize="small" />
-        </IconButton>
-      </Stack>
+    <MenuItem>
+      <ListItemContent>
+        <Typography level="body1" noWrap sx={{ maxWidth: 300 }}>
+          {markdown2plain(message.message)}
+        </Typography>
+        <Typography level="body2" color="neutral">
+          {formatTime(message.created_at)}
+        </Typography>
+      </ListItemContent>
+      <IconButton size="sm" onClick={setReadMessage} disabled={settingReadMessage}>
+        <NotificationsOffIcon fontSize="small" />
+      </IconButton>
     </MenuItem>
   )
 })

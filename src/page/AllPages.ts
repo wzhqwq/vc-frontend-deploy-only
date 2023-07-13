@@ -15,7 +15,11 @@ import NewProject from './project/NewProject'
 import ViewProject from './project/ViewProject'
 import EditProject from './project/EditProject'
 import ViewTask from './task/ViewTask'
+
 import OwnProperty from './user/OwnProperty'
+import OwnTasks from './user/OwnTasks'
+import Notifications from './user/Notifications'
+import NotificationDetail from './user/NotificationDetail'
 
 export const mainFrame = {
   Component: MainFrame,
@@ -71,5 +75,17 @@ export const viewTask = {
 
 export const ownProperty = {
   Component: OwnProperty,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const ownTasks = {
+  Component: OwnTasks,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const notifications = {
+  Component: Notifications,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const notificationDetail = {
+  Component: NotificationDetail,
   ErrorBoundary: SimpleErrorBoundary,
 }

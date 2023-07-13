@@ -21,6 +21,7 @@ import { TASK_CREATED, TASK_FINISHED } from '@/utils/constants'
 import { TaskConnectingContextProvider } from '@/component/context/TaskConnectingContext'
 import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
 import { BigSwitch } from '@/component/basic/CustomInput'
+import equal from 'deep-equal'
 
 interface ProjectGraphEditorProps {
   readonly?: boolean
@@ -77,7 +78,7 @@ export default function ProjectGraphEditor({
           ...taskData,
           taskId: groupTaskData.taskId,
         }
-        if (JSON.stringify(groupTaskData) == JSON.stringify(filledTaskData)) return filledTaskData
+        if (equal(groupTaskData, filledTaskData)) return filledTaskData
       }
       // 否则，没有对应的taskId
       return taskData
@@ -100,8 +101,12 @@ export default function ProjectGraphEditor({
   }, [config])
 
   const tasksMustCreate = useMemo(() => {
-    const isTaskMustRun = (t: TaskData<any>) =>
-      !t.taskId || tasks?.find((t2) => t2.id == t.taskId)?.status != TASK_FINISHED
+    const isTaskMustRun = (t: TaskData<any>) => {
+      if (!t.taskId) return true
+      const task = tasks?.find((t2) => t2.id == t.taskId)
+      if (!task) return false
+      return task.status != TASK_FINISHED
+    }
     return config
       ? [
           ...config.preProcesses.filter(isTaskMustRun),
@@ -109,7 +114,7 @@ export default function ProjectGraphEditor({
           ...config.analyses.filter(isTaskMustRun),
         ]
       : []
-  }, [config])
+  }, [config, tasks])
   const allTasks = useMemo(() => {
     return config ? [...config.preProcesses, ...config.algorithms, ...config.analyses] : []
   }, [config])
@@ -320,7 +325,7 @@ function Runner({
         item_id: taskToCreate.id,
         task_type: taskToCreate.task_type,
         pre_task_ids: taskToCreate.inPeers
-          .map((id) => tasks.find((t) => t.item_id == id)?.id)
+          .map((id) => allTasks.find((t) => t.id == id)?.taskId)
           .filter((id): id is number => id != undefined),
         data_config: taskToCreate.parameters,
       })

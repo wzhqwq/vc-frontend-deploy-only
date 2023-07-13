@@ -9,14 +9,14 @@ export interface QueryTaskGroupsResult {
   fetchingTaskGroups: boolean
   refetchTaskGroup: () => void
 }
-export function usePublicTaskGroups(): QueryTaskGroupsResult {
+export function useTaskGroups(isPublic: boolean): QueryTaskGroupsResult {
   const {
     data: taskGroups,
     isFetching: fetchingTaskGroups,
     refetch: refetchTaskGroup,
   } = useErrorlessQuery<TaskGroup[]>(
     {
-      queryKey: ['private', 'algo', 'projects', 'task_groups'],
+      queryKey: ['private', 'algo', 'projects', 'task_groups', { all: Number(isPublic) }],
     },
     '获取公开任务失败',
   )
@@ -42,7 +42,7 @@ export function useProjectTaskGroups(projectId?: number) {
   )
 
   return {
-    taskGroups: useMemo(() => taskGroups ?? ([] as TaskGroup[]), [taskGroups]),
+    taskGroups,
     fetchingTaskGroups,
     refetchTaskGroup,
   } as QueryTaskGroupsResult
