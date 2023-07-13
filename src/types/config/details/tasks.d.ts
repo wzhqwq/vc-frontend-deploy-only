@@ -135,7 +135,7 @@ export interface MultiCCConfig {
   /**
    * 聚类的簇数
    */
-  num_clusterings: number
+  num_clusters: number
   options: MultiCCOptions
 }
 
@@ -234,7 +234,7 @@ export interface MNMFConfig {
    */
   k: number[] | number
   /**
-   * 聚类数，k若为数组，k的长度应与num_clusterings相等
+   * 聚类数，k若为数组，k的长度应与num_clusters相等
    */
   num_clusters: number
   /**

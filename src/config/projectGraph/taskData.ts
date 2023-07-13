@@ -430,7 +430,7 @@ const multiCCConfigDict: DictConfigParameter<MultiCCAlgorithmParameter, 'algo_co
       default: 10,
     },
     {
-      key: 'num_clusterings',
+      key: 'num_clusters',
       type: 'int',
       description: '聚类的簇数',
       default: 10,
@@ -440,7 +440,7 @@ const multiCCConfigDict: DictConfigParameter<MultiCCAlgorithmParameter, 'algo_co
   default: {
     kFea: 10,
     kSample: 10,
-    num_clusterings: 10,
+    num_clusters: 10,
     options: multiCCOptionDict.default,
   },
 }
