@@ -136,6 +136,7 @@ export interface MultiCCConfig {
    * 聚类的簇数
    */
   num_clusters: number
+  epochs: number
   options: MultiCCOptions
 }
 
@@ -148,10 +149,6 @@ export interface MultiCCOptions {
    * 控制着质量和差异之间的权衡的值，最好为100
    */
   lambda: number
-  /**
-   * 最大迭代次数
-   */
-  maxIter: number
   /**
    * 控制着质量和差异之间的权衡的值，最好为100
    */

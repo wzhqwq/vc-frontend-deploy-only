@@ -392,12 +392,6 @@ const multiCCOptionDict: DictConfigParameter<MultiCCConfig, 'options'> = {
       default: 100,
     },
     {
-      key: 'maxIter',
-      type: 'int',
-      description: '最大迭代次数',
-      default: 100,
-    },
-    {
       key: 'mu',
       type: 'float',
       description: '控制着质量和差异之间的权衡的值，最好为100',
@@ -407,7 +401,6 @@ const multiCCOptionDict: DictConfigParameter<MultiCCConfig, 'options'> = {
   default: {
     error: 0.0001,
     lambda: 100,
-    maxIter: 100,
     mu: 100,
   },
 }
@@ -435,12 +428,19 @@ const multiCCConfigDict: DictConfigParameter<MultiCCAlgorithmParameter, 'algo_co
       description: '聚类的簇数',
       default: 10,
     },
+    {
+      key: 'epochs',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 5,
+    },
     multiCCOptionDict,
   ],
   default: {
     kFea: 10,
     kSample: 10,
     num_clusters: 10,
+    epochs: 5,
     options: multiCCOptionDict.default,
   },
 }
