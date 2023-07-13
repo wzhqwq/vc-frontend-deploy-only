@@ -1,6 +1,6 @@
 import { DictConfigParameter } from '@/types/config/parameter'
 import { Box, Button, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
 import { FormProvider, useController, useForm } from 'react-hook-form'
 import { Collapse } from '@mui/material'
@@ -30,9 +30,6 @@ export default function FormModal({
       )),
     [properties],
   )
-  useEffect(() => {
-    console.log(properties)
-  }, [properties])
 
   return (
     <>

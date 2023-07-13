@@ -50,12 +50,12 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
     // console.log(multiChoice, selection)
     if (!multiChoice || selection == undefined) return
     if (!checkDirty(dirtyFields, prefix)) return
-    console.log('setValue', name, parameter.availableValues[selection].default)
+    // console.log('setValue', name, parameter.availableValues[selection].default)
     setValue(name, parameter.availableValues[selection].default, { shouldDirty: true })
   }, [selection])
 
   useEffect(() => {
-    console.log(parameter.key, show, form)
+    // console.log(parameter.key, show, form)
     if (!show) unregister(name)
     else trigger(name)
   }, [show])
