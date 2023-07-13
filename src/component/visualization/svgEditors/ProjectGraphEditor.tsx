@@ -8,7 +8,7 @@ import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
 import { Box, Button, Divider, FormLabel, Stack, Typography } from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
-import { useProjectTaskGroups, useTaskGroup } from '@/api/task'
+import { useCreateTaskGroup, useTaskGroup } from '@/api/task'
 import { AlgorithmTaskCard, PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
@@ -292,7 +292,7 @@ function Runner({
   tasksMustCreate: TaskData<any>[]
   config: ProjectGraph
 }) {
-  const { createTaskGroup } = useProjectTaskGroups(project.id)
+  const { createTaskGroup } = useCreateTaskGroup(project.id)
   const [newGroupId, setNewGroupId] = useState<number>()
   const [tasksToCreate, setTasksToCreate] = useState<TaskData<any>[]>([])
   const { group, tasks, createTask, startGroup } = useTaskGroup(newGroupId)
@@ -309,6 +309,7 @@ function Runner({
     setNewGroupId(id)
     setTasksToCreate(allTasks)
   }
+  console.log(tasksMustCreate)
   useEffect(() => {
     if (!newGroupId || !tasks) return
     const taskToCreate = tasksToCreate.find(

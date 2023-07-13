@@ -28,11 +28,6 @@ export function usePublicTaskGroups(): QueryTaskGroupsResult {
   } as QueryTaskGroupsResult
 }
 
-export type GroupCreatingForm = Pick<Project, 'config'>
-export interface CreateTaskGroupResult {
-  createTaskGroup: (form: GroupCreatingForm) => Promise<TaskGroup>
-}
-
 export function useProjectTaskGroups(projectId?: number) {
   const {
     data: taskGroups,
@@ -45,6 +40,20 @@ export function useProjectTaskGroups(projectId?: number) {
     },
     '获取历史任务失败',
   )
+
+  return {
+    taskGroups: useMemo(() => taskGroups ?? ([] as TaskGroup[]), [taskGroups]),
+    fetchingTaskGroups,
+    refetchTaskGroup,
+  } as QueryTaskGroupsResult
+}
+
+export type GroupCreatingForm = Pick<Project, 'config'>
+export interface CreateTaskGroupResult {
+  createTaskGroup: (form: GroupCreatingForm) => Promise<TaskGroup>
+}
+
+export function useCreateTaskGroup(projectId?: number) {
   const { mutateAsync: createTaskGroup } = usePost<TaskGroup, { config: string }>(
     ['private', 'algo', 'projects', projectId, 'task_groups'],
     '创建任务失败',
@@ -54,17 +63,12 @@ export function useProjectTaskGroups(projectId?: number) {
       },
     },
   )
-
   return {
-    taskGroups: useMemo(() => taskGroups ?? ([] as TaskGroup[]), [taskGroups]),
-    fetchingTaskGroups,
-    refetchTaskGroup,
-
     createTaskGroup: useCallback(
       ({ config }: GroupCreatingForm) => createTaskGroup({ config: JSON.stringify(config) }),
       [],
     ),
-  } as QueryTaskGroupsResult & CreateTaskGroupResult
+  }
 }
 
 type TaskCreatingForm = Pick<Task, 'task_type' | 'pre_task_ids' | 'item_id'> & { data_config: any }
