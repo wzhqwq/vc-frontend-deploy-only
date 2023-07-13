@@ -21,7 +21,7 @@ export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int
   : T extends 'tuple3'
   ? [number, number, number]
   : T extends 'dict'
-  ? undefined
+  ? any
   : T extends 'list'
   ? any[]
   : never

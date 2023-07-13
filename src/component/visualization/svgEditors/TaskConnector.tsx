@@ -1,7 +1,8 @@
+import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { useTaskConnecting } from '@/component/context/TaskConnectingContext'
 import { ProjectGraph } from '@/types/config/project'
 import { Box } from '@mui/joy'
-import { memo, useEffect } from 'react'
+import { memo, useContext, useEffect } from 'react'
 import { useController, useWatch } from 'react-hook-form'
 
 interface ConnectingPointProps {
@@ -16,6 +17,7 @@ const ConnectingPoint = memo(function ConnectingPoint({
   onClick,
   id,
 }: ConnectingPointProps) {
+  const readonly = useContext(ReadonlyContext)
   return (
     <Box
       sx={(theme) => ({
@@ -28,7 +30,7 @@ const ConnectingPoint = memo(function ConnectingPoint({
         borderRadius: 8,
         zIndex: 100,
       })}
-      onClick={onClick}
+      onClick={() => !readonly && onClick()}
       id={id}
     />
   )

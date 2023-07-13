@@ -58,11 +58,16 @@ export type DropoutParameters = {
   inplace: boolean
 }
 
+export type OutputBaseParameters = {
+  label_from: string
+  is_main_out: boolean
+  loss_weight: number
+}
 export type MSELossParameters = {
   size_average: boolean
   reduce: boolean
   reduction: 'mean' | 'sum' | 'none'
-}
+} & OutputBaseParameters
 
 export type ReLUParameters = {
   inplace: boolean
@@ -72,3 +77,11 @@ export type SplitParameters = {
   split_size_or_sections: [number, number]
   dim: number
 }
+
+export type CrossEntropyLossParameters = {
+  size_average: boolean
+  reduce: boolean
+  reduction: 'mean' | 'sum' | 'none'
+  ignore_index: number
+  label_smoothing: number
+} & OutputBaseParameters

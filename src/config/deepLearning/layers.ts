@@ -1,4 +1,4 @@
-import { ConfigParameterArray, EachTypeOfConfigParameter } from '@/types/config/parameter'
+import { ConfigParameterArray } from '@/types/config/parameter'
 import {
   Base1DKernelParameters,
   Base2DKernelParameters,
@@ -17,6 +17,7 @@ import {
   MSELossParameters,
   ReLUParameters,
   SplitParameters,
+  CrossEntropyLossParameters,
 } from '@/types/config/details/layers'
 import {
   bottomOutput,
@@ -258,6 +259,15 @@ const dropout = createLayerConfig<DropoutParameters>({
 })
 
 const mseLossParameters: ConfigParameterArray<MSELossParameters> = [
+  {
+    key: 'label_from',
+    type: 'str',
+    description: '标签来源',
+    default: 'input_data',
+    selections: ['input_data', 'label'],
+  },
+  { key: 'is_main_out', type: 'bool', description: '是否为主输出', default: true },
+  { key: 'loss_weight', type: 'float', description: '损失权重', default: 1 },
   { key: 'size_average', type: 'bool', description: '是否对损失进行平均', default: true },
   { key: 'reduce', type: 'bool', description: '是否对损失进行降维', default: true },
   {
@@ -271,9 +281,50 @@ const mseLossParameters: ConfigParameterArray<MSELossParameters> = [
 const mseLoss = createLayerConfig<MSELossParameters>({
   name: 'MSELoss',
   renderer: rectRenderer1,
+  inputs: [topInput(0)],
+  outputs: [],
+  parameters: mseLossParameters,
+  checkers: [checkSameInputShape],
+})
+
+const crossEntropyLossParameters: ConfigParameterArray<CrossEntropyLossParameters> = [
+  {
+    key: 'label_from',
+    type: 'str',
+    description: '标签来源',
+    default: 'input_data',
+    selections: ['input_data', 'label'],
+  },
+  { key: 'is_main_out', type: 'bool', description: '是否为主输出', default: true },
+  { key: 'loss_weight', type: 'float', description: '损失权重', default: 1 },
+  { key: 'size_average', type: 'bool', description: '是否对损失进行平均', default: true },
+  { key: 'reduce', type: 'bool', description: '是否对损失进行降维', default: true },
+  {
+    key: 'reduction',
+    type: 'str',
+    description: '指定损失函数的计算方式',
+    default: 'mean',
+    selections: ['none', 'mean', 'sum'],
+  },
+  {
+    key: 'ignore_index',
+    type: 'int',
+    description: '忽略的标签',
+    default: -100,
+  },
+  {
+    key: 'label_smoothing',
+    type: 'float',
+    description: '损失计算平滑，范围为[0.0,1.0]',
+    default: 0,
+  },
+]
+const crossEntropyLoss = createLayerConfig<CrossEntropyLossParameters>({
+  name: 'CrossEntropyLoss',
+  renderer: rectRenderer1,
   inputs: [topInput(0), topInput(1)],
   outputs: [bottomOutput(generateInputShapeFn(0))],
-  parameters: mseLossParameters,
+  parameters: crossEntropyLossParameters,
   checkers: [checkSameInputShape],
 })
 
@@ -370,13 +421,6 @@ const inputLayer3 = createLayerConfig<{}>({
   outputs: [bottomOutput(generateInputLayerOutputShapeFn(4), ['m', 'n', 'width', 'height'])],
   parameters: [],
 })
-const outputLayer = createLayerConfig<{}>({
-  name: 'Output',
-  renderer: rectRenderer1,
-  inputs: [topInput(0)],
-  outputs: [],
-  parameters: [],
-})
 
 export const layers = [
   conv1d,
@@ -389,7 +433,6 @@ export const layers = [
   batchNorm2d,
   linear,
   dropout,
-  mseLoss,
   reLU,
   sigmoid,
   tanh,
@@ -397,3 +440,4 @@ export const layers = [
 
 export const inputLayers = [inputLayer1, inputLayer2, inputLayer3]
 export const tensorProcessingLayers = [sum, hadamardProduct, split, copy]
+export const lossLayers = [mseLoss, crossEntropyLoss]
