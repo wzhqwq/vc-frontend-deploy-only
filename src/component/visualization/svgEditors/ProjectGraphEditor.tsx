@@ -38,9 +38,9 @@ export default function ProjectGraphEditor({
 }: ProjectGraphEditorProps) {
   const { group, tasks } = useTaskGroup(groupId)
   const { project, updateProject, updatingProject } = useProject(projectId)
-  const methods = useForm<ProjectGraph>({ mode: 'onChange' })
+  const methods = useForm<ProjectGraph>({ mode: 'onBlur' })
   const {
-    formState: { isDirty, isValid, dirtyFields },
+    formState: { isDirty, isValid },
     reset,
     handleSubmit,
   } = methods

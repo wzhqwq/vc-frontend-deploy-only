@@ -1,3 +1,9 @@
+import SaveIcon from '@mui/icons-material/Save'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import CheckIcon from '@mui/icons-material/Check'
+import DeleteIcon from '@mui/icons-material/Delete'
+import ParameterInput from '@/component/basic/ParameterInput'
+
 import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
 import {
@@ -6,18 +12,11 @@ import {
   lossLayers,
   tensorProcessingLayers,
 } from '@/config/deepLearning/layers'
-
 import { Box, Button, CircularProgress, Divider, Stack, Typography } from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
 import { Popover } from '@mui/material'
 import { useForm, SubmitHandler, FormProvider } from 'react-hook-form'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import SaveIcon from '@mui/icons-material/Save'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import CheckIcon from '@mui/icons-material/Check'
-import DeleteIcon from '@mui/icons-material/Delete'
-import ParameterInput from '@/component/basic/ParameterInput'
 import { useLayerData } from '@/api/files'
 
 interface LayerGraphEditorProps {

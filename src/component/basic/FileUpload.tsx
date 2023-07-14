@@ -2,7 +2,6 @@ import { createRef } from 'react'
 
 import { useFileInfo, useUploadFile } from '@/api/files'
 import { CircularProgress, IconButton, Sheet, Stack, Typography } from '@mui/joy'
-import { baseUrl } from '@/api/network'
 
 import Description from '@mui/icons-material/Description'
 import Delete from '@mui/icons-material/Delete'

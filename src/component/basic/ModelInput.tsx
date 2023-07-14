@@ -5,9 +5,10 @@ import { LayerGraphEditor } from '../visualization/svgEditors'
 export interface ModelInputProps {
   value: string
   onChange: (value: string) => void
+  onBlur?: () => void
   readonly?: boolean
 }
-export function ModelInput({ value, onChange, readonly }: ModelInputProps) {
+export function ModelInput({ value, onChange, onBlur, readonly }: ModelInputProps) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -19,7 +20,14 @@ export function ModelInput({ value, onChange, readonly }: ModelInputProps) {
       </Stack>
       <Modal open={open}>
         <ModalDialog layout="fullscreen">
-          <LayerGraphEditor filename={value} onSave={onChange} onClose={() => setOpen(false)} />
+          <LayerGraphEditor
+            filename={value}
+            onSave={onChange}
+            onClose={() => {
+              setOpen(false)
+              onBlur?.()
+            }}
+          />
         </ModalDialog>
       </Modal>
     </>

@@ -2,26 +2,27 @@ import { DictConfigParameter } from '@/types/config/parameter'
 import { Box, Button, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
-import { FormProvider, useController, useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { Fade } from '@mui/material'
 
 export interface FormModalProps {
-  name: string
   parameter: DictConfigParameter<any, any>
   readonly?: boolean
+  value: any
+  onChange?: (value: any) => void
+  onBlur?: () => void
 }
 
 export default function FormModal({
-  name,
   parameter: { properties, key },
   readonly,
+  value,
+  onChange,
+  onBlur,
 }: FormModalProps) {
   const [open, setOpen] = useState(false)
 
-  const {
-    field: { value, onChange },
-  } = useController({ name })
-  const methods = useForm<{ dict: any }>()
+  const methods = useForm<{ dict: any }>({ mode: 'onBlur' })
   const columns = properties.length > 3 ? Math.max(2, properties.length / 3).toFixed(0) : 1
   const parameterList = useMemo(
     () =>
@@ -40,7 +41,13 @@ export default function FormModal({
       <Button onClick={() => setOpen(true)} size="sm" sx={{ my: 0.5 }} fullWidth>
         {readonly ? '点击查看' : '点击编辑'}
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)}>
+      <Modal
+        open={open}
+        onClose={() => {
+          onBlur?.()
+          setOpen(false)
+        }}
+      >
         <ModalDialog sx={{ p: 2, minWidth: 200 }}>
           <Typography level="h5" sx={{ mb: 2 }}>
             编辑{key}字典
@@ -63,7 +70,7 @@ export default function FormModal({
                     <Button
                       onClick={(e) =>
                         methods
-                          .handleSubmit((data) => onChange(data.dict))(e)
+                          .handleSubmit((data) => onChange?.(data.dict))(e)
                           .then(() => {
                             setOpen(false)
                           })
@@ -83,7 +90,14 @@ export default function FormModal({
                   </Stack>
                 </Fade>
               )}
-              <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
+              <Button
+                onClick={() => {
+                  onBlur?.()
+                  setOpen(false)
+                }}
+                variant="soft"
+                color="neutral"
+              >
                 关闭
               </Button>
             </Stack>

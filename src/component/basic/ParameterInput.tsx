@@ -80,12 +80,12 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
           ? (field: ControllerRenderProps) => (
               <Chip sx={{ my: 0.5 }}>{type == 'int' ? selections[field.value] : field.value}</Chip>
             )
-          : (field: ControllerRenderProps) => (
+          : ({ value, onChange, ...field }: ControllerRenderProps) => (
               <Select
                 {...field}
-                value={type == 'int' ? field.value : selections!.indexOf(field.value)}
+                value={type == 'int' ? value : selections!.indexOf(value)}
                 onChange={(_, value) =>
-                  field.onChange(type == 'int' ? parseInt(value) : selections![value])
+                  onChange(type == 'int' ? parseInt(value) : selections![value])
                 }
                 sx={{ my: 0.5 }}
                 size="sm"
@@ -106,13 +106,8 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
                   {field.value ? 'True' : 'False'}
                 </Typography>
               )
-            : (field: ControllerRenderProps) => (
-                <Switch
-                  {...field}
-                  onChange={field.onChange}
-                  checked={field.value}
-                  sx={{ my: 0.5 }}
-                />
+            : ({ value, ...field }: ControllerRenderProps) => (
+                <Switch {...field} checked={value} sx={{ my: 0.5 }} />
               )
         case 'tuple2':
         case 'tuple3':
@@ -125,38 +120,38 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
               )
             : (field: ControllerRenderProps) => (
                 <TupleInput
-                  length={parseInt(type.at(-1) ?? '2')}
                   {...field}
+                  length={parseInt(type.at(-1) ?? '2')}
                   sx={{ my: 0.5 }}
                   size="sm"
                 />
               )
         case 'dict':
-          return () => (
+          return ({ ref: _, ...field }: ControllerRenderProps) => (
             <FormModal
-              name={name}
+              {...field}
               parameter={multiChoice ? parameter.availableValues[selection!] : parameter}
               readonly={readonly}
             />
           )
         case 'list':
-          return () => <ListModal name={name} parameter={parameter} readonly={readonly} />
+          return ({ ref: _, ...field }: ControllerRenderProps) => (
+            <ListModal {...field} parameter={parameter} readonly={readonly} />
+          )
         case 'file':
-          return (field: ControllerRenderProps) => (
+          return ({ ref: _, onBlur, ...field }: ControllerRenderProps) => (
             <FileUpload
-              value={field.value}
+              {...field}
               readonly={readonly}
-              onChange={field.onChange}
-              onRemove={() => field.onChange('')}
+              onRemove={() => {
+                field.onChange('')
+                onBlur()
+              }}
             />
           )
         case 'model':
-          return (field: ControllerRenderProps) => (
-            <ModelInput
-              value={field.value}
-              onChange={field.onChange}
-              readonly={readonly}
-            />
+          return ({ ref: _, ...field }: ControllerRenderProps) => (
+            <ModelInput {...field} readonly={readonly} />
           )
         case 'int':
         case 'float':
@@ -166,12 +161,11 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
                   {field.value}
                 </Typography>
               )
-            : (field: ControllerRenderProps) => (
+            : ({ onChange, ...field }: ControllerRenderProps) => (
                 <Input
                   type="number"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  value={field.value}
-                  ref={field.ref}
+                  {...field}
+                  onChange={(e) => onChange(Number(e.target.value))}
                   sx={{ my: 0.5 }}
                   size="sm"
                 />

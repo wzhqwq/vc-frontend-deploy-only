@@ -2,29 +2,28 @@ import { DictConfigParameter, ListConfigParameter } from '@/types/config/paramet
 import { Box, Button, Card, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
-import {
-  FormProvider,
-  UseFieldArrayRemove,
-  useController,
-  useFieldArray,
-  useForm,
-} from 'react-hook-form'
+import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
 
 import AddIcon from '@mui/icons-material/Add'
 import { Fade } from '@mui/material'
 
 export interface ListModalProps {
-  name: string
   parameter: ListConfigParameter<any, any>
   readonly?: boolean
+  value: any
+  onChange?: (value: any) => void
+  onBlur?: () => void
 }
 
-export default function ListModal({ name, parameter, readonly }: ListModalProps) {
+export default function ListModal({
+  parameter,
+  readonly,
+  value,
+  onChange,
+  onBlur,
+}: ListModalProps) {
   const [open, setOpen] = useState(false)
-  const {
-    field: { value, onChange },
-  } = useController({ name })
-  const methods = useForm<{ list: any[] }>()
+  const methods = useForm<{ list: any[] }>({ mode: 'onBlur' })
   const { append, fields, remove } = useFieldArray({ name: 'list', control: methods.control })
 
   useEffect(() => {
@@ -36,7 +35,13 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
       <Button onClick={() => setOpen(true)} size="sm" sx={{ my: 0.5 }}>
         {readonly ? '点击查看' : '点击编辑'}
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)}>
+      <Modal
+        open={open}
+        onClose={() => {
+          onBlur?.()
+          setOpen(false)
+        }}
+      >
         <ModalDialog sx={{ p: 2, minWidth: 200 }}>
           <Typography level="h5" sx={{ mb: 2 }}>
             编辑{parameter.key}列表
@@ -67,7 +72,7 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
                     <Button
                       onClick={(e) =>
                         methods
-                          .handleSubmit((data) => onChange(data.list))(e)
+                          .handleSubmit((data) => onChange?.(data.list))(e)
                           .then(() => {
                             setOpen(false)
                           })
@@ -87,7 +92,14 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
                   </Stack>
                 </Fade>
               )}
-              <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
+              <Button
+                onClick={() => {
+                  onBlur?.()
+                  setOpen(false)
+                }}
+                variant="soft"
+                color="neutral"
+              >
                 关闭
               </Button>
             </Stack>
