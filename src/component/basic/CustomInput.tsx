@@ -2,10 +2,20 @@ import SearchRounded from '@mui/icons-material/SearchRounded'
 
 import { Box, Input, InputProps, Switch, SwitchProps, Typography } from '@mui/joy'
 import { forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
-export const SearchInput = (props: InputProps) => (
-  <Input {...props} variant="soft" startDecorator={<SearchRounded />} />
-)
+export type SearchInputProps = Omit<InputProps, 'onChange' | 'value'> & {
+  onChange?: (search: string) => void
+  value: string
+}
+export function SearchInput({ value, onChange, ...rest }: SearchInputProps) {
+  const { register, handleSubmit } = useForm({ values: { search: value } })
+  return (
+    <form onSubmit={handleSubmit(({ search }) => onChange?.(search))}>
+      <Input {...rest} {...register('search')} variant="soft" startDecorator={<SearchRounded />} />
+    </form>
+  )
+}
 
 export interface TupleInputProps extends Omit<InputProps, 'onChange' | 'value'> {
   readonly value: number[]

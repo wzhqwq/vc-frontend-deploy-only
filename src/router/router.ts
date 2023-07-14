@@ -25,6 +25,14 @@ export const router = createBrowserRouter([
       },
       { path: 'task/:id', lazy: () => import('@/page/AllPages').then((m) => m.viewTask) },
       {
+        path: 'model',
+        children: [
+          { path: ':id', lazy: () => import('@/page/AllPages').then((m) => m.viewModel) },
+          { path: ':id/edit', lazy: () => import('@/page/AllPages').then((m) => m.editModel) },
+          { path: 'new', lazy: () => import('@/page/AllPages').then((m) => m.newModel) },
+        ],
+      },
+      {
         path: 'user',
         children: [
           {

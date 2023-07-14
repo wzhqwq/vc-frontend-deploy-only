@@ -86,6 +86,13 @@ export function useLayerData(filename: string) {
     uploadingLayer: uploadingFile,
   }
 }
+export const emptyLayerFile: FileInfo = {
+  "id": 96,
+  "filename": "3df33176-01b2-4df9-b239-24640cf8526b",
+  "content_type": "application/json",
+  "extension": "json",
+  "created_at": "2023-07-14T10:53:15+08:00"
+}
 
 export function useFileInfo(filename?: string) {
   const { data: fileInfo, isFetching: fetchingFileInfo } = useErrorlessQuery<FileInfo>(

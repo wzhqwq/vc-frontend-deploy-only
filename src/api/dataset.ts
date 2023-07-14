@@ -1,17 +1,25 @@
 import { Dataset } from '@/types/entity/dataset'
 import { useErrorlessQuery, usePost, usePut, useDelete } from './common'
 import { queryClient } from './queryClient'
+import { useCallback } from 'react'
+import { ServerGeneratedKeys } from '@/types/entity/common'
 
-type DatasetCreatingForm = Pick<Dataset, 'task_id' | 'description' | 'private' | 'title'>
-
-export function useDatasets(isPublic: boolean) {
+export function useDatasets(isPublic: boolean, search?: string) {
   const { data: datasets, isFetching: fetchingDatasets } = useErrorlessQuery<Dataset[]>(
     {
-      queryKey: ['private', 'algo', 'datasets', { all: Number(isPublic) }],
+      queryKey: ['private', 'algo', 'datasets', { all: Number(isPublic), search }],
     },
     '获取数据集列表',
   )
-  const { mutate: createDataset, isLoading: creatingDataset } = usePost<
+  return {
+    datasets,
+    fetchingDatasets,
+  }
+}
+
+export type DatasetCreatingForm = Omit<Dataset, ServerGeneratedKeys>
+export function useCreateDataset() {
+  const { mutateAsync: createDataset, isLoading: creatingDataset } = usePost<
     Dataset,
     DatasetCreatingForm
   >(['private', 'algo', 'datasets'], '新建数据集', {
@@ -21,9 +29,6 @@ export function useDatasets(isPublic: boolean) {
   })
 
   return {
-    datasets,
-    fetchingDatasets,
-
     createDataset,
     creatingDataset,
   }
@@ -36,7 +41,7 @@ export function useDataset(datasetId: number) {
     },
     '获取数据集信息',
   )
-  const { mutate: updateDataset, isLoading: updatingDataset } = usePut<
+  const { mutateAsync: updateDataset, isLoading: updatingDataset } = usePut<
     Dataset,
     DatasetCreatingForm
   >(['private', 'algo', 'datasets', datasetId], '更新数据集', {
@@ -62,7 +67,7 @@ export function useDataset(datasetId: number) {
     updateDataset,
     updatingDataset,
 
-    deleteDataset,
+    deleteDataset: useCallback(() => deleteDataset(undefined), [deleteDataset]),
     deletingDataset,
   }
 }

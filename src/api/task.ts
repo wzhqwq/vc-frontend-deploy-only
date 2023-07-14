@@ -2,6 +2,7 @@ import { useDelete, useErrorlessQuery, usePost, usePut } from './common'
 import { Task, TaskGroup } from '@/types/entity/task'
 import { queryClient } from './queryClient'
 import { useCallback, useEffect, useMemo } from 'react'
+import { ServerGeneratedKeys } from '@/types/entity/common'
 
 export interface QueryTaskGroupsResult {
   taskGroups: TaskGroup[]
@@ -73,7 +74,7 @@ export function useCreateTaskGroup(projectId?: number) {
   }
 }
 
-type TaskCreatingForm = Pick<Task, 'task_type' | 'pre_task_ids' | 'item_id'> & { data_config: any }
+type TaskCreatingForm = Omit<Task, ServerGeneratedKeys | 'data_config'> & { data_config: any }
 
 export function useTaskGroup(groupId?: number, autoUpdate = false) {
   const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>(

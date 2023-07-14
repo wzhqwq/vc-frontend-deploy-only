@@ -12,7 +12,7 @@ export interface UserCreatingForm {
 }
 export type UserForm = Partial<UserCreatingForm>
 export type LoginForm = Omit<UserCreatingForm, 'confirmPassword'>
-export type JwtUserData = Omit<User, 'email'>
+export type JwtUserData = Pick<User, 'id' | 'role_id' | 'is_anon'>
 
 export function useUser(userId?: number) {
   const { hasToken } = useSession()

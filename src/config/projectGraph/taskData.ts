@@ -1,3 +1,4 @@
+import { emptyLayerFile } from '@/api/files'
 import {
   AllImagePreprocessType,
   BioPreprocessParameter,
@@ -91,7 +92,7 @@ export const saltPepperNoiseArgs: DictConfigParameter<SaltPepperNoiseConfig, 'ar
   description: '椒盐噪声参数',
   multiChoice: false,
   properties: [
-    { key: 'occupy_rate', type: 'float', description: '占比', default: 0 },
+    { key: 'occupy_rate', type: 'float', description: '噪声占比', default: 0 },
     { key: 'salt_pepper_rate', type: 'float', description: '椒盐比例', default: 0 },
   ],
   default: { occupy_rate: 0, salt_pepper_rate: 0 },
@@ -665,11 +666,11 @@ const customDeepConfigDict: DictConfigParameter<CustomDeepAlgorithmParameter, 'a
       key: 'json_model_name',
       type: 'model',
       description: '深度学习模型',
-      default: '3df33176-01b2-4df9-b239-24640cf8526b',
+      default: emptyLayerFile.filename,
     },
   ],
   default: {
-    json_model_name: '3df33176-01b2-4df9-b239-24640cf8526b',
+    json_model_name: emptyLayerFile.filename,
   },
 }
 

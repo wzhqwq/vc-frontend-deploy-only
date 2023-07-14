@@ -33,17 +33,20 @@ import {
 } from '@mui/joy'
 import { AppBar, Toolbar } from '@mui/material'
 import { memo, useCallback, useState } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import logo from '@/logo.svg'
 import { useMessage, useMessages } from '@/api/message'
 import { formatTime } from '@/utils/time'
 import { Message } from '@/types/entity/message'
 import { markdown2plain } from '@/utils/string'
+import { noScrollingPages } from '@/router/pages'
 
 export default function MainFrame() {
   const { loggedIn } = useSession()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const noScroll = noScrollingPages.includes(pathname)
 
   return (
     <Stack
@@ -70,7 +73,7 @@ export default function MainFrame() {
             <img src={logo} alt="logo" height={32} width={32} />
             多聚类可视化平台
           </Typography>
-          <SearchInput placeholder="平台内搜索…" />
+          <SearchInput placeholder="平台内搜索…" value="" />
           <Button variant="plain" color="neutral" onClick={() => navigate('/explore/projects')}>
             <ExploreTwoTone fontSize="small" sx={{ mr: 1 }} />
             探索
@@ -108,10 +111,20 @@ export default function MainFrame() {
       <Box
         sx={{
           flexGrow: 1,
-          overflow: 'auto',
+          overflow: noScroll ? 'hidden' : 'auto',
         }}
       >
-        <Container maxWidth="lg">
+        <Container
+          maxWidth="lg"
+          sx={
+            noScroll
+              ? {
+                  overflow: 'hidden',
+                  height: '100%',
+                }
+              : undefined
+          }
+        >
           <Outlet />
         </Container>
       </Box>
@@ -168,9 +181,9 @@ const UserControl = memo(() => {
           个人数据
         </Typography>
         <NormalMenuButton
-          Icon={ViewInAr}
-          text="算法模型"
-          onClick={() => navigate('/user/models')}
+          Icon={AccountTree}
+          text="项目"
+          onClick={() => navigate('/user/projects')}
         />
         <NormalMenuButton
           Icon={Description}
@@ -178,9 +191,9 @@ const UserControl = memo(() => {
           onClick={() => navigate('/user/datasets')}
         />
         <NormalMenuButton
-          Icon={AccountTree}
-          text="项目"
-          onClick={() => navigate('/user/projects')}
+          Icon={ViewInAr}
+          text="算法模型"
+          onClick={() => navigate('/user/models')}
         />
         <NormalMenuButton Icon={Task} text="任务管理" onClick={() => navigate('/user/tasks')} />
       </Menu>
@@ -205,7 +218,13 @@ const MessageControl = memo(() => {
   return (
     <>
       <IconButton onClick={handleClick} variant="plain" color="neutral">
-        <Badge badgeContent={messages?.length} color="danger">
+        <Badge
+          badgeContent={messages?.length}
+          color="danger"
+          sx={(theme) => ({
+            '--Badge-ring': `0 0 0 var(--Badge-ringSize) ${theme.vars.palette.neutral[50]}`,
+          })}
+        >
           <Notifications />
         </Badge>
       </IconButton>

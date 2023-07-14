@@ -1,18 +1,22 @@
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+
 import { useDatasets } from '@/api/dataset'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { UserWidget } from '@/component/basic/getters'
 import { formatDate } from '@/utils/time'
 import { Box, Card, CircularProgress, Grid, Stack, Typography } from '@mui/joy'
 import InnerLink from '../basic/innerLink/InnerLink'
-
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import { useState } from 'react'
 
 export default function Datasets({ isPublic }: { isPublic: boolean }) {
-  const { datasets, fetchingDatasets } = useDatasets(isPublic)
+  const [search, setSearch] = useState('')
+  const { datasets, fetchingDatasets } = useDatasets(isPublic, search)
 
   return (
     <Box>
-      <SearchInput placeholder="搜索数据集" />
+      <Stack direction="row" spacing={1}>
+        <SearchInput placeholder="搜索数据集" value={search} onChange={setSearch} />
+      </Stack>
       {fetchingDatasets && <CircularProgress sx={{ mx: 'auto', mt: 2, display: 'block' }} />}
       <Grid container spacing={2} py={2}>
         {datasets?.map((dataset) => (
@@ -20,7 +24,7 @@ export default function Datasets({ isPublic }: { isPublic: boolean }) {
             <Card variant="outlined">
               <div>
                 <Typography level="h5">
-                  <InnerLink overlay to={`/datasets/${dataset.id}`} underline="none">
+                  <InnerLink overlay to={`/dataset/${dataset.id}`} underline="none">
                     {dataset.title}
                   </InnerLink>
                 </Typography>

@@ -1,3 +1,8 @@
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import FileCopyIcon from '@mui/icons-material/FileCopy'
+
 import { useProject } from '@/api/project'
 import { ProjectGraphEditor } from '@/component/visualization/svgEditors'
 import {
@@ -9,7 +14,6 @@ import {
   Grid,
   List,
   ListItem,
-  ListItemButton,
   ListItemContent,
   ListItemDecorator,
   Stack,
@@ -22,11 +26,6 @@ import { UserWidget } from '@/component/basic/getters'
 import { useProjectTaskGroups } from '@/api/task'
 import { formatTime } from '@/utils/time'
 import { taskStatusIcon, taskStatusText } from '@/component/basic/chips'
-
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import FileCopyIcon from '@mui/icons-material/FileCopy'
 import { useUser } from '@/api/user'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
 import InnerLinkListItemButton from '@/component/basic/innerLink/InnerLinkListItemButton'
@@ -55,6 +54,11 @@ export default function ViewProject() {
               <Chip variant="outlined" size="sm">
                 {project.private ? '私有' : '公开'}
               </Chip>
+              <Divider orientation="vertical" />
+              <Box>
+                <Typography level='body2'>创建时间</Typography>
+                <Typography level='body1'>{formatTime(project.created_at)}</Typography>
+              </Box>
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
             {isOwner && (

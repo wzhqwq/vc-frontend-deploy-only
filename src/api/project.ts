@@ -2,13 +2,12 @@ import { Project } from '@/types/entity/project'
 import { useErrorlessQuery, usePost, usePut, useDelete } from './common'
 import { queryClient } from './queryClient'
 import { useCallback } from 'react'
+import { ServerGeneratedKeys } from '@/types/entity/common'
 
-export type ProjectCreatingForm = Pick<Project, 'name' | 'config' | 'description' | 'private'>
-
-export function useProjects(isPublic: boolean) {
+export function useProjects(isPublic: boolean, search?: string) {
   const { data: projects, isFetching: fetchingProjects } = useErrorlessQuery<Project[]>(
     {
-      queryKey: ['private', 'algo', 'projects', { all: Number(isPublic) }],
+      queryKey: ['private', 'algo', 'projects', { all: Number(isPublic), search }],
     },
     '获取项目列表',
   )
@@ -18,6 +17,8 @@ export function useProjects(isPublic: boolean) {
     fetchingProjects,
   }
 }
+
+export type ProjectCreatingForm = Omit<Project, ServerGeneratedKeys>
 export function useCreateProject() {
   const { mutateAsync: createProject, isLoading: creatingProject } = usePost<
     Project,

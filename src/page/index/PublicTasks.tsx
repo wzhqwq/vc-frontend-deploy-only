@@ -5,7 +5,7 @@ import { TaskGroupDataGrid } from '@/component/visualization/lazyDataGrids'
 
 export default function PublicTasks() {
   return (
-    <Box my={2}>
+    <Box sx={{ boxSizing: 'border-box', height: '100%', py: 2 }}>
       <TaskGroupDataGrid result={useTaskGroups(true)} />
     </Box>
   )

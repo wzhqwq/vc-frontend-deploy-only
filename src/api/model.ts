@@ -1,30 +1,35 @@
 import { Model } from '@/types/entity/model'
 import { useErrorlessQuery, usePost, usePut, useDelete } from './common'
 import { queryClient } from './queryClient'
+import { useCallback } from 'react'
+import { ServerGeneratedKeys } from '@/types/entity/common'
 
-type ModelCreatingForm = Pick<Model, 'file_id' | 'description' | 'private' | 'title'>
-
-export function useModels(isPublic: boolean) {
+export function useModels(isPublic: boolean, search?: string) {
   const { data: models, isFetching: fetchingModels } = useErrorlessQuery<Model[]>(
     {
-      queryKey: ['private', 'algo', 'models', { all: Number(isPublic) }],
+      queryKey: ['private', 'model', 'models', { all: Number(isPublic), search }],
     },
     '获取算法列表',
   )
-  const { mutate: createModel, isLoading: creatingModel } = usePost<Model, ModelCreatingForm>(
-    ['private', 'algo', 'models'],
+  return {
+    models,
+    fetchingModels,
+  }
+}
+
+export type ModelCreatingForm = Omit<Model, ServerGeneratedKeys>
+export function useCreateModel() {
+  const { mutateAsync: createModel, isLoading: creatingModel } = usePost<Model, ModelCreatingForm>(
+    ['private', 'model', 'models'],
     '新建算法',
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'models'])
+        queryClient.invalidateQueries(['private', 'model', 'models'])
       },
     },
   )
 
   return {
-    models,
-    fetchingModels,
-
     createModel,
     creatingModel,
   }
@@ -33,26 +38,26 @@ export function useModels(isPublic: boolean) {
 export function useModel(modelId: number) {
   const { data: model, isFetching: fetchingModel } = useErrorlessQuery<Model>(
     {
-      queryKey: ['private', 'algo', 'models', modelId],
+      queryKey: ['private', 'model', 'models', modelId],
     },
     '获取算法信息',
   )
-  const { mutate: updateModel, isLoading: updatingModel } = usePut<Model, ModelCreatingForm>(
-    ['private', 'algo', 'models', modelId],
+  const { mutateAsync: updateModel, isLoading: updatingModel } = usePut<Model, ModelCreatingForm>(
+    ['private', 'model', 'models', modelId],
     '更新算法',
     {
       onSuccess: (model) => {
-        queryClient.setQueryData(['private', 'algo', 'models', modelId], model)
-        queryClient.invalidateQueries(['private', 'algo', 'models'], { exact: true })
+        queryClient.setQueryData(['private', 'model', 'models', modelId], model)
+        queryClient.invalidateQueries(['private', 'model', 'models'], { exact: true })
       },
     },
   )
   const { mutate: deleteModel, isLoading: deletingModel } = useDelete(
-    ['private', 'algo', 'models', modelId],
+    ['private', 'model', 'models', modelId],
     '删除算法',
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['private', 'algo', 'models'])
+        queryClient.invalidateQueries(['private', 'model', 'models'])
       },
     },
   )
@@ -64,7 +69,7 @@ export function useModel(modelId: number) {
     updateModel,
     updatingModel,
 
-    deleteModel,
+    deleteModel: useCallback(() => deleteModel(undefined), []),
     deletingModel,
   }
 }

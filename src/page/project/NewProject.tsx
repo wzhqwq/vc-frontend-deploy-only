@@ -13,7 +13,7 @@ import {
 } from '@mui/joy'
 import { useEffect } from 'react'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function NewProject() {
   const { createProject, creatingProject } = useCreateProject()

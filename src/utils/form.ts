@@ -1,5 +1,3 @@
-import { ConfigParameter, ConfigParameterArray } from '@/types/config/parameter'
-
 export function checkDirty(dirtyFields: any, name: string) {
   const paths = name.split('.')
   let dirtyValue = dirtyFields
@@ -15,18 +13,3 @@ function checkHasTrue(dirtyFields: any): boolean {
     if (typeof value === 'object') return checkHasTrue(value)
   })
 }
-
-// export function generateDefault<T extends Record<any, any>, K extends keyof T>(
-//   parameter: ConfigParameter<'dict', K, T>,
-// ) {
-//   return (
-//     parameter.properties?.reduce((obj, property) => {
-//       if (property.type == 'dict') {
-//         obj[property.key] = generateDefault(property)
-//       } else {
-//         obj[property.key] = property.default
-//       }
-//       return obj
-//     }, {} as T[K]) ?? {}
-//   )
-// }

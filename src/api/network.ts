@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios'
-import { StandardResponse } from './common'
+import { StandardResponse } from '@/types/entity/common'
 import qs from 'qs'
 
 export const baseUrl = 'http://202.194.15.150:6999/api/'

@@ -4,24 +4,6 @@ import qs from 'qs'
 import { useEffect } from 'react'
 import { useSnackbar } from 'notistack'
 
-export interface StandardResponse {
-  code: number
-  data: any
-  msg?: string
-  _links?: Link[]
-}
-
-export interface Link {
-  method: string
-  rel: string
-  href: string
-}
-
-export type ToForm<T> = Omit<T, 'id' | '_links'>
-export interface ResourceIdentifier {
-  id: number
-}
-
 export function usePathMutation<TData = any, TVariables = any>(
   mutationKey: unknown[],
   method: string,

@@ -66,7 +66,6 @@ export function TaskGroupDataGrid({ result }: { result: QueryTaskGroupsResult })
     <StyledDataGrid
       rows={result.taskGroups ?? []}
       columns={taskGroupColumns}
-      autoHeight
       loading={result.fetchingTaskGroups}
     />
   )

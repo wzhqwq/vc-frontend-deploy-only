@@ -7,14 +7,19 @@ import Register from './user/Register'
 
 import Welcome from './index/Welcome'
 import PublicTasks from './index/PublicTasks'
-import ExploreFrame from './explore/ExploreFrame'
+import ExploreFrame from './index/ExploreFrame'
 import Guide from './index/Guide'
 import About from './index/About'
 
 import NewProject from './project/NewProject'
 import ViewProject from './project/ViewProject'
 import EditProject from './project/EditProject'
+
 import ViewTask from './task/ViewTask'
+
+import NewModel from './model/NewModel'
+import ViewModel from './model/ViewModel'
+import EditModel from './model/EditModel'
 
 import OwnProperty from './user/OwnProperty'
 import OwnTasks from './user/OwnTasks'
@@ -70,6 +75,19 @@ export const editProject = {
 
 export const viewTask = {
   Component: ViewTask,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+
+export const newModel = {
+  Component: NewModel,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const viewModel = {
+  Component: ViewModel,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const editModel = {
+  Component: EditModel,
   ErrorBoundary: SimpleErrorBoundary,
 }
 
