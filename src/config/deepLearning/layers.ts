@@ -18,6 +18,9 @@ import {
   ReLUParameters,
   SplitParameters,
   CrossEntropyLossParameters,
+  FlattenParameters,
+  StackParameters,
+  CatParameters,
 } from '@/types/config/details/layers'
 import {
   bottomOutput,
@@ -26,16 +29,22 @@ import {
   generateSplitOutputShapeFn,
   get1DKernelOutputShapeFn,
   get2DKernelOutputShapeFn,
+  getCatOutputShapeFn,
+  getFlattenOutputShapeFn,
   getLinearOutputShapeFn,
+  getStackOutputShapeFn,
   topInput,
 } from './connectorHelper'
 import {
+  catRenderer,
   copyRenderer,
   createLayerConfig,
+  flattenRenderer,
   productRenderer,
   rectRenderer1,
   rectRenderer2,
   splitRenderer,
+  stackRenderer,
   sumRenderer,
 } from './layerHelper'
 import {
@@ -45,6 +54,7 @@ import {
   checkInFeatures,
   checkNumFeatures,
   checkSameInputShape,
+  checkSameInputShapeExceptDim,
 } from './validation'
 
 const base1DKernelParameters: ConfigParameterArray<Base1DKernelParameters> = [
@@ -356,9 +366,16 @@ const tanh = createLayerConfig<{}>({
   outputs: [bottomOutput(generateInputShapeFn(0))],
   parameters: [],
 })
+const softmax = createLayerConfig<{}>({
+  name: 'Softmax',
+  renderer: rectRenderer1,
+  inputs: [topInput(0)],
+  outputs: [bottomOutput(generateInputShapeFn(0))],
+  parameters: [],
+})
 
-const sum = createLayerConfig<{}>({
-  name: 'Sum',
+const addition = createLayerConfig<{}>({
+  name: 'Addition',
   displayName: '',
   renderer: sumRenderer,
   inputs: [topInput(0), topInput(1)],
@@ -366,8 +383,8 @@ const sum = createLayerConfig<{}>({
   parameters: [],
   checkers: [checkSameInputShape],
 })
-const hadamardProduct = createLayerConfig<{}>({
-  name: 'HadamardProduct',
+const multiply = createLayerConfig<{}>({
+  name: 'Multiply',
   displayName: '',
   renderer: productRenderer,
   inputs: [topInput(0), topInput(1)],
@@ -404,6 +421,42 @@ const copy = createLayerConfig<{}>({
   outputs: [bottomOutput(generateInputShapeFn(0)), bottomOutput(generateInputShapeFn(0))],
   parameters: [],
 })
+const flattenParameters: ConfigParameterArray<FlattenParameters> = [
+  { key: 'start_dim', type: 'int', description: '起始维度', inShape: true, default: 0 },
+  { key: 'end_dim', type: 'int', description: '结束维度', inShape: true, default: -1 },
+]
+const flatten = createLayerConfig<FlattenParameters>({
+  name: 'Flatten',
+  renderer: flattenRenderer,
+  inputs: [topInput(0)],
+  outputs: [bottomOutput(getFlattenOutputShapeFn)],
+  parameters: flattenParameters,
+})
+const catParameters: ConfigParameterArray<CatParameters> = [
+  { key: 'dim', type: 'int', description: '沿着哪个维度进行拼接', inShape: true, default: 0 },
+]
+const cat = createLayerConfig<CatParameters>({
+  name: 'Cat',
+  renderer: catRenderer,
+  inputs: [topInput(0), topInput(1)],
+  outputs: [bottomOutput(getCatOutputShapeFn)],
+  parameters: catParameters,
+  checkers: [checkSameInputShapeExceptDim],
+})
+const stackParameters: ConfigParameterArray<StackParameters> = [
+  { key: 'dim', type: 'int', description: '沿着哪个维度进行堆叠', inShape: true, default: 0 },
+]
+const stack = createLayerConfig<StackParameters>({
+  name: 'Stack',
+  renderer: stackRenderer,
+  inputs: [topInput(0), topInput(1)],
+  outputs: [bottomOutput(getStackOutputShapeFn)],
+  parameters: stackParameters,
+  checkers: [checkSameInputShape],
+})
+// const viewParameters: ConfigParameterArray<ViewParameters> = [
+//   { key: 'shape', type: 'str', description: '变换后的形状', inShape: true, default: '0,0' },
+// ]
 
 const inputLayer1 = createLayerConfig<{}>({
   name: 'Input2D',
@@ -441,8 +494,9 @@ export const normalLayers = [
   reLU,
   sigmoid,
   tanh,
+  softmax,
 ]
 
 export const inputLayers = [inputLayer1, inputLayer2, inputLayer3]
-export const tensorProcessingLayers = [sum, hadamardProduct, split, copy]
+export const tensorProcessingLayers = [addition, multiply, split, copy, flatten, cat, stack]
 export const lossLayers = [mseLoss, crossEntropyLoss]

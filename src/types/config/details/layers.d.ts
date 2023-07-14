@@ -73,10 +73,18 @@ export type ReLUParameters = {
   inplace: boolean
 }
 
-export type SplitParameters = {
-  split_size_or_sections: [number, number]
+export type DimParameters = {
   dim: number
 }
+export type SplitParameters = {
+  split_size_or_sections: [number, number]
+} & DimParameters
+export type FlattenParameters = {
+  start_dim: number
+  end_dim: number
+}
+export type CatParameters = DimParameters
+export type StackParameters = DimParameters
 
 export type CrossEntropyLossParameters = {
   size_average: boolean

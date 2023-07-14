@@ -91,7 +91,7 @@ export const splitRenderer: LayerRenderer = {
           `M ${x + w - w / 10} ${y + h / 2 - w / 10} l ${w / 10} ${w / 10} l ${-w / 10} ${w / 10}`,
       )
       .fill('none')
-      .stroke({ color: darkPrimary, width: 4 })
+      .stroke({ color: darkPrimary, width: 4, linecap: 'round', linejoin: 'round' })
   },
 }
 
@@ -105,9 +105,67 @@ export const copyRenderer: LayerRenderer = {
       .plot(
         `M ${x} ${y} h ${(size * 2) / 3} v ${(size * 2) / 3} ` +
           `h ${(-size * 2) / 3} v ${(-size * 2) / 3} ` +
-          `M ${x + (size * 5) / 6} ${y + size / 3} h ${size / 6} v ${(size * 2) / 3} ` +
+          `M ${x + (size * 5) / 6} ${y + size / 3} H ${x + size} V ${y + size} ` +
           `h ${(-size * 2) / 3} v ${-size / 6} ` +
-          `h ${size / 2} v ${-size / 3} `,
+          `H ${x + (size * 5) / 6} V ${-size / 3} `,
+      )
+      .fill({ color: darkPrimary, rule: 'evenodd' })
+  },
+}
+
+export const flattenRenderer: LayerRenderer = {
+  color: 'light',
+  getElement: (box: Box) => {
+    const size = Math.min(box.w, box.h)
+    const x = box.x + box.w / 2 - size / 2
+    const y = box.y + box.h / 2 - size / 2
+    return new Path()
+      .plot(
+        `M ${x} ${y} h ${size} ` +
+          `M ${x} ${y + 10} h ${size} ` +
+          `M ${x} ${y + 20} h ${size} ` +
+          `M ${x} ${y + size} h ${size}` +
+          `M ${x + size / 2} ${y + size / 2 + 10} V ${y + size} ` +
+          `M ${x + size / 2 - 10} ${y + size - 10} ` +
+          `l 10 10 l 10 -10`,
+      )
+      .fill('none')
+      .stroke({ color: darkPrimary, width: 4, linecap: 'round', linejoin: 'round' })
+  },
+}
+
+export const catRenderer: LayerRenderer = {
+  color: 'light',
+  getElement: (box: Box) => {
+    let { x, y, w, h } = box
+    x += 10
+    w -= 20
+    return new Path()
+      .plot(
+        `M ${x + w / 3} ${y} l 0 ${h} ` +
+          `M ${x + (2 * w) / 3} ${y} l 0 ${h} ` +
+          `M ${x + w / 3} ${y + h / 2} l ${-w / 3} 0 ` +
+          `M ${x + (2 * w) / 3} ${y + h / 2} l ${w / 3} 0 ` +
+          `M ${x + w / 3 - w / 10} ${y + h / 2 - w / 10} ` +
+          `l ${w / 10} ${w / 10} l ${-w / 10} ${w / 10}` +
+          `M ${x + (2 * w) / 3 + w / 10} ${y + h / 2 - w / 10} ` +
+          `l ${-w / 10} ${w / 10} l ${w / 10} ${w / 10}`,
+      )
+      .fill('none')
+      .stroke({ color: darkPrimary, width: 4, linecap: 'round', linejoin: 'round' })
+  },
+}
+
+export const stackRenderer: LayerRenderer = {
+  color: 'light',
+  getElement: (box: Box) => {
+    let { x, y, w, h } = box
+    x += 10
+    w -= 20
+    return new Path()
+      .plot(
+        `M ${x} ${y} h ${w} v ${h / 2 - 10} h ${-w} v ${-h / 2 + 10} ` +
+          `M ${x} ${y + h / 2 + 10} h ${w} v ${h / 2 - 10} h ${-w} v ${-h / 2 + 10} `,
       )
       .fill({ color: darkPrimary, rule: 'evenodd' })
   },

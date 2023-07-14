@@ -23,10 +23,16 @@ interface LayerGraphEditorProps {
   filename?: string
   onSave?: (filename: string) => void
   onClose?: () => void
+  readonly?: boolean
 }
 
 const allLayers = [...normalLayers, ...inputLayers, ...lossLayers, ...tensorProcessingLayers]
-export default function LayerGraphEditor({ filename, onSave, onClose }: LayerGraphEditorProps) {
+export default function LayerGraphEditor({
+  filename,
+  onSave,
+  onClose,
+  readonly,
+}: LayerGraphEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>()
   const [anchorEl, setAnchorEl] = useState<null | SVGElement>(null)
@@ -123,16 +129,18 @@ export default function LayerGraphEditor({ filename, onSave, onClose }: LayerGra
           >
             返回
           </Button>
-          <Button
-            variant="solid"
-            color="primary"
-            startDecorator={<SaveIcon />}
-            onClick={handleSave}
-            disabled={uploadingLayer || !scene}
-            loading={uploadingLayer}
-          >
-            保存
-          </Button>
+          {!readonly && (
+            <Button
+              variant="solid"
+              color="primary"
+              startDecorator={<SaveIcon />}
+              onClick={handleSave}
+              disabled={uploadingLayer || !scene}
+              loading={uploadingLayer}
+            >
+              保存
+            </Button>
+          )}
         </Box>
       </Box>
       <Popover
@@ -196,7 +204,7 @@ function LayerList() {
       {normalLayers.map((layer) => (
         <LayerItem config={layer} key={layer.name} />
       ))}
-      <Typography level="h6">输出层</Typography>
+      <Typography level="h6">loss层</Typography>
       {lossLayers.map((layer) => (
         <LayerItem config={layer} key={layer.name} />
       ))}

@@ -3,8 +3,11 @@ import { AllShapePlaceholders, ConfigParameterRecord, ShapeGetter } from '@/type
 import {
   Base1DKernelParameters,
   Base2DKernelParameters,
+  CatParameters,
+  FlattenParameters,
   LinearParameters,
   SplitParameters,
+  StackParameters,
 } from '@/types/config/details/layers'
 
 export const placeholderToShortName: Record<AllShapePlaceholders, string> = {
@@ -166,3 +169,52 @@ export const generateInputLayerOutputShapeFn = (dim: number) =>
       .fill(0)
       .map(() => toVirtualValue(Math.floor(Math.random() * 100 + 1), true))
   }
+
+export function getFlattenOutputShapeFn(
+  inputShapes: DynamicShape[],
+  parameters: FlattenParameters,
+) {
+  if (!inputShapes[0].connected) return undefined
+
+  const dimensions = inputShapes[0].shapeValue
+  const { start_dim, end_dim } = parameters
+  const notFlattenedPrefix = dimensions.slice(0, start_dim)
+  const notFlattenedSuffix = dimensions.slice(end_dim + 1)
+  const dimsToFlatten = dimensions.slice(start_dim, end_dim + 1)
+  if (dimsToFlatten.some((dim) => !dim.available))
+    return [...notFlattenedPrefix, UNAVAILABLE, ...notFlattenedSuffix]
+  const virtual = dimsToFlatten.some((dim) => dim.virtual)
+  const flattened = toVirtualValue(
+    dimsToFlatten.reduce((a, b) => a * b.value, 1),
+    virtual,
+  )
+  return [...notFlattenedPrefix, flattened, ...notFlattenedSuffix]
+}
+
+export function getCatOutputShapeFn(inputShapes: DynamicShape[], parameters: CatParameters) {
+  if (!inputShapes[0].connected || !inputShapes[1].connected) return undefined
+
+  const { dim } = parameters
+  const shape1 = inputShapes[0].shapeValue
+  const shape2 = inputShapes[1].shapeValue
+  const notConcatenatedPrefix = shape1.slice(0, dim)
+  const notConcatenatedSuffix = shape1.slice(dim + 1)
+  if (!shape1[dim].available || !shape2[dim].available)
+    return [...notConcatenatedPrefix, UNAVAILABLE, ...notConcatenatedSuffix]
+  const concatenated = toVirtualValue(
+    shape1[dim].value + shape2[dim].value,
+    shape1[dim].virtual || shape2[dim].virtual,
+  )
+  return [...notConcatenatedPrefix, concatenated, ...notConcatenatedSuffix]
+}
+
+export function getStackOutputShapeFn(
+  inputShapes: DynamicShape[],
+  parameters: StackParameters,
+) {
+  if (!inputShapes[0].connected || !inputShapes[1].connected) return undefined
+
+  const { dim } = parameters
+  const shape1 = inputShapes[0].shapeValue
+  return [...shape1.slice(0, dim), toVirtualValue(2), ...shape1.slice(dim)]
+}

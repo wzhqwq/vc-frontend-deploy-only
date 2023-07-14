@@ -13,10 +13,10 @@ export function ModelInput({ value, onChange, onBlur, readonly }: ModelInputProp
   return (
     <>
       <Stack direction="row" spacing={2} sx={{ my: 1, justifyContent: 'center' }}>
-        <Button size="sm" onClick={() => !readonly && setOpen(true)}>
-          编辑模型
+        <Button size="sm" onClick={() => setOpen(true)}>
+          {readonly ? '查看模型' : '编辑模型'}
         </Button>
-        <Button size="sm">导入模型</Button>
+        {!readonly && <Button size="sm">使用现有模型</Button>}
       </Stack>
       <Modal open={open}>
         <ModalDialog layout="fullscreen">
@@ -27,6 +27,7 @@ export function ModelInput({ value, onChange, onBlur, readonly }: ModelInputProp
               setOpen(false)
               onBlur?.()
             }}
+            readonly={readonly}
           />
         </ModalDialog>
       </Modal>

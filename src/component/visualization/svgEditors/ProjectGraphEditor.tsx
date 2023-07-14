@@ -316,7 +316,6 @@ function Runner({
     if (!tasks) return
     if (tasksToCreate.length) {
       const taskToCreate = tasksToCreate[0]
-      console.log('do create')
       createTask({
         item_id: taskToCreate.id,
         task_type: taskToCreate.task_type,

@@ -2,6 +2,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import FileCopyIcon from '@mui/icons-material/FileCopy'
+import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 
 import { useProject } from '@/api/project'
 import { ProjectGraphEditor } from '@/component/visualization/svgEditors'
@@ -12,6 +13,7 @@ import {
   Chip,
   Divider,
   Grid,
+  IconButton,
   List,
   ListItem,
   ListItemContent,
@@ -33,7 +35,7 @@ import InnerLinkListItemButton from '@/component/basic/innerLink/InnerLinkListIt
 export default function ViewProject() {
   const { id: projectId } = useParams<{ id: string }>()
   const { project, fetchingProject, deleteProject, deletingProject } = useProject(Number(projectId))
-  const { taskGroups, fetchingTaskGroups } = useProjectTaskGroups(Number(projectId))
+  const { taskGroups, fetchingTaskGroups, refetchTaskGroup } = useProjectTaskGroups(Number(projectId))
   const { user } = useUser()
   const isOwner = !!user && user.id === project?.user_id
 
@@ -112,9 +114,14 @@ export default function ViewProject() {
               {fetchingProject && <FakeParagraph />}
             </Card>
             <Card variant="soft">
-              <Typography level="h5" gutterBottom>
-                历史任务
-              </Typography>
+              <Stack direction="row" alignItems="center" justifyContent='space-between'>
+                <Typography level="h5" gutterBottom>
+                  历史任务
+                </Typography>
+                <IconButton onClick={refetchTaskGroup} color='neutral'>
+                  <ReplayRoundedIcon />
+                </IconButton>
+              </Stack>
               <List sx={{ maxHeight: 500, overflow: 'auto' }}>
                 {taskGroups?.map((taskGroup) => (
                   <ListItem key={taskGroup.id}>
