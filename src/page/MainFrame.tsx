@@ -68,7 +68,7 @@ export default function MainFrame() {
             href="/"
           >
             <img src={logo} alt="logo" height={32} width={32} />
-            多模态可视化平台
+            多聚类可视化平台
           </Typography>
           <SearchInput placeholder="平台内搜索…" />
           <Button variant="plain" color="neutral" onClick={() => navigate('/explore/projects')}>

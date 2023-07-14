@@ -11,7 +11,7 @@ export default function Welcome() {
     <Stack alignItems="center" justifyContent="center" height="100%">
       <Stack alignItems="center">
         <img src={logo} alt="logo" width="200" />
-        <Typography level="h4">多模态可视化平台</Typography>
+        <Typography level="h4">多聚类可视化平台</Typography>
         <Stack direction="row" alignItems="center" spacing={0.5} mt={4}>
           <StepBlock step={1} title="上传数据集" badgeContent="xxx个在线公开数据集">
             <ul>
