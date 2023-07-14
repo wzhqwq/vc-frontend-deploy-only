@@ -19,6 +19,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "axios": "^1.4.0",
+    "d3": "^7.8.5",
     "dayjs": "^1.11.8",
     "deep-equal": "^2.2.2",
     "jwt-decode": "^3.1.2",
@@ -62,6 +63,7 @@
     ]
   },
   "devDependencies": {
+    "@types/d3": "^7.4.0",
     "@types/deep-equal": "^1.0.1",
     "@types/qs": "^6.9.7",
     "@vitejs/plugin-react": "^4.0.1",
