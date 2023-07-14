@@ -53,9 +53,9 @@ export function usePlainTextFile(filename: string) {
   return {
     text,
     fetchingFile,
-    uploadFile: useCallback((content: string, type = 'text/plain') => {
+    uploadFile: useCallback((content: string, filename: string, type = 'text/plain') => {
       const blob = new Blob([content], { type })
-      const file = new File([blob], filename)
+      const file = new File([blob], filename, { type })
       return uploadFile({ file })
     }, []),
     uploadingFile,
@@ -79,7 +79,8 @@ export function useLayerData(filename: string) {
     layerData,
     fetchingLayer: fetchingFile,
     uploadLayer: useCallback(
-      (layerData: LayerData<any>[]) => uploadFile(JSON.stringify(layerData), 'application/json'),
+      (layerData: LayerData<any>[]) =>
+        uploadFile(JSON.stringify(layerData), 'config.json', 'application/json'),
       [],
     ),
     uploadingLayer: uploadingFile,

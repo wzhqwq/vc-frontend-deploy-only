@@ -1,10 +1,10 @@
 import { placeholderToShortName } from '@/config/deepLearning/connectorHelper'
 import { joyTheme } from '@/theme'
-import { DynamicShape, VirtualValue } from '@/types/config/deepLearning'
+import { VirtualValue } from '@/types/config/deepLearning'
 import { ShapeParameter, ConfigParameterRecord, AnyDimPlaceholders } from '@/types/config/parameter'
 import { Container, Text } from '@svgdotjs/svg.js'
 
-const shortNameAttr = { fill: joyTheme.vars.palette.primary[200], 'font-weight': 'bold' }
+const shortNameAttr = { fill: joyTheme.vars.palette.primary[200] }
 const placeholderAttr = { fill: joyTheme.vars.palette.neutral[100], 'font-size': 12 }
 const valueAttr = { fill: joyTheme.vars.palette.primary[50] }
 

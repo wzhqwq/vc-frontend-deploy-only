@@ -26,6 +26,7 @@ import { checkDirty } from '@/utils/form'
 import FormModal from './FormModal'
 import FileUpload from './FileUpload'
 import ListModal from './ListModal'
+import { ModelInput } from './ModelInput'
 
 export interface ParameterInputProps {
   parameter: EachTypeOfConfigParameter<any, any>
@@ -115,6 +116,7 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
               )
         case 'tuple2':
         case 'tuple3':
+        case 'tuple4':
           return readonly
             ? (field: ControllerRenderProps) => (
                 <Typography level="h6" color="primary">
@@ -140,22 +142,22 @@ export default function ParameterInput({ prefix, parameter, simple = false }: Pa
         case 'list':
           return () => <ListModal name={name} parameter={parameter} readonly={readonly} />
         case 'file':
-          return readonly
-            ? (field: ControllerRenderProps) => (
-                <FileUpload
-                  value={field.value}
-                  readonly={readonly}
-                  onChange={field.onChange}
-                  onRemove={() => field.onChange('')}
-                />
-              )
-            : (field: ControllerRenderProps) => (
-                <FileUpload
-                  value={field.value}
-                  onChange={field.onChange}
-                  onRemove={() => field.onChange('')}
-                />
-              )
+          return (field: ControllerRenderProps) => (
+            <FileUpload
+              value={field.value}
+              readonly={readonly}
+              onChange={field.onChange}
+              onRemove={() => field.onChange('')}
+            />
+          )
+        case 'model':
+          return (field: ControllerRenderProps) => (
+            <ModelInput
+              value={field.value}
+              onChange={field.onChange}
+              readonly={readonly}
+            />
+          )
         case 'int':
         case 'float':
           return readonly

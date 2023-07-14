@@ -3,13 +3,14 @@ import {
   BioPreprocessParameter,
   ClipConfig,
   ContrastConfig,
-  DeKmeansAlgorithmParameter,
+  CustomDeepAlgorithmParameter,
+  DeKMeansAlgorithmParameter,
   EachAlgorithmParameter,
   EachPreprocessParameter,
   FlipConfig,
   GaussianBlurConfig,
   GaussianNoiseConfig,
-  IMClustesAlgorithmParameter,
+  IMClustersAlgorithmParameter,
   ImgDataConfig,
   ImgPreprocessParameter,
   MNMFAlgorithmParameter,
@@ -180,7 +181,7 @@ export const imgPreprocessConfigDict: DictConfigParameter<ImgDataConfig, 'prepro
 export const imgDataConfigDict: DictConfigParameter<ImgPreprocessParameter, 'data_config'> = {
   key: 'data_config',
   type: 'dict',
-  description: '数据配置',
+  description: '预处理配置',
   multiChoice: false,
   properties: [
     { key: 'width', type: 'int', description: '压缩目标宽度', default: 400 },
@@ -215,7 +216,7 @@ export const imgDataConfigDict: DictConfigParameter<ImgPreprocessParameter, 'dat
 export const textDataConfigDict: DictConfigParameter<TextPreprocessParameter, 'data_config'> = {
   key: 'data_config',
   type: 'dict',
-  description: '数据配置',
+  description: '预处理配置',
   multiChoice: false,
   properties: [
     { key: 'delete_chars', type: 'str', description: '删除字符', default: ',' },
@@ -260,7 +261,7 @@ export const textDataConfigDict: DictConfigParameter<TextPreprocessParameter, 'd
 export const bioDataConfigDict: DictConfigParameter<BioPreprocessParameter, 'data_config'> = {
   key: 'data_config',
   type: 'dict',
-  description: '数据配置',
+  description: '预处理配置',
   multiChoice: false,
   properties: [
     {
@@ -295,7 +296,7 @@ export const bioDataConfigDict: DictConfigParameter<BioPreprocessParameter, 'dat
 export const otherDataConfigDict: DictConfigParameter<OtherPreprocessParameter, 'data_config'> = {
   key: 'data_config',
   type: 'dict',
-  description: '数据配置',
+  description: '预处理配置',
   multiChoice: false,
   properties: [
     { key: 'data_matrix_name', type: 'str', description: '数据文件中矩阵的变量名', default: '' },
@@ -376,7 +377,7 @@ export const preprocessConfigDict: DictConfigParameter<PreprocessTaskData, 'para
 const multiCCOptionDict: DictConfigParameter<MultiCCConfig, 'options'> = {
   key: 'options',
   type: 'dict',
-  description: '算法配置',
+  description: 'MultiCC算法具体配置',
   multiChoice: false,
   properties: [
     {
@@ -407,7 +408,7 @@ const multiCCOptionDict: DictConfigParameter<MultiCCConfig, 'options'> = {
 const multiCCConfigDict: DictConfigParameter<MultiCCAlgorithmParameter, 'algo_config'> = {
   key: 'algo_config',
   type: 'dict',
-  description: '算法配置',
+  description: 'MultiCC算法配置',
   multiChoice: false,
   properties: [
     {
@@ -445,10 +446,10 @@ const multiCCConfigDict: DictConfigParameter<MultiCCAlgorithmParameter, 'algo_co
   },
 }
 
-const deKmeansConfigDict: DictConfigParameter<DeKmeansAlgorithmParameter, 'algo_config'> = {
+const deKMeansConfigDict: DictConfigParameter<DeKMeansAlgorithmParameter, 'algo_config'> = {
   key: 'algo_config',
   type: 'dict',
-  description: '算法配置',
+  description: 'DeKMeans算法配置',
   multiChoice: false,
   properties: [
     {
@@ -491,10 +492,10 @@ const deKmeansConfigDict: DictConfigParameter<DeKmeansAlgorithmParameter, 'algo_
   },
 }
 
-const imClustesConfigDict: DictConfigParameter<IMClustesAlgorithmParameter, 'algo_config'> = {
+const imClustersConfigDict: DictConfigParameter<IMClustersAlgorithmParameter, 'algo_config'> = {
   key: 'algo_config',
   type: 'dict',
-  description: '算法配置',
+  description: 'iMCluster算法配置',
   multiChoice: false,
   properties: [
     {
@@ -533,7 +534,7 @@ const imClustesConfigDict: DictConfigParameter<IMClustesAlgorithmParameter, 'alg
 const oscConfigDict: DictConfigParameter<OSCAlgorithmParameter, 'algo_config'> = {
   key: 'algo_config',
   type: 'dict',
-  description: '算法配置',
+  description: 'OSC算法配置',
   multiChoice: false,
   properties: [
     {
@@ -565,7 +566,7 @@ const oscConfigDict: DictConfigParameter<OSCAlgorithmParameter, 'algo_config'> =
 const mnmfOptionDict: DictConfigParameter<MNMFConfig, 'options'> = {
   key: 'options',
   type: 'dict',
-  description: '算法配置',
+  description: 'MNMF算法具体配置',
   multiChoice: false,
   properties: [
     {
@@ -624,7 +625,7 @@ const mnmfOptionDict: DictConfigParameter<MNMFConfig, 'options'> = {
 const mnmfConfigDict: DictConfigParameter<MNMFAlgorithmParameter, 'algo_config'> = {
   key: 'algo_config',
   type: 'dict',
-  description: '算法配置',
+  description: 'MNMF算法配置',
   multiChoice: false,
   properties: [
     {
@@ -654,15 +655,33 @@ const mnmfConfigDict: DictConfigParameter<MNMFAlgorithmParameter, 'algo_config'>
     options: mnmfOptionDict.default,
   },
 }
+const customDeepConfigDict: DictConfigParameter<CustomDeepAlgorithmParameter, 'algo_config'> = {
+  key: 'algo_config',
+  type: 'dict',
+  description: '自定义模型配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'json_model_name',
+      type: 'model',
+      description: '深度学习模型',
+      default: '3df33176-01b2-4df9-b239-24640cf8526b',
+    },
+  ],
+  default: {
+    json_model_name: '3df33176-01b2-4df9-b239-24640cf8526b',
+  },
+}
 
 const allAlgorithmConfigParameters = [
   multiCCConfigDict,
-  deKmeansConfigDict,
-  imClustesConfigDict,
+  deKMeansConfigDict,
+  imClustersConfigDict,
   oscConfigDict,
   mnmfConfigDict,
+  customDeepConfigDict,
 ] as DictConfigParameter<EachAlgorithmParameter, 'algo_config'>[]
-const algorithmNames = ['MultiCC', 'DeKMeans', 'iMClustes', 'OSC', 'MNMF', 'CustomDeep']
+const algorithmNames = ['MultiCC', 'DeKMeans', 'iMClusters', 'OSC', 'MNMF', 'CustomDeep']
 export const algorithmConfigDict: DictConfigParameter<AlgorithmTaskData, 'parameters'> = {
   key: 'parameters',
   type: 'dict',

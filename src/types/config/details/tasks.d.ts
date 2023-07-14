@@ -156,9 +156,9 @@ export interface MultiCCOptions {
 }
 
 /**
- * DeKmeansConfig
+ * DeKMeansConfig
  */
-export interface DeKmeansConfig {
+export interface DeKMeansConfig {
   /**
    * 最大迭代次数
    */
@@ -182,9 +182,9 @@ export interface DeKmeansConfig {
 }
 
 /**
- * iMClustesConfig
+ * iMClustersConfig
  */
-export interface IMClustesConfig {
+export interface IMClustersConfig {
   /**
    * 迭代次数
    */
@@ -274,15 +274,21 @@ export interface MNMFOptions {
   weight: number
 }
 
+export interface CustomDeepConfig {
+  json_model_name: string
+}
+
 export type MultiCCAlgorithmParameter = AlgorithmParameter<MultiCCConfig>
-export type DeKmeansAlgorithmParameter = AlgorithmParameter<DeKmeansConfig>
-export type IMClustesAlgorithmParameter = AlgorithmParameter<IMClustesConfig>
+export type DeKMeansAlgorithmParameter = AlgorithmParameter<DeKMeansConfig>
+export type IMClustersAlgorithmParameter = AlgorithmParameter<IMClustersConfig>
 export type OSCAlgorithmParameter = AlgorithmParameter<OSCConfig>
 export type MNMFAlgorithmParameter = AlgorithmParameter<MNMFConfig>
+export type CustomDeepAlgorithmParameter = AlgorithmParameter<CustomDeepConfig>
 
 export type EachAlgorithmParameter =
   | MultiCCAlgorithmParameter
-  | DeKmeansAlgorithmParameter
-  | IMClustesAlgorithmParameter
+  | DeKMeansAlgorithmParameter
+  | IMClustersAlgorithmParameter
   | OSCAlgorithmParameter
   | MNMFAlgorithmParameter
+  | CustomDeepAlgorithmParameter

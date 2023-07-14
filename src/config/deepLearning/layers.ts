@@ -281,10 +281,9 @@ const mseLossParameters: ConfigParameterArray<MSELossParameters> = [
 const mseLoss = createLayerConfig<MSELossParameters>({
   name: 'MSELoss',
   renderer: rectRenderer1,
-  inputs: [topInput(0)],
+  inputs: [topInput(0, ['m', 'n'])],
   outputs: [],
   parameters: mseLossParameters,
-  checkers: [checkSameInputShape],
 })
 
 const crossEntropyLossParameters: ConfigParameterArray<CrossEntropyLossParameters> = [
@@ -296,7 +295,7 @@ const crossEntropyLossParameters: ConfigParameterArray<CrossEntropyLossParameter
     selections: ['input_data', 'label'],
   },
   { key: 'is_main_out', type: 'bool', description: '是否为主输出', default: true },
-  { key: 'loss_weight', type: 'float', description: '损失权重', default: 1 },
+  { key: 'loss_weight', type: 'float', description: '损失权重（仅在多标签时起效）', default: 1 },
   { key: 'size_average', type: 'bool', description: '是否对损失进行平均', default: true },
   { key: 'reduce', type: 'bool', description: '是否对损失进行降维', default: true },
   {
@@ -322,10 +321,9 @@ const crossEntropyLossParameters: ConfigParameterArray<CrossEntropyLossParameter
 const crossEntropyLoss = createLayerConfig<CrossEntropyLossParameters>({
   name: 'CrossEntropyLoss',
   renderer: rectRenderer1,
-  inputs: [topInput(0), topInput(1)],
-  outputs: [bottomOutput(generateInputShapeFn(0))],
+  inputs: [topInput(0, ['m', 'n'])],
+  outputs: [],
   parameters: crossEntropyLossParameters,
-  checkers: [checkSameInputShape],
 })
 
 const reLUParameters: ConfigParameterArray<ReLUParameters> = [

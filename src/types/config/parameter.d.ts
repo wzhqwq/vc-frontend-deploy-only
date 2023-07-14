@@ -5,14 +5,16 @@ export type ConfigParameterType =
   | 'float'
   | 'str'
   | 'file'
+  | 'model'
   | 'bool'
   | 'tuple2'
   | 'tuple3'
+  | 'tuple4'
   | 'dict'
   | 'list'
 export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int' | 'float'
   ? number
-  : T extends 'str' | 'file'
+  : T extends 'str' | 'file' | 'model'
   ? string
   : T extends 'bool'
   ? boolean
@@ -20,6 +22,8 @@ export type ConfigParameterValue<T extends ConfigParameterType> = T extends 'int
   ? [number, number]
   : T extends 'tuple3'
   ? [number, number, number]
+  : T extends 'tuple4'
+  ? [number, number, number, number]
   : T extends 'dict'
   ? any
   : T extends 'list'
@@ -79,7 +83,9 @@ export type EachTypeOfConfigParameter<
   | ConfigParameter<Parent, Key, 'bool'>
   | ConfigParameter<Parent, Key, 'tuple2'>
   | ConfigParameter<Parent, Key, 'tuple3'>
+  | ConfigParameter<Parent, Key, 'tuple4'>
   | ConfigParameter<Parent, Key, 'file'>
+  | ConfigParameter<Parent, Key, 'model'>
   | DictConfigParameter<Parent, Key>
   | MultiChoiceDictConfigParameter<Parent, Key>
   | ListConfigParameter<Parent, Key>

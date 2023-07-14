@@ -3,6 +3,7 @@ import LayerItem from '@/component/visualization/LayerItem'
 import {
   layers as allLayers,
   inputLayers,
+  lossLayers,
   tensorProcessingLayers,
 } from '@/config/deepLearning/layers'
 
@@ -22,9 +23,10 @@ import { useLayerData } from '@/api/files'
 interface LayerGraphEditorProps {
   filename?: string
   onSave?: (filename: string) => void
+  onClose?: () => void
 }
 
-export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorProps) {
+export default function LayerGraphEditor({ filename, onSave, onClose }: LayerGraphEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>()
   const [anchorEl, setAnchorEl] = useState<null | SVGElement>(null)
@@ -39,18 +41,15 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
       layer.initializeConnectors(data)
       return layer
     })
-    setScene(
-      new Scene(layers, containerRef.current!, (layer) => {
-        setLayer(layer)
-        setAnchorEl(layer.el.node)
-      }),
-    )
+    const scene = new Scene(layers, containerRef.current!, (layer) => {
+      setLayer(layer)
+      setAnchorEl(layer.el.node)
+    })
+    setScene(scene)
 
     return () => {
-      setScene((s) => {
-        s?.dispose()
-        return undefined
-      })
+      scene.dispose()
+      setScene(undefined)
       setAnchorEl(null)
       setLayer(null)
     }
@@ -116,7 +115,12 @@ export default function LayerGraphEditor({ filename, onSave }: LayerGraphEditorP
             flexShrink: 0,
           }}
         >
-          <Button variant="soft" color="neutral" startDecorator={<ChevronLeftIcon />}>
+          <Button
+            variant="soft"
+            color="neutral"
+            startDecorator={<ChevronLeftIcon />}
+            onClick={onClose}
+          >
             返回
           </Button>
           <Button
@@ -189,6 +193,10 @@ function LayerList() {
       ))}
       <Typography level="h6">中间层</Typography>
       {allLayers.map((layer) => (
+        <LayerItem config={layer} key={layer.name} />
+      ))}
+      <Typography level="h6">输出层</Typography>
+      {lossLayers.map((layer) => (
         <LayerItem config={layer} key={layer.name} />
       ))}
       <Typography level="h6">张量处理层</Typography>

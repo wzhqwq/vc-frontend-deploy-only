@@ -60,55 +60,59 @@ export default function FileUpload({ value, readonly, onChange, onRemove }: File
       }}
       variant="soft"
       color="primary"
-      onClick={triggerDownload}
     >
-      <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
-        {uploadingFile ? (
-          <>
-            <CircularProgress />
-            <Typography level="body3" color="primary">
-              上传中
-            </Typography>
-          </>
-        ) : value ? (
-          <>
+      {uploadingFile ? (
+        <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
+          <CircularProgress />
+          <Typography level="body3" color="primary">
+            上传中
+          </Typography>
+        </Stack>
+      ) : value ? (
+        <>
+          <Stack
+            alignItems="center"
+            justifyContent="center"
+            sx={{ height: '100%' }}
+            onClick={triggerDownload}
+          >
             <Description fontSize="large" />
             <Typography level="body2" sx={{ mb: -1 }} color="primary">
               {fileInfo?.extension.toUpperCase()}
             </Typography>
-            {!readonly && (
-              <IconButton
-                size="sm"
-                onClick={onRemove}
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  transform: 'translate(30%, -30%)',
-                }}
-                color="danger"
-                variant="solid"
-              >
-                <Delete fontSize="small" />
-              </IconButton>
-            )}
-          </>
-        ) : readonly ? (
-          <>
-            <QuestionMarkIcon fontSize="large" />
-            <Typography level="body3" color="primary">
-              未提供
-            </Typography>
-          </>
-        ) : (
-          <>
-            <AddRounded fontSize="large" />
-            <form ref={formRef}>
-              <input type="file" onChange={handleFileChange} />
-            </form>
-          </>
-        )}
-      </Stack>
+          </Stack>
+          {!readonly && (
+            <IconButton
+              size="sm"
+              onClick={onRemove}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                transform: 'translate(30%, -30%)',
+              }}
+              color="danger"
+              variant="solid"
+            >
+              <Delete fontSize="small" />
+            </IconButton>
+          )}
+        </>
+      ) : readonly ? (
+        <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
+          <QuestionMarkIcon fontSize="large" />
+          <Typography level="body3" color="primary">
+            未提供
+          </Typography>
+        </Stack>
+      ) : (
+        <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
+          <AddRounded fontSize="large" />
+          <form ref={formRef}>
+            <input type="file" onChange={handleFileChange} />
+          </form>
+        </Stack>
+      )}
     </Sheet>
   )
 }
