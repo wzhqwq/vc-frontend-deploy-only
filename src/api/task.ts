@@ -74,7 +74,10 @@ export function useCreateTaskGroup(projectId?: number) {
   }
 }
 
-type TaskCreatingForm = Omit<Task, ServerGeneratedKeys | 'data_config'> & { data_config: any }
+type TaskCreatingForm = Pick<
+  Task,
+  'item_id' | 'task_type' | 'pre_task_ids'
+> & { data_config: any }
 
 export function useTaskGroup(groupId?: number, autoUpdate = false) {
   const { data: group, isFetching: fetchingGroup } = useErrorlessQuery<TaskGroup>(
