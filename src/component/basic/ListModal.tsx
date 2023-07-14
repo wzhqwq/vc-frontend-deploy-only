@@ -1,6 +1,6 @@
 import { DictConfigParameter, ListConfigParameter } from '@/types/config/parameter'
 import { Box, Button, Card, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
 import {
   FormProvider,
@@ -8,12 +8,10 @@ import {
   useController,
   useFieldArray,
   useForm,
-  useFormContext,
-  useFormState,
 } from 'react-hook-form'
 
 import AddIcon from '@mui/icons-material/Add'
-import Collapse from '@mui/material/Collapse'
+import { Fade } from '@mui/material'
 
 export interface ListModalProps {
   name: string
@@ -26,8 +24,12 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
   const {
     field: { value, onChange },
   } = useController({ name })
-  const methods = useForm<{ list: any[] }>({ values: { list: value } })
+  const methods = useForm<{ list: any[] }>()
   const { append, fields, remove } = useFieldArray({ name: 'list', control: methods.control })
+
+  useEffect(() => {
+    methods.reset({ list: value })
+  }, [value])
 
   return (
     <>
@@ -57,14 +59,39 @@ export default function ListModal({ name, parameter, readonly }: ListModalProps)
                 </Button>
               )}
             </Stack>
+            <Stack direction="row" mt={2} spacing={2}>
+              <Box sx={{ flexGrow: 1 }} />
+              {!readonly && (
+                <Fade in={methods.formState.isDirty}>
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      onClick={(e) =>
+                        methods
+                          .handleSubmit((data) => onChange(data.list))(e)
+                          .then(() => {
+                            setOpen(false)
+                          })
+                      }
+                      disabled={!methods.formState.isValid}
+                    >
+                      <Box sx={{ flexShrink: 0 }}>保存</Box>
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        methods.reset()
+                      }}
+                      variant="soft"
+                    >
+                      <Box sx={{ flexShrink: 0 }}>重置</Box>
+                    </Button>
+                  </Stack>
+                </Fade>
+              )}
+              <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
+                关闭
+              </Button>
+            </Stack>
           </FormProvider>
-          <Stack direction="row" mt={2}>
-            <Box sx={{ flexGrow: 1 }} />
-            <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
-              关闭
-            </Button>
-            {!readonly && <SaveIndicator onChange={onChange} onClose={() => setOpen(false)} />}
-          </Stack>
         </ModalDialog>
       </Modal>
     </>
@@ -126,32 +153,5 @@ function ListItemCard({
         {parameterList}
       </Box>
     </Card>
-  )
-}
-
-function SaveIndicator({
-  onChange,
-  onClose,
-}: {
-  onChange: (value: any) => void
-  onClose: () => void
-}) {
-  const { isDirty, isValid } = useFormState()
-  const { handleSubmit } = useFormContext()
-  return (
-    <Collapse in={isDirty} orientation="horizontal">
-      <Button
-        onClick={(e) =>
-          handleSubmit((data) => onChange(data.list))(e).then(() => {
-            onClose()
-          })
-        }
-        disabled={!isValid}
-        variant="soft"
-        sx={{ ml: 2 }}
-      >
-        <Box sx={{ flexShrink: 0 }}>保存</Box>
-      </Button>
-    </Collapse>
   )
 }

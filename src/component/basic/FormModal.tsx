@@ -1,9 +1,9 @@
 import { DictConfigParameter } from '@/types/config/parameter'
 import { Box, Button, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
-import { FormProvider, useController, useForm, useFormContext, useFormState } from 'react-hook-form'
-import { Collapse } from '@mui/material'
+import { FormProvider, useController, useForm } from 'react-hook-form'
+import { Fade } from '@mui/material'
 
 export interface FormModalProps {
   name: string
@@ -21,7 +21,7 @@ export default function FormModal({
   const {
     field: { value, onChange },
   } = useController({ name })
-  const methods = useForm<{ dict: any }>({ values: { dict: value } })
+  const methods = useForm<{ dict: any }>()
   const columns = properties.length > 3 ? Math.max(2, properties.length / 3).toFixed(0) : 1
   const parameterList = useMemo(
     () =>
@@ -30,6 +30,10 @@ export default function FormModal({
       )),
     [properties],
   )
+
+  useEffect(() => {
+    methods.reset({ dict: value })
+  }, [value])
 
   return (
     <>
@@ -51,43 +55,41 @@ export default function FormModal({
             >
               {parameterList}
             </Box>
-            <Stack direction="row" mt={2}>
+            <Stack direction="row" mt={2} spacing={2}>
               <Box sx={{ flexGrow: 1 }} />
+              {!readonly && (
+                <Fade in={methods.formState.isDirty}>
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      onClick={(e) =>
+                        methods
+                          .handleSubmit((data) => onChange(data.dict))(e)
+                          .then(() => {
+                            setOpen(false)
+                          })
+                      }
+                      disabled={!methods.formState.isValid}
+                    >
+                      <Box sx={{ flexShrink: 0 }}>保存</Box>
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        methods.reset()
+                      }}
+                      variant="soft"
+                    >
+                      <Box sx={{ flexShrink: 0 }}>重置</Box>
+                    </Button>
+                  </Stack>
+                </Fade>
+              )}
               <Button onClick={() => setOpen(false)} variant="soft" color="neutral">
                 关闭
               </Button>
-              {!readonly && <SaveIndicator onChange={onChange} onClose={() => setOpen(false)} />}
             </Stack>
           </FormProvider>
         </ModalDialog>
       </Modal>
     </>
-  )
-}
-
-function SaveIndicator({
-  onChange,
-  onClose,
-}: {
-  onChange: (value: any) => void
-  onClose: () => void
-}) {
-  const { isDirty, isValid } = useFormState()
-  const { handleSubmit } = useFormContext()
-  return (
-    <Collapse in={isDirty} orientation="horizontal">
-      <Button
-        onClick={(e) =>
-          handleSubmit((data) => onChange(data.dict))(e).then(() => {
-            onClose()
-          })
-        }
-        disabled={!isValid}
-        variant="soft"
-        sx={{ ml: 2 }}
-      >
-        <Box sx={{ flexShrink: 0 }}>保存</Box>
-      </Button>
-    </Collapse>
   )
 }
