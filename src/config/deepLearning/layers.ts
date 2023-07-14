@@ -234,7 +234,13 @@ const batchNorm2d = createLayerConfig<BatchNormParameters>({
 
 const linearParameters: ConfigParameterArray<LinearParameters> = [
   { key: 'in_features', type: 'int', description: '输入数据特征向量的长度', default: 1 },
-  { key: 'out_features', type: 'int', description: '输出数据特征向量的长度', default: 1 },
+  {
+    key: 'out_features',
+    type: 'int',
+    description: '输出数据特征向量的长度',
+    inShape: true,
+    default: 1,
+  },
   { key: 'bias', type: 'bool', description: '是否添加偏置', default: true },
 ]
 const linear = createLayerConfig<LinearParameters>({
@@ -375,9 +381,10 @@ const splitParameters: ConfigParameterArray<SplitParameters> = [
     key: 'split_size_or_sections',
     type: 'tuple2',
     description: '将输入分成给定大小的部分',
+    inShape: true,
     default: [0, 0],
   },
-  { key: 'dim', type: 'int', description: '沿着哪个维度进行切分', default: 0 },
+  { key: 'dim', type: 'int', description: '沿着哪个维度进行切分', inShape: true, default: 0 },
 ]
 const split = createLayerConfig<SplitParameters>({
   name: 'Split',
@@ -420,7 +427,7 @@ const inputLayer3 = createLayerConfig<{}>({
   parameters: [],
 })
 
-export const layers = [
+export const normalLayers = [
   conv1d,
   conv2d,
   maxPool1d,

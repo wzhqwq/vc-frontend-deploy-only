@@ -1,7 +1,7 @@
 import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
 import {
-  layers as allLayers,
+  normalLayers,
   inputLayers,
   lossLayers,
   tensorProcessingLayers,
@@ -26,6 +26,7 @@ interface LayerGraphEditorProps {
   onClose?: () => void
 }
 
+const allLayers = [...normalLayers, ...inputLayers, ...lossLayers, ...tensorProcessingLayers]
 export default function LayerGraphEditor({ filename, onSave, onClose }: LayerGraphEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<Scene>()
@@ -144,9 +145,10 @@ export default function LayerGraphEditor({ filename, onSave, onClose }: LayerGra
       >
         {layer && (
           <>
-            <Box sx={{ borderBottom: '1px solid', borderBottomColor: 'divider', p: 1 }}>
+            <Box sx={{ p: 2 }}>
               <Typography level="h6">设置参数： {layer.config.name}</Typography>
             </Box>
+            <Divider />
             <LayerInfo layer={layer} onClose={() => setAnchorEl(null)} />
           </>
         )}
@@ -192,7 +194,7 @@ function LayerList() {
         <LayerItem config={layer} key={layer.name} />
       ))}
       <Typography level="h6">中间层</Typography>
-      {allLayers.map((layer) => (
+      {normalLayers.map((layer) => (
         <LayerItem config={layer} key={layer.name} />
       ))}
       <Typography level="h6">输出层</Typography>
@@ -235,7 +237,7 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
   const columns = Math.max(2, layer.config.parameters.length / 3).toFixed(0)
 
   return (
-    <Box sx={{ p: 1, minWidth: 200 }}>
+    <Box sx={{ p: 2, minWidth: 200 }}>
       <FormProvider {...methods}>
         <Box
           sx={{
@@ -247,7 +249,7 @@ function LayerInfo({ layer, onClose }: { layer: Layer; onClose: () => void }) {
           {parameterList}
         </Box>
       </FormProvider>
-      <Stack direction="row" spacing={1} mt={1}>
+      <Stack direction="row" spacing={2} mt={2}>
         <Button disabled={!isValid} onClick={handleSubmit(onSubmit)}>
           <CheckIcon />
         </Button>
