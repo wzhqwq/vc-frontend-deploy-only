@@ -3,10 +3,25 @@ import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import SaveIcon from '@mui/icons-material/Save'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import FullscreenIcon from '@mui/icons-material/Fullscreen'
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 
 import { ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
-import { Box, Button, Divider, FormLabel, Stack, Typography } from '@mui/joy'
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  Divider,
+  FormLabel,
+  IconButton,
+  Modal,
+  ModalDialog,
+  ModalOverflow,
+  Stack,
+  Typography,
+} from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useCreateTaskGroup, useTaskGroup } from '@/api/task'
 import { AlgorithmTaskCard, PreprocessTaskCard } from './TaskCard'
@@ -14,7 +29,6 @@ import { nanoid } from 'nanoid'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
 import { useProject } from '@/api/project'
 import { useNavigate } from 'react-router-dom'
-import Collapse from '@mui/material/Collapse'
 import Fade from '@mui/material/Fade'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { TASK_CREATED, TASK_FINISHED } from '@/utils/constants'
@@ -22,6 +36,7 @@ import { TaskConnectingContextProvider } from '@/component/context/TaskConnectin
 import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
 import { BigSwitch } from '@/component/basic/CustomInput'
 import equal from 'deep-equal'
+import { joyTheme } from '@/theme'
 
 interface ProjectGraphEditorProps {
   readonly?: boolean
@@ -45,6 +60,7 @@ export default function ProjectGraphEditor({
     handleSubmit,
   } = methods
   const [useGroupConfig, setUseGroupConfig] = useState(true)
+  const [fullscreen, setFullscreen] = useState(false)
   const config = useMemo(() => {
     const projectConfig = project?.config
     // 必须有项目配置
@@ -113,73 +129,82 @@ export default function ProjectGraphEditor({
     return pureTasks.map(keepFinishedTask)
   }, [config, tasks])
 
-  return project ? (
-    <Box>
+  const content = project ? (
+    <>
       <Box
-        sx={(theme) => ({
+        sx={{
           position: 'sticky',
-          top: 0,
-          bgcolor: theme.vars.palette.background.surface,
+          mt: -2,
+          top: fullscreen ? -24 : 0,
+          bgcolor: joyTheme.vars.palette.background.surface,
           zIndex: 200,
-        })}
+        }}
       >
-        <Collapse in={(!readonly && isDirty) || canRun}>
-          <Stack direction="row" alignItems="center" spacing={2} p={1}>
-            {groupId && (
-              <>
-                <FormLabel>配置图来源</FormLabel>
-                <BigSwitch
-                  checked={useGroupConfig}
-                  onChange={(e) => setUseGroupConfig(e.target.checked)}
-                  onLabel="任务"
-                  offLabel="项目"
-                />
-              </>
-            )}
-            <Box sx={{ flexGrow: 1 }} />
-            <Fade in={!readonly && isDirty}>
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={2}
-                sx={{ '.MuiButton-root': { flexShrink: 0 } }}
+        <Stack direction="row" alignItems="center" spacing={2} py={2}>
+          <Typography level='h5'>
+            项目配置图
+          </Typography>
+          {readonly && (
+            <Chip size='sm' variant='outlined'>只读</Chip>
+          )}
+          {groupId && (
+            <>
+              <FormLabel>配置图来源</FormLabel>
+              <BigSwitch
+                checked={useGroupConfig}
+                onChange={(e) => setUseGroupConfig(e.target.checked)}
+                onLabel="任务"
+                offLabel="项目"
+              />
+            </>
+          )}
+          <Box sx={{ flexGrow: 1 }} />
+          <Fade in={!readonly && isDirty}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={2}
+              sx={{ '.MuiButton-root': { flexShrink: 0 } }}
+            >
+              <Button
+                variant="solid"
+                startDecorator={<SaveIcon />}
+                color="primary"
+                onClick={handleSubmit((data) =>
+                  updateProject({
+                    ...project,
+                    config: {
+                      preProcesses: data.preProcesses.map(({ taskId: _, ...rest }) => rest),
+                      algorithms: data.algorithms.map(({ taskId: _, ...rest }) => rest),
+                      analyses: data.analyses.map(({ taskId: _, ...rest }) => rest),
+                    },
+                  }).then(() => {
+                    if (groupId) setUseGroupConfig(false)
+                  }),
+                )}
+                disabled={!isValid || updatingProject}
+                loading={updatingProject}
               >
-                <Button
-                  variant="solid"
-                  startDecorator={<SaveIcon />}
-                  color="primary"
-                  onClick={handleSubmit((data) =>
-                    updateProject({
-                      ...project,
-                      config: {
-                        preProcesses: data.preProcesses.map(({ taskId: _, ...rest }) => rest),
-                        algorithms: data.algorithms.map(({ taskId: _, ...rest }) => rest),
-                        analyses: data.analyses.map(({ taskId: _, ...rest }) => rest),
-                      },
-                    }).then(() => {
-                      if (groupId) setUseGroupConfig(false)
-                    }),
-                  )}
-                  disabled={!isValid || updatingProject}
-                  loading={updatingProject}
-                >
-                  {groupId ? '保存至项目' : '保存'}
-                </Button>
-                <Button
-                  variant="soft"
-                  startDecorator={<ReplayRoundedIcon />}
-                  color="primary"
-                  onClick={() => reset()}
-                >
-                  重置
-                </Button>
-              </Stack>
-            </Fade>
-            <Collapse in={canRun && allTasks.length > 0} orientation="horizontal">
-              <Runner project={project} noRestart={!groupId} allTasks={allTasks} />
-            </Collapse>
-          </Stack>
-        </Collapse>
+                {groupId ? '保存至项目' : '保存'}
+              </Button>
+              <Button
+                variant="soft"
+                startDecorator={<ReplayRoundedIcon />}
+                color="primary"
+                onClick={() => reset()}
+              >
+                重置
+              </Button>
+            </Stack>
+          </Fade>
+          {canRun && allTasks.length > 0 && (
+            <Runner project={project} noRestart={!groupId} allTasks={allTasks} />
+          )}
+          <IconButton onClick={() => setFullscreen((s) => !s)} color="neutral">
+            {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        </Stack>
+        <Divider sx={{ mx: -2 }} />
       </Box>
       <FormProvider {...methods}>
         <ReadonlyContext.Provider value={readonly}>
@@ -227,8 +252,18 @@ export default function ProjectGraphEditor({
           </Box>
         </ReadonlyContext.Provider>
       </FormProvider>
-    </Box>
+    </>
   ) : null
+
+  return fullscreen ? (
+    <Modal open>
+      <ModalOverflow>
+        <ModalDialog layout="fullscreen" sx={{ p: 2 }}>{content}</ModalDialog>
+      </ModalOverflow>
+    </Modal>
+  ) : (
+    <Card variant="outlined">{content}</Card>
+  )
 }
 
 interface TaskSlotProps<T extends Record<string, any>> {

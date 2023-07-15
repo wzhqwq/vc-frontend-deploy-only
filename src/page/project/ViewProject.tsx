@@ -31,6 +31,7 @@ import { taskStatusIcon, taskStatusText } from '@/component/basic/chips'
 import { useUser } from '@/api/user'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
 import InnerLinkListItemButton from '@/component/basic/innerLink/InnerLinkListItemButton'
+import { useState } from 'react'
 
 export default function ViewProject() {
   const { id: projectId } = useParams<{ id: string }>()
@@ -98,14 +99,14 @@ export default function ViewProject() {
           </>
         )}
       </Stack>
-      <Divider sx={{ mt: 2 }} />
-      <Grid container spacing={4}>
+      <Divider sx={{ my: 2 }} />
+      <Grid container spacing={2}>
         <Grid sm={12} md={9}>
           {fetchingProject && <Skeleton variant="rounded" width="100%" height={300} />}
           <ProjectGraphEditor projectId={Number(projectId)} canRun={isOwner} readonly />
         </Grid>
         <Grid sm={12} md={3}>
-          <Stack spacing={2} mt={2}>
+          <Stack spacing={2}>
             <Card variant="soft">
               <Typography level="h5" gutterBottom>
                 项目描述

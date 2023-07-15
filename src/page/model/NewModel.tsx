@@ -23,7 +23,7 @@ export default function NewModel() {
       title: '',
       description: '',
       private: false,
-      file_id: emptyLayerFile.id,
+      filename: emptyLayerFile.filename,
       kind: 1,
     },
   })

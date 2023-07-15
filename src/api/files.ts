@@ -87,11 +87,11 @@ export function useLayerData(filename: string) {
   }
 }
 export const emptyLayerFile: FileInfo = {
-  "id": 96,
-  "filename": "3df33176-01b2-4df9-b239-24640cf8526b",
-  "content_type": "application/json",
-  "extension": "json",
-  "created_at": "2023-07-14T10:53:15+08:00"
+  id: 96,
+  filename: '3df33176-01b2-4df9-b239-24640cf8526b',
+  content_type: 'application/json',
+  extension: 'json',
+  created_at: '2023-07-14T10:53:15+08:00',
 }
 
 export function useFileInfo(filename?: string) {
@@ -99,6 +99,21 @@ export function useFileInfo(filename?: string) {
     {
       queryKey: ['public', 'file', 'file_info', { filename }],
       enabled: !!filename,
+    },
+    '获取文件信息失败',
+  )
+
+  return {
+    fileInfo,
+    fetchingFileInfo,
+  }
+}
+
+export function useFileInfoById(id?: number) {
+  const { data: fileInfo, isFetching: fetchingFileInfo } = useErrorlessQuery<FileInfo>(
+    {
+      queryKey: ['public', 'file', 'file_info', { id }],
+      enabled: !!id,
     },
     '获取文件信息失败',
   )

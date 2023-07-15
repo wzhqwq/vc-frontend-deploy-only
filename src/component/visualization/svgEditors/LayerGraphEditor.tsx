@@ -2,8 +2,11 @@ import SaveIcon from '@mui/icons-material/Save'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import CheckIcon from '@mui/icons-material/Check'
 import DeleteIcon from '@mui/icons-material/Delete'
-import ParameterInput from '@/component/basic/ParameterInput'
+import CloseIcon from '@mui/icons-material/Close'
+import FullscreenIcon from '@mui/icons-material/Fullscreen'
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 
+import ParameterInput from '@/component/basic/ParameterInput'
 import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/LayerItem'
 import {
@@ -12,12 +15,24 @@ import {
   lossLayers,
   tensorProcessingLayers,
 } from '@/config/deepLearning/layers'
-import { Box, Button, CircularProgress, Divider, Stack, Typography } from '@mui/joy'
+import {
+  Box,
+  Button,
+  Card,
+  CircularProgress,
+  Divider,
+  IconButton,
+  Modal,
+  ModalDialog,
+  Stack,
+  Typography,
+} from '@mui/joy'
 import { Layer } from '@/component/svgCompoent/Layer'
 import { Popover } from '@mui/material'
 import { useForm, SubmitHandler, FormProvider } from 'react-hook-form'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLayerData } from '@/api/files'
+import { joyTheme } from '@/theme'
 
 interface LayerGraphEditorProps {
   filename?: string
@@ -37,6 +52,7 @@ export default function LayerGraphEditor({
   const [scene, setScene] = useState<Scene>()
   const [anchorEl, setAnchorEl] = useState<null | SVGElement>(null)
   const [layer, setLayer] = useState<Layer | null>(null)
+  const [fullscreen, setFullscreen] = useState(false)
   const { layerData, fetchingLayer, uploadLayer, uploadingLayer } = useLayerData(filename ?? 'new')
 
   useEffect(() => {
@@ -47,11 +63,12 @@ export default function LayerGraphEditor({
       layer.initializeConnectors(data)
       return layer
     })
-    const scene = new Scene(layers, containerRef.current!, (layer) => {
+    const scene = new Scene(layers, (layer) => {
       setLayer(layer)
       setAnchorEl(layer.el.node)
     })
     setScene(scene)
+    scene.attach(containerRef.current!)
 
     return () => {
       scene.dispose()
@@ -59,7 +76,7 @@ export default function LayerGraphEditor({
       setAnchorEl(null)
       setLayer(null)
     }
-  }, [layerData])
+  }, [layerData, fullscreen])
 
   const handleSave = useCallback(() => {
     if (!scene) return
@@ -68,17 +85,13 @@ export default function LayerGraphEditor({
     })
   }, [scene])
 
-  return (
+  const content = (
     <Box
       sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        height: '100vh',
-        width: '100vw',
+        height: '100%',
+        minHeight: 500,
         display: 'grid',
-        bgcolor: 'white',
-        gridTemplateColumns: 'minmax(400px, 1fr) auto 400px',
+        gridTemplateColumns: readonly ? '1fr' : 'minmax(400px, 1fr) auto 400px',
         '.svg-container': {
           overflow: 'hidden',
           svg: {
@@ -97,69 +110,97 @@ export default function LayerGraphEditor({
         onDrop={scene?.drop}
         className="svg-container"
       />
-      <Divider orientation="vertical" />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
-        <Box sx={{ p: 1 }}>
-          <Typography level="h6">拖拽层至左侧虚线框</Typography>
-        </Box>
-        <Divider />
-        <LayerListMemo />
-        <Divider />
-        <Box
-          sx={{
-            px: 2,
-            py: 1,
-            display: 'flex',
-            gap: 2,
-            justifyContent: 'flex-end',
-            flexShrink: 0,
-          }}
-        >
-          <Button
-            variant="soft"
-            color="neutral"
-            startDecorator={<ChevronLeftIcon />}
-            onClick={onClose}
+      {!readonly && (
+        <>
+          <Divider orientation="vertical" />
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
           >
-            返回
-          </Button>
-          {!readonly && (
-            <Button
-              variant="solid"
-              color="primary"
-              startDecorator={<SaveIcon />}
-              onClick={handleSave}
-              disabled={uploadingLayer || !scene}
-              loading={uploadingLayer}
-            >
-              保存
-            </Button>
-          )}
-        </Box>
-      </Box>
-      <Popover
-        open={!!anchorEl}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        {layer && (
-          <>
-            <Box sx={{ p: 2 }}>
-              <Typography level="h6">设置参数： {layer.config.name}</Typography>
-            </Box>
+            <Stack direction="row" alignItems="center" sx={{ p: 1 }}>
+              <Typography level="h6">拖拽层至左侧虚线框</Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              {!onClose && (
+                <IconButton onClick={() => setFullscreen((s) => !s)} color="neutral">
+                  {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              )}
+            </Stack>
             <Divider />
-            <LayerInfo layer={layer} onClose={() => setAnchorEl(null)} />
-          </>
-        )}
-      </Popover>
+            <LayerListMemo />
+            <Divider />
+            <Box
+              sx={{
+                px: 2,
+                py: 1,
+                display: 'flex',
+                gap: 2,
+                justifyContent: 'flex-end',
+                flexShrink: 0,
+              }}
+            >
+              {!!onClose && (
+                <Button
+                  variant="soft"
+                  color="neutral"
+                  startDecorator={<ChevronLeftIcon />}
+                  onClick={onClose}
+                >
+                  返回
+                </Button>
+              )}
+              <Button
+                variant="solid"
+                color="primary"
+                startDecorator={<SaveIcon />}
+                onClick={handleSave}
+                disabled={uploadingLayer || !scene}
+                loading={uploadingLayer}
+              >
+                保存
+              </Button>
+            </Box>
+          </Box>
+          <Popover
+            open={!!anchorEl}
+            anchorEl={anchorEl}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+          >
+            {layer && (
+              <>
+                <Box sx={{ p: 2 }}>
+                  <Typography level="h6">设置参数： {layer.config.name}</Typography>
+                </Box>
+                <Divider />
+                <LayerInfo layer={layer} onClose={() => setAnchorEl(null)} />
+              </>
+            )}
+          </Popover>
+        </>
+      )}
+      {readonly &&
+        (onClose ? (
+          <IconButton
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+            onClick={onClose}
+            color="neutral"
+          >
+            <CloseIcon />
+          </IconButton>
+        ) : (
+          <IconButton
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+            onClick={() => setFullscreen((s) => !s)}
+            color="neutral"
+          >
+            {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        ))}
       <CircularProgress
         sx={{
           position: 'absolute',
@@ -170,6 +211,28 @@ export default function LayerGraphEditor({
         }}
       />
     </Box>
+  )
+
+  return onClose ? (
+    content
+  ) : fullscreen ? (
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        bgcolor: joyTheme.vars.palette.background.body,
+        zIndex: joyTheme.vars.zIndex.modal,
+      }}
+    >
+      {content}
+    </Box>
+  ) : (
+    <Card variant="outlined" sx={{ p: 0, height: 700 }}>
+      {content}
+    </Card>
   )
 }
 

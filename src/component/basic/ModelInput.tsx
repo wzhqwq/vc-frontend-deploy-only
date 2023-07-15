@@ -19,7 +19,7 @@ export function ModelInput({ value, onChange, onBlur, readonly }: ModelInputProp
         {!readonly && <Button size="sm">使用现有模型</Button>}
       </Stack>
       <Modal open={open}>
-        <ModalDialog layout="fullscreen">
+        <ModalDialog layout="fullscreen" sx={{ p: 0 }}>
           <LayerGraphEditor
             filename={value}
             onSave={onChange}

@@ -1,8 +1,13 @@
+import { joyTheme } from '@/theme'
 import * as d3 from 'd3'
 import { useEffect, useRef } from 'react'
 
 const MARGIN_X = 50
 const MARGIN_Y = 30
+
+const LINE_COLOR_1 = joyTheme.vars.palette.primary[500]
+const LINE_COLOR_1_LIGHT = joyTheme.vars.palette.primary[100]
+const LINE_COLOR_2 = joyTheme.vars.palette.primary[300]
 
 type SvgSelection = d3.Selection<SVGSVGElement, undefined, null, undefined>
 type GroupSelection = d3.Selection<SVGGElement, undefined, null, undefined>
@@ -53,41 +58,47 @@ const updateYAxis = (group: GroupSelection, y: d3.AxisScale<d3.NumberValue>) => 
 }
 
 export interface LinePlotProps {
-  data: number[]
+  data: [number[], number[]]
   xLabel: string
   yLabel: string
   width?: number
   height?: number
 }
-interface LinePlotController {
+interface DoubleLinePlotController {
   svg: SVGElement
-  doUpdate: (data: number[]) => void
+  doUpdate: (data: [number[], number[]]) => void
 }
-function generateLinePlot(
+function generateDoubleLinePlot(
   xLabel: string,
   yLabel: string,
   width: number,
   height: number,
-): LinePlotController {
+): DoubleLinePlotController {
   const svg = getSvg(width, height)
   const [xGroup, yGroup] = getAxisGroup(svg, xLabel, yLabel, width, height)
 
-  const path = svg
+  const path1 = svg
     .append('path')
     .attr('fill', 'none')
-    .attr('stroke', 'steelblue')
-    .attr('stroke-width', 1.5)
+    .attr('stroke', LINE_COLOR_1)
+    .attr('stroke-width', 2)
+  const path2 = svg
+    .append('path')
+    .attr('fill', 'none')
+    .attr('stroke', LINE_COLOR_2)
+    .attr('stroke-width', 2)
 
-  const doUpdate = (data: number[]) => {
+  const doUpdate = (data: [number[], number[]]) => {
     const x = d3.scaleLinear([0, data.length], [MARGIN_X, width - MARGIN_X])
-    const y = d3.scaleLinear([0, Math.max(...data)], [height - MARGIN_Y, MARGIN_Y])
+    const y = d3.scaleLinear([0, Math.max(...data.flat())], [height - MARGIN_Y, MARGIN_Y])
     updateXAxis(xGroup, x)
     updateYAxis(yGroup, y)
     const line = d3.line<number>(
       (_, i) => x(i),
       (d) => y(d),
     )
-    path.transition().duration(300).attr('d', line(data))
+    path1.transition().duration(300).attr('d', line(data[0]))
+    path2.transition().duration(300).attr('d', line(data[1]))
   }
 
   return {
@@ -97,10 +108,10 @@ function generateLinePlot(
 }
 export function LinePlot({ data, xLabel, yLabel, width = 500, height = 400 }: LinePlotProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const components = useRef<LinePlotController>()
+  const components = useRef<DoubleLinePlotController>()
   useEffect(() => {
     if (ref.current) {
-      components.current = generateLinePlot(xLabel, yLabel, width, height)
+      components.current = generateDoubleLinePlot(xLabel, yLabel, width, height)
       ref.current.appendChild(components.current.svg)
       return () => {
         ref.current?.removeChild(components.current!.svg)
@@ -112,4 +123,19 @@ export function LinePlot({ data, xLabel, yLabel, width = 500, height = 400 }: Li
   }, [data])
 
   return <div ref={ref} />
+}
+
+interface RidgeLinePlotController {
+  svg: SVGElement
+  doUpdate: (data: number[][]) => void
+}
+function generateRidgeLinePlot(
+  xLabel: string,
+  yLabel: string,
+  width: number,
+  height: number,
+  overlap: number,
+) {
+  const svg = getSvg(width, height)
+  const [xGroup, yGroup] = getAxisGroup(svg, xLabel, yLabel, width, height)
 }

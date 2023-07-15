@@ -9,10 +9,10 @@ export class Scene {
   public readonly layout: Layout
   private activeLayer: Layer | null = null
   private moving = false
+  private observer: ResizeObserver | null = null
 
   constructor(
     private layers: Layer[],
-    private parent: HTMLElement,
     private onLayerClick: (layer: Layer) => void,
   ) {
     this.layout = new Layout(layers)
@@ -20,16 +20,12 @@ export class Scene {
       layer.scene = this
     })
     this.el.add(this.layout.el)
-    this.updateSize()
-    this.layout.el.translate((this.el.width() as number) / 2, 20)
-    this.el.addTo(parent)
 
     this.dragStart = this.dragStart.bind(this)
     this.dragEnter = this.dragEnter.bind(this)
     this.dragEnd = this.dragEnd.bind(this)
     this.dragLeave = this.dragLeave.bind(this)
     this.drop = this.drop.bind(this)
-    this.updateSize = this.updateSize.bind(this)
     this.mouseMove = this.mouseMove.bind(this)
 
     this.el.on('mousedown', (e) => {
@@ -40,13 +36,22 @@ export class Scene {
       this.moving = false
     })
 
-    window.addEventListener('resize', this.updateSize)
     window.addEventListener('mousemove', this.mouseMove)
   }
 
-  private updateSize() {
-    this.el.size(this.parent.clientWidth, this.parent.clientHeight)
+  public attach(parent: HTMLElement) {
+    this.el.addTo(parent)
+    const updateSize = () => {
+      this.el.size(parent.clientWidth, parent.clientHeight)
+      this.layout.el.transform({
+        relative: [(this.el.width() as number) / 2, 20],
+      })
+    }
+    this.observer?.disconnect()
+    this.observer = new ResizeObserver(updateSize)
+    this.observer.observe(parent)
   }
+
   public mouseMove(e: MouseEvent) {
     if (!this.moving) return
     this.layout.el.translate(e.movementX, e.movementY)
@@ -61,8 +66,8 @@ export class Scene {
     this.el.remove()
     this.layers.forEach((l) => l.cleanup())
     Label.virtualValueMap = {}
-    window.removeEventListener('resize', this.updateSize)
     window.removeEventListener('mousemove', this.mouseMove)
+    this.observer?.disconnect()
   }
 
   public setPossibleDraggingLayer(layer: Layer | null) {

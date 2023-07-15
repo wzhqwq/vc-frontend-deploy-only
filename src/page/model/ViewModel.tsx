@@ -3,25 +3,16 @@ import EditIcon from '@mui/icons-material/Edit'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import { useModel } from '@/api/model'
-import {
-  Box,
-  Button,
-  Card,
-  Chip,
-  Divider,
-  Grid,
-  Stack,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, Card, Chip, Divider, Grid, Stack, Typography } from '@mui/joy'
 import { Skeleton } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { FakeParagraph } from '@/utils/fake'
 import { UserWidget } from '@/component/basic/getters'
 import { formatTime } from '@/utils/time'
-import { taskStatusIcon, taskStatusText } from '@/component/basic/chips'
 import { useUser } from '@/api/user'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
-import InnerLinkListItemButton from '@/component/basic/innerLink/InnerLinkListItemButton'
+import { LayerGraphEditor } from '@/component/visualization/svgEditors'
+import { useFileInfoById } from '@/api/files'
 
 export default function ViewModel() {
   const { id: modelId } = useParams<{ id: string }>()
@@ -48,8 +39,8 @@ export default function ViewModel() {
               </Chip>
               <Divider orientation="vertical" />
               <Box>
-                <Typography level='body2'>创建时间</Typography>
-                <Typography level='body1'>{formatTime(model.created_at)}</Typography>
+                <Typography level="body2">创建时间</Typography>
+                <Typography level="body1">{formatTime(model.created_at)}</Typography>
               </Box>
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
@@ -79,13 +70,14 @@ export default function ViewModel() {
           </>
         )}
       </Stack>
-      <Divider sx={{ mt: 2 }} />
-      <Grid container spacing={4}>
+      <Divider sx={{ my: 2 }} />
+      <Grid container spacing={2}>
         <Grid sm={12} md={9}>
           {fetchingModel && <Skeleton variant="rounded" width="100%" height={300} />}
+          {model && <LayerGraphEditor filename={model.filename} readonly />}
         </Grid>
         <Grid sm={12} md={3}>
-          <Stack spacing={2} mt={2}>
+          <Stack spacing={2}>
             <Card variant="soft">
               <Typography level="h5" gutterBottom>
                 算法描述

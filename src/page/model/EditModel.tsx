@@ -11,6 +11,8 @@ import { useUser } from '@/api/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { BigSwitch } from '@/component/basic/CustomInput'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
+import { LayerGraphEditor } from '@/component/visualization/svgEditors'
+import { useEffect } from 'react'
 
 export default function EditModel() {
   const { id: modelId } = useParams<{ id: string }>()
@@ -19,11 +21,14 @@ export default function EditModel() {
   const isOwner = !!user && user.id === model?.user_id
 
   const navigate = useNavigate()
-  const { register, control, handleSubmit } = useForm({ defaultValues: model })
+  const { register, control, handleSubmit, reset } = useForm<ModelCreatingForm>()
   const onSubmit: SubmitHandler<ModelCreatingForm> = async (data) => {
     const { id } = await updateModel(data)
     navigate(`/model/${id}`)
   }
+  useEffect(() => {
+    if (model) reset(model)
+  }, [model, reset])
 
   return (
     <Box mt={4}>
@@ -40,6 +45,7 @@ export default function EditModel() {
               <Controller
                 control={control}
                 name="private"
+                defaultValue={model.private}
                 render={({ field }) => (
                   <BigSwitch {...field} checked={field.value} onLabel="私有" offLabel="公开" />
                 )}
@@ -47,8 +53,8 @@ export default function EditModel() {
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
             <InnerLinkButton
-              color='neutral'
-              variant='soft'
+              color="neutral"
+              variant="soft"
               startDecorator={<ChevronLeftIcon />}
               to={`/model/${modelId}`}
             >
@@ -67,18 +73,25 @@ export default function EditModel() {
           </>
         )}
       </Stack>
-      <Divider sx={{ mt: 2 }} />
-      <Grid container spacing={4}>
+      <Divider sx={{ my: 2 }} />
+      <Grid container spacing={2}>
         <Grid sm={12} md={9}>
           {fetchingModel && <Skeleton variant="rounded" width="100%" height={300} />}
+          <Controller
+            control={control}
+            name="filename"
+            render={({ field: { value, onChange } }) => (
+              <LayerGraphEditor filename={value} onSave={onChange} />
+            )}
+          />
         </Grid>
         <Grid sm={12} md={3}>
-          <Stack spacing={2} mt={2}>
+          <Stack spacing={2}>
             <Card variant="soft">
               <Typography level="h5" gutterBottom>
-                项目描述
+                算法描述
               </Typography>
-              <Textarea minRows={3} placeholder="项目描述" {...register('description')} />
+              <Textarea minRows={3} placeholder="算法描述" {...register('description')} />
             </Card>
           </Stack>
         </Grid>

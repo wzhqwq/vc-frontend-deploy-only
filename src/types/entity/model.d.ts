@@ -10,7 +10,7 @@ export interface Model {
   /**
    * 模型文件id
    */
-  file_id: number
+  filename: string
   /**
    * 模型类型
    */

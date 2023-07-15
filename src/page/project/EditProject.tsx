@@ -62,7 +62,7 @@ export default function EditProject() {
             >
               返回
             </InnerLinkButton>
-            {isDirty && !isOwner && (
+            {isDirty && isOwner && (
               <>
                 <Button
                   variant="soft"
@@ -87,14 +87,14 @@ export default function EditProject() {
           </>
         )}
       </Stack>
-      <Divider sx={{ mt: 2 }} />
-      <Grid container spacing={4}>
+      <Divider sx={{ my: 2 }} />
+      <Grid container spacing={2}>
         <Grid sm={12} md={9}>
           {fetchingProject && <Skeleton variant="rounded" width="100%" height={300} />}
           <ProjectGraphEditor projectId={Number(projectId)} />
         </Grid>
         <Grid sm={12} md={3}>
-          <Stack spacing={2} mt={2}>
+          <Stack spacing={2}>
             <Card variant="soft">
               <Typography level="h5" gutterBottom>
                 项目描述
