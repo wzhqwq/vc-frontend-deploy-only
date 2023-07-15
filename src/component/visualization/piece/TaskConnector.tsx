@@ -1,5 +1,6 @@
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { useTaskConnecting } from '@/component/context/TaskConnectingContext'
+import { joyTheme } from '@/theme'
 import { ProjectGraph } from '@/types/config/project'
 import { Box } from '@mui/joy'
 import { memo, useContext, useEffect } from 'react'
@@ -20,17 +21,17 @@ const ConnectingPoint = memo(function ConnectingPoint({
   const readonly = useContext(ReadonlyContext)
   return (
     <Box
-      sx={(theme) => ({
-        bgcolor: theme.vars.palette.primary[connected ? 500 : connecting ? 50 : 300],
+      sx={{
+        bgcolor: joyTheme.vars.palette.primary[connected ? 400 : 50],
         border: '2px solid',
-        borderColor: theme.vars.palette.primary[connected || connecting ? 500 : 300],
+        borderColor: joyTheme.vars.palette.primary[connecting ? 600 : connected ? 400 : 300],
         width: 12,
         height: 12,
         mx: -1,
         my: 1,
         borderRadius: 8,
         zIndex: 100,
-      })}
+      }}
       onClick={() => !readonly && onClick()}
       id={id}
     />
@@ -104,7 +105,7 @@ export function TaskOutputConnector({ name }: TaskConnectorProps) {
     <ConnectingPoint
       connected={connected}
       connecting={selfConnecting}
-      onClick={() => !connected && toggleSelf()}
+      onClick={() => toggleSelf()}
       id={`tc-${id}`}
     />
   )

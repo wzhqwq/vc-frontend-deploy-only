@@ -35,6 +35,7 @@ import { useResizeObserver } from '@/component/context/TaskConnectingContext'
 import { TASK_ERROR_TERMINATED, TASK_FINISHED } from '@/utils/constants'
 import { useRefreshEnabled } from '@/component/context/RefreshContext'
 import { download } from '@/utils/action'
+import { joyTheme } from '@/theme'
 
 export interface TaskCardProps {
   index: number
@@ -83,7 +84,9 @@ export function BasicTaskCard({
   return (
     <Card variant="outlined" sx={{ p: 0 }} ref={cardRef}>
       <Stack direction="row">
-        <Stack justifyContent="space-evenly" sx={{ py: 2 }}>{inputConnectors}</Stack>
+        <Stack justifyContent="space-evenly" sx={{ py: 2 }}>
+          {inputConnectors}
+        </Stack>
         <Stack flexGrow={1} p={2} spacing={1}>
           <Stack direction="row" alignItems="center">
             {!readonly && (
@@ -98,7 +101,9 @@ export function BasicTaskCard({
           </Stack>
           {children}
         </Stack>
-        <Stack justifyContent="space-evenly" sx={{ py: 2 }}>{outputConnectors}</Stack>
+        <Stack justifyContent="space-evenly" sx={{ py: 2 }}>
+          {outputConnectors}
+        </Stack>
       </Stack>
     </Card>
   )
@@ -114,10 +119,8 @@ const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) =>
   const [showLogs, setShowLogs] = useState(false)
 
   useEffect(() => {
-    if ((task?.status ?? 0) >= TASK_FINISHED) {
-      setAutoUpdate(false)
-    }
-  }, [task?.status])
+    setAutoUpdate(refreshEnabled && (task?.status ?? 0) < TASK_FINISHED)
+  }, [task?.status, refreshEnabled])
 
   return task && !checkDirty(dirtyFields, name) ? (
     <>
@@ -149,6 +152,7 @@ const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) =>
         onClose={() => setAnchorEl(null)}
         placement="right-start"
         size="sm"
+        sx={{ zIndex: joyTheme.vars.zIndex.modal }}
       >
         <MenuItem onClick={() => setShowLogs(true)}>查看日志</MenuItem>
         {task.status == TASK_ERROR_TERMINATED && task.exception && <MenuItem>查看问题</MenuItem>}
@@ -229,14 +233,18 @@ export function AnalysisTaskCard(props: TaskCardProps) {
 
   return (
     <BasicTaskCard {...props} name="analyses" inputCount={tasksCount ?? 1}>
-      <Stack direction="row" spacing={2}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(2, 120px)`,
+          gap: 2,
+        }}
+      >
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[0]} simple />
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[1]} simple />
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[2]} simple />
-      </Stack>
-      <Button fullWidth>
-        查看分析结果
-      </Button>
+      </Box>
+      <Button fullWidth>查看分析结果</Button>
     </BasicTaskCard>
   )
 }

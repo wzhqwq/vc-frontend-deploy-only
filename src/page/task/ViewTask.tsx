@@ -33,7 +33,7 @@ export default function ViewTask() {
 
   return (
     <Box mt={4}>
-      <Stack direction="row" alignItems="center" spacing={2}>
+      <Stack direction="row" alignItems="center" spacing={2} mb={2}>
         {group ? (
           <>
             <Stack direction="row" alignItems="center" spacing={2}>
@@ -78,7 +78,6 @@ export default function ViewTask() {
           fetchingGroup && <Skeleton variant="text" sx={{ fontSize: '2rem', width: 100 }} />
         )}
       </Stack>
-      <Divider sx={{ mt: 2 }} />
       {group ? (
         <RefreshContext.Provider value={autoUpdate}>
           <ProjectGraphEditor

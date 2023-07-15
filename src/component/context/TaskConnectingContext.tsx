@@ -34,7 +34,7 @@ export const TaskConnectingContext = createContext<{
   reset: () => {},
 })
 
-const lineStroke = { color: joyTheme.vars.palette.primary[500], width: 2, linecap: 'round' }
+const lineStroke = { color: joyTheme.vars.palette.primary[400], width: 2, linecap: 'round' }
 
 export function TaskConnectingContextProvider({ children }: { children: ReactNode }) {
   const [inputToConnect, setInputToConnect] = useState<string | null>(null)

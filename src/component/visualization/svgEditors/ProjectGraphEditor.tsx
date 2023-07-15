@@ -213,51 +213,49 @@ export default function ProjectGraphEditor({
       <FormProvider {...methods}>
         <ReadonlyContext.Provider value={readonly}>
           <Box sx={{ overflowX: 'auto', overflowY: 'clip', pb: 4 }}>
-            <Box sx={{ minWidth: 1000 }}>
-              <TaskConnectingContextProvider>
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto 1fr auto 1fr',
-                    gap: 2,
-                    p: 1,
-                  }}
-                >
-                  <TaskSlot
-                    title="预处理"
-                    name="preProcesses"
-                    renderer={(task, index, remove) => (
-                      <PreprocessTaskCard key={task.id} index={index} remove={remove} />
-                    )}
-                    taskType="preprocess"
-                    initialParameters={preprocessConfigDict.default}
-                    inCount={0}
-                  />
-                  <Divider orientation="vertical" />
-                  <TaskSlot
-                    title="算法"
-                    name="algorithms"
-                    renderer={(task, index, remove) => (
-                      <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
-                    )}
-                    taskType="algo"
-                    initialParameters={algorithmConfigDict.default}
-                    inCount={1}
-                  />
-                  <Divider orientation="vertical" />
-                  <TaskSlot
-                    title="分析"
-                    name="analyses"
-                    renderer={(task, index, remove) => (
-                      <AnalysisTaskCard key={task.id} index={index} remove={remove} />
-                    )}
-                    taskType="visualization"
-                    initialParameters={analysisConfigDict.default}
-                    inCount={1}
-                  />
-                </Box>
-              </TaskConnectingContextProvider>
-            </Box>
+            <TaskConnectingContextProvider>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto 1fr auto 1fr',
+                  gap: 4,
+                  minWidth: 'max-content',
+                }}
+              >
+                <TaskSlot
+                  title="预处理"
+                  name="preProcesses"
+                  renderer={(task, index, remove) => (
+                    <PreprocessTaskCard key={task.id} index={index} remove={remove} />
+                  )}
+                  taskType="preprocess"
+                  initialParameters={preprocessConfigDict.default}
+                  inCount={0}
+                />
+                <Divider orientation="vertical" />
+                <TaskSlot
+                  title="算法"
+                  name="algorithms"
+                  renderer={(task, index, remove) => (
+                    <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
+                  )}
+                  taskType="algo"
+                  initialParameters={algorithmConfigDict.default}
+                  inCount={1}
+                />
+                <Divider orientation="vertical" />
+                <TaskSlot
+                  title="分析"
+                  name="analyses"
+                  renderer={(task, index, remove) => (
+                    <AnalysisTaskCard key={task.id} index={index} remove={remove} />
+                  )}
+                  taskType="visualization"
+                  initialParameters={analysisConfigDict.default}
+                  inCount={1}
+                />
+              </Box>
+            </TaskConnectingContextProvider>
           </Box>
         </ReadonlyContext.Provider>
       </FormProvider>
