@@ -57,6 +57,7 @@ export const taskStatusText = [
 ]
 
 export const modelKinds = [
+  undefined,
   <Chip color="primary" variant="soft">
     深度学习模型
   </Chip>,

@@ -5,23 +5,22 @@ import { useProjects } from '@/api/project'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { UserWidget } from '@/component/basic/getters'
 import { formatDate } from '@/utils/time'
-import { Box, Button, Card, CircularProgress, Grid, Stack, Typography } from '@mui/joy'
+import { Box, Card, CircularProgress, Grid, Stack, Typography } from '@mui/joy'
 import InnerLink from '../basic/innerLink/InnerLink'
-import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import InnerLinkButton from '../basic/innerLink/InnerLinkButton'
 
 export default function Projects({ isPublic }: { isPublic: boolean }) {
   const [search, setSearch] = useState('')
   const { projects, fetchingProjects } = useProjects(isPublic, search)
-  const navigate = useNavigate()
 
   return (
     <Box>
       <Stack direction="row" spacing={1}>
         <SearchInput placeholder="搜索项目" sx={{ flexGrow: 1 }} value={search} onChange={setSearch} />
-        <Button variant="solid" onClick={() => navigate('/project/new')} startDecorator={<AddIcon />}>
+        <InnerLinkButton variant="solid" to='/project/new' startDecorator={<AddIcon />}>
           创建项目
-        </Button>
+        </InnerLinkButton>
       </Stack>
       {fetchingProjects && <CircularProgress sx={{ mx: 'auto', mt: 2, display: 'block' }} />}
       <Grid container spacing={2} py={2}>

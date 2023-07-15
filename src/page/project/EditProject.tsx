@@ -13,6 +13,7 @@ import { useUser } from '@/api/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { BigSwitch } from '@/component/basic/CustomInput'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
+import { useEffect } from 'react'
 
 export default function EditProject() {
   const { id: projectId } = useParams<{ id: string }>()
@@ -27,11 +28,14 @@ export default function EditProject() {
     handleSubmit,
     reset,
     formState: { isValid, isDirty },
-  } = useForm({ defaultValues: project })
+  } = useForm<ProjectCreatingForm>()
   const onSubmit: SubmitHandler<ProjectCreatingForm> = async (data) => {
     const { id } = await updateProject(data)
     navigate(`/project/${id}`)
   }
+  useEffect(() => {
+    reset(project)
+  }, [project, reset])
 
   return (
     <Box mt={4}>
@@ -48,6 +52,7 @@ export default function EditProject() {
               <Controller
                 control={control}
                 name="private"
+                defaultValue={project.private}
                 render={({ field }) => (
                   <BigSwitch {...field} checked={field.value} onLabel="私有" offLabel="公开" />
                 )}
