@@ -5,9 +5,18 @@ import { useEffect, useRef } from 'react'
 const MARGIN_X = 50
 const MARGIN_Y = 30
 
-const LINE_COLOR_1 = joyTheme.vars.palette.primary[500]
-const LINE_COLOR_1_LIGHT = joyTheme.vars.palette.primary[100]
-const LINE_COLOR_2 = joyTheme.vars.palette.primary[300]
+const LINE_COLORS = [
+  joyTheme.vars.palette.neutral[300],
+  joyTheme.vars.palette.primary[500],
+  joyTheme.vars.palette.danger[300],
+  joyTheme.vars.palette.warning[300],
+]
+const FILL_COLORS = [
+  joyTheme.vars.palette.neutral[100],
+  joyTheme.vars.palette.primary[100],
+  joyTheme.vars.palette.danger[100],
+  joyTheme.vars.palette.warning[100],
+]
 
 type SvgSelection = d3.Selection<SVGSVGElement, undefined, null, undefined>
 type GroupSelection = d3.Selection<SVGGElement, undefined, null, undefined>
@@ -43,8 +52,9 @@ const getAxisGroup = (
       g
         .append('text')
         .attr('y', MARGIN_Y - 10)
+        .attr('x', -10)
         .attr('fill', 'currentColor')
-        .attr('text-anchor', 'end')
+        .attr('text-anchor', 'start')
         .text(yLabel),
     ),
 ]
@@ -57,39 +67,30 @@ const updateYAxis = (group: GroupSelection, y: d3.AxisScale<d3.NumberValue>) => 
   group.transition().duration(300).call(yAxis)
 }
 
-export interface LinePlotProps {
-  data: [number[], number[]]
-  xLabel: string
-  yLabel: string
-  width?: number
-  height?: number
-}
-interface DoubleLinePlotController {
+interface LinePlotController {
   svg: SVGElement
-  doUpdate: (data: [number[], number[]]) => void
+  doUpdate: (data: number[][]) => void
 }
-function generateDoubleLinePlot(
+function generateLinePlot(
+  count: number,
   xLabel: string,
   yLabel: string,
   width: number,
   height: number,
-): DoubleLinePlotController {
+): LinePlotController {
   const svg = getSvg(width, height)
   const [xGroup, yGroup] = getAxisGroup(svg, xLabel, yLabel, width, height)
 
-  const path1 = svg
-    .append('path')
-    .attr('fill', 'none')
-    .attr('stroke', LINE_COLOR_1)
-    .attr('stroke-width', 2)
-  const path2 = svg
-    .append('path')
-    .attr('fill', 'none')
-    .attr('stroke', LINE_COLOR_2)
-    .attr('stroke-width', 2)
+  const paths = new Array(count).fill(0).map((_, i) =>
+    svg
+      .append('path')
+      .attr('fill', 'none')
+      .attr('stroke', LINE_COLORS[i % LINE_COLORS.length])
+      .attr('stroke-width', 2),
+  )
 
-  const doUpdate = (data: [number[], number[]]) => {
-    const x = d3.scaleLinear([0, data.length], [MARGIN_X, width - MARGIN_X])
+  const doUpdate = (data: number[][]) => {
+    const x = d3.scaleLinear([1, data[0].length + 1], [MARGIN_X, width - MARGIN_X])
     const y = d3.scaleLinear([0, Math.max(...data.flat())], [height - MARGIN_Y, MARGIN_Y])
     updateXAxis(xGroup, x)
     updateYAxis(yGroup, y)
@@ -97,8 +98,7 @@ function generateDoubleLinePlot(
       (_, i) => x(i),
       (d) => y(d),
     )
-    path1.transition().duration(300).attr('d', line(data[0]))
-    path2.transition().duration(300).attr('d', line(data[1]))
+    paths.forEach((path, i) => path.transition().duration(300).attr('d', line(data[i])))
   }
 
   return {
@@ -106,18 +106,26 @@ function generateDoubleLinePlot(
     doUpdate,
   }
 }
+
+export interface LinePlotProps {
+  data: number[][]
+  xLabel: string
+  yLabel: string
+  width?: number
+  height?: number
+}
 export function LinePlot({ data, xLabel, yLabel, width = 500, height = 400 }: LinePlotProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const components = useRef<DoubleLinePlotController>()
+  const components = useRef<LinePlotController>()
   useEffect(() => {
     if (ref.current) {
-      components.current = generateDoubleLinePlot(xLabel, yLabel, width, height)
+      components.current = generateLinePlot(data.length, xLabel, yLabel, width, height)
       ref.current.appendChild(components.current.svg)
       return () => {
         ref.current?.removeChild(components.current!.svg)
       }
     }
-  }, [xLabel, yLabel, width, height])
+  }, [xLabel, yLabel, width, height, data.length])
   useEffect(() => {
     components.current?.doUpdate(data)
   }, [data])

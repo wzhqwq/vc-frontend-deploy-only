@@ -293,6 +293,7 @@ export type EachAlgorithmParameter =
   | MNMFAlgorithmParameter
   | CustomDeepAlgorithmParameter
 
+export type AllAnalysisType = 'line_chart' | 'scatter_plot' | 'heat_map'
 export type LineChartAnalysisParameter = BaseAnalysisParameter<'line_chart'> & {
   tasks_count: number
 }
@@ -305,3 +306,11 @@ export type EachAnalysisParameter =
   | LineChartAnalysisParameter
   | ScatterPlotAnalysisParameter
   | HeatMapAnalysisParameter
+
+export type LineChartResult = Record<string, number[][]>
+export type ScatterPlotResult = {
+  x_y: [number, number][],
+  label: number[][],
+}
+export type HeatMapResult = string[]
+export type EachAnalysisResult = LineChartResult | ScatterPlotResult | HeatMapResult

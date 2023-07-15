@@ -62,7 +62,7 @@ export default function FileUpload({ value, readonly, onChange, onRemove }: File
     >
       {uploadingFile ? (
         <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
-          <CircularProgress />
+          <CircularProgress size='sm' />
           <Typography level="body3" color="primary">
             上传中
           </Typography>

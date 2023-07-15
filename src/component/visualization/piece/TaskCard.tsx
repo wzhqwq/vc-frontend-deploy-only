@@ -2,13 +2,15 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import ErrorIcon from '@mui/icons-material/Error'
+import CloseIcon from '@mui/icons-material/Close'
 
 import { useTask } from '@/api/task'
-import { ProjectGraph } from '@/types/config/project'
+import { BasicResult, ProjectGraph } from '@/types/config/project'
 import {
   Box,
   Button,
   Card,
+  CardContent,
   Chip,
   ChipDelete,
   Divider,
@@ -17,7 +19,9 @@ import {
   MenuItem,
   Modal,
   ModalDialog,
+  ModalOverflow,
   Stack,
+  Typography,
 } from '@mui/joy'
 import { taskStatus } from '@/component/basic/chips'
 import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -36,6 +40,9 @@ import { TASK_ERROR_TERMINATED, TASK_FINISHED } from '@/utils/constants'
 import { useRefreshEnabled } from '@/component/context/RefreshContext'
 import { download } from '@/utils/action'
 import { joyTheme } from '@/theme'
+import Visualization from './Visualization'
+import { EachAnalysisResult } from '@/types/config/details/tasks'
+import { Fade } from '@mui/material'
 
 export interface TaskCardProps {
   index: number
@@ -117,6 +124,7 @@ const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) =>
   const readonly = useContext(ReadonlyContext)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [showLogs, setShowLogs] = useState(false)
+  const [showErrors, setShowErrors] = useState(false)
 
   useEffect(() => {
     setAutoUpdate(refreshEnabled && (task?.status ?? 0) < TASK_FINISHED)
@@ -154,14 +162,63 @@ const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) =>
         size="sm"
         sx={{ zIndex: joyTheme.vars.zIndex.modal }}
       >
-        <MenuItem onClick={() => setShowLogs(true)}>查看日志</MenuItem>
-        {task.status == TASK_ERROR_TERMINATED && task.exception && <MenuItem>查看问题</MenuItem>}
+        {task.status == TASK_ERROR_TERMINATED && task.exception && (
+          <MenuItem
+            onClick={() => {
+              setShowErrors(true)
+              setAnchorEl(null)
+            }}
+          >
+            显示问题
+          </MenuItem>
+        )}
+        <MenuItem onClick={() => setShowLogs(true)}>显示日志</MenuItem>
         {task.status == TASK_FINISHED && task.task_type == 'preprocess' && task.result && (
-          <MenuItem onClick={() => download(task.result!.filename, task.result!.extension)}>
+          <MenuItem
+            onClick={() =>
+              download(
+                (task.result as BasicResult).filename,
+                (task.result as BasicResult).extension,
+              )
+            }
+          >
             下载输出数据
           </MenuItem>
         )}
       </Menu>
+      <Fade in={showErrors}>
+        <Card
+          color="danger"
+          variant="soft"
+          sx={{
+            position: 'absolute',
+            left: 'calc(100% + 8px)',
+            width: 180,
+            top: 0,
+            zIndex: 600,
+          }}
+          size="sm"
+        >
+          <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
+            <Typography level="h6" sx={{ flexGrow: 1 }}>
+              问题
+            </Typography>
+            <IconButton
+              size="sm"
+              onClick={() => setShowErrors(false)}
+              color="danger"
+              variant="plain"
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+          <CardContent>
+            <Typography level="body2" color="danger">
+              {task.exception?.message}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Fade>
       <Modal open={showLogs} onClose={() => setShowLogs(false)}>
         <ModalDialog>
           <Box component="pre" sx={{ maxHeight: '80vh', overflow: 'auto' }}>
@@ -227,9 +284,15 @@ export function AlgorithmTaskCard(props: TaskCardProps) {
 export function AnalysisTaskCard(props: TaskCardProps) {
   const { index } = props
   const name = `analyses.${index}.parameters`
-  const tasksCount = useWatch<ProjectGraph>({
-    name: `${name}.tasks_count` as `analyses.${number}.parameters.tasks_count`,
+  const [tasksCount, type, taskId] = useWatch<ProjectGraph>({
+    name: [
+      `analyses.${index}.parameters.tasks_count`,
+      `analyses.${index}.parameters.visualization_type`,
+      `analyses.${index}.taskId`,
+    ],
   })
+  const { task } = useTask(taskId)
+  const [showResult, setShowResult] = useState(false)
 
   return (
     <BasicTaskCard {...props} name="analyses" inputCount={tasksCount ?? 1}>
@@ -244,7 +307,24 @@ export function AnalysisTaskCard(props: TaskCardProps) {
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[1]} simple />
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[2]} simple />
       </Box>
-      <Button fullWidth>查看分析结果</Button>
+      {task?.result && (
+        <>
+          <Button fullWidth onClick={() => setShowResult(true)}>
+            查看分析结果
+          </Button>
+          <Modal open={showResult} onClose={() => setShowResult(false)}>
+            <ModalOverflow sx={{ boxSizing: 'border-box' }}>
+              <ModalDialog>
+                <Visualization
+                  data={task.result as EachAnalysisResult}
+                  type={type}
+                  multiTask={tasksCount > 1}
+                />
+              </ModalDialog>
+            </ModalOverflow>
+          </Modal>
+        </>
+      )}
     </BasicTaskCard>
   )
 }

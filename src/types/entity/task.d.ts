@@ -1,3 +1,4 @@
+import { EachAnalysisResult } from '../config/details/tasks'
 import { BasicResult, ProjectGraph } from '../config/project'
 
 export interface TaskGroup {
@@ -59,7 +60,7 @@ export interface Task {
   /**
    * 结果描述项id
    */
-  result: BasicResult | null
+  result: BasicResult | EachAnalysisResult | null
   /**
    * 任务运行状态
    */
