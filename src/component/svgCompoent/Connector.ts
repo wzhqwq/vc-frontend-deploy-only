@@ -138,6 +138,7 @@ export class Connector<P extends ConfigParameterRecord = any> {
   }
   disconnect() {
     if (!this.connectedConnector) return
+    const peer = this.connectedConnector
     this.connectedConnector = null
     this.line.stroke({ color: ISOLATED_COLOR })
     this.pill.fill(ISOLATED_COLOR)
@@ -146,6 +147,7 @@ export class Connector<P extends ConfigParameterRecord = any> {
       this.shapeValue = undefined
       this.layer.updateInputShapes()
     }
+    peer.disconnect()
     return this
   }
   get peer() {
