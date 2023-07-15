@@ -8,7 +8,7 @@ import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 
 import ParameterInput from '@/component/basic/ParameterInput'
 import { Scene } from '@/component/svgCompoent/Scene'
-import LayerItem from '@/component/visualization/LayerItem'
+import LayerItem from '@/component/visualization/piece/LayerItem'
 import {
   normalLayers,
   inputLayers,

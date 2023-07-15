@@ -1,7 +1,7 @@
 import { Box } from '@mui/joy'
 
 import { useTaskGroups } from '@/api/task'
-import { TaskGroupDataGrid } from '@/component/visualization/lazyDataGrids'
+import { TaskGroupDataGrid } from '@/component/large/lazyDataGrids'
 
 export default function OwnTasks() {
   return (

@@ -7,6 +7,7 @@ import { useTask } from '@/api/task'
 import { ProjectGraph } from '@/types/config/project'
 import {
   Box,
+  Button,
   Card,
   Chip,
   ChipDelete,
@@ -197,7 +198,7 @@ export function PreprocessTaskCard(props: TaskCardProps) {
   return (
     <BasicTaskCard {...props} name="preProcesses" outputCount={1}>
       <ParameterInput prefix={name} parameter={preprocessConfigDict.properties[0]} simple />
-      <Stack direction="row" spacing={4}>
+      <Stack direction="row" spacing={2}>
         <ParameterInput prefix={name} parameter={preprocessConfigDict.properties[1]} simple />
         <ParameterInput prefix={name} parameter={preprocessConfigDict.properties[2]} simple />
       </Stack>
@@ -211,7 +212,7 @@ export function AlgorithmTaskCard(props: TaskCardProps) {
 
   return (
     <BasicTaskCard {...props} name="algorithms" inputCount={1} outputCount={1}>
-      <Stack direction="row" spacing={4}>
+      <Stack direction="row" spacing={2}>
         <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[0]} simple />
         <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[1]} simple />
       </Stack>
@@ -228,11 +229,14 @@ export function AnalysisTaskCard(props: TaskCardProps) {
 
   return (
     <BasicTaskCard {...props} name="analyses" inputCount={tasksCount ?? 1}>
-      <Stack direction="row" spacing={4}>
+      <Stack direction="row" spacing={2}>
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[0]} simple />
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[1]} simple />
         <ParameterInput prefix={name} parameter={analysisConfigDict.properties[2]} simple />
       </Stack>
+      <Button fullWidth>
+        查看分析结果
+      </Button>
     </BasicTaskCard>
   )
 }

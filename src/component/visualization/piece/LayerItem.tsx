@@ -1,7 +1,7 @@
 import { LayerConfig } from '@/types/config/deepLearning'
 import { Box, CircularProgress, Stack } from '@mui/joy'
 import { memo, useEffect, useRef, useState } from 'react'
-import { Layer } from '../svgCompoent/Layer'
+import { Layer } from '../../svgCompoent/Layer'
 
 export interface LayerItemProps {
   config: LayerConfig<any>

@@ -24,7 +24,7 @@ import {
 } from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useCreateTaskGroup, useTaskGroup } from '@/api/task'
-import { AlgorithmTaskCard, AnalysisTaskCard, PreprocessTaskCard } from './TaskCard'
+import { AlgorithmTaskCard, AnalysisTaskCard, PreprocessTaskCard } from '../piece/TaskCard'
 import { nanoid } from 'nanoid'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
 import { useProject } from '@/api/project'
