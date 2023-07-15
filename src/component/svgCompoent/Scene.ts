@@ -35,6 +35,9 @@ export class Scene {
     this.el.on('mouseup', () => {
       this.moving = false
     })
+    this.el.on('wheel', (e) => {
+      this.layout.el.translate(-(e as WheelEvent).deltaX / 2, -(e as WheelEvent).deltaY / 2)
+    })
 
     window.addEventListener('mousemove', this.mouseMove)
   }
@@ -50,6 +53,11 @@ export class Scene {
     this.observer?.disconnect()
     this.observer = new ResizeObserver(updateSize)
     this.observer.observe(parent)
+  }
+
+  public removeLayer(layer: Layer) {
+    this.layers = this.layers.filter((l) => l !== layer)
+    this.layout.removeLayer(layer)
   }
 
   public mouseMove(e: MouseEvent) {

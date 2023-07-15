@@ -52,6 +52,8 @@ export class Layer<P extends ConfigParameterRecord = any> {
 
   private offsetX = 0
   private offsetY = 0
+  private lastX = 0
+  private lastY = 0
   public x = 0
   public y = 0
   public width = 0
@@ -208,7 +210,7 @@ export class Layer<P extends ConfigParameterRecord = any> {
     }
   }
   public remove() {
-    this.scene?.layout.removeLayer(this)
+    this.scene?.removeLayer(this)
   }
 
   public has(connector: Connector) {
@@ -276,15 +278,18 @@ export class Layer<P extends ConfigParameterRecord = any> {
     this.text.front()
   }
 
-  move(x: number, y: number, animated = false) {
-    x += this.offsetX
-    y += this.offsetY
-    ;(animated ? this.el.animate() : this.el).transform({
-      relative: [x, y],
-    })
-    this.x = x
-    this.y = y
+  public updatePosition(x: number, y: number) {
+    this.x = x + this.offsetX
+    this.y = y + this.offsetY
     return this
+  }
+
+  public moveAnimated() {
+    this.el.animate().transform({
+      translate: [this.x - this.lastX, this.y - this.lastY],
+    }, true)
+    this.lastX = this.x
+    this.lastY = this.y
   }
 
   public dispose() {

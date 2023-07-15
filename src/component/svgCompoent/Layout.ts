@@ -119,6 +119,7 @@ export class Layout {
         (y, r) => r.doLayoutY(y) + ITEM_GAP,
         (startRow ? this.rows[startRow - 1].endY : 0) + ITEM_GAP,
       )
+    this.rows.slice(startRow).forEach(r => r.render())
     this.dirtyPaths.forEach((p) => p.render())
     this.dirtyPaths.clear()
   }
@@ -308,6 +309,11 @@ export class LayoutRow {
 
     return (this.endY = y + height)
   }
+  public render() {
+    this.items
+      .filter((i): i is LayoutLayer => i instanceof LayoutLayer)
+      .forEach((i) => i.layer.moveAnimated())
+  }
 
   public optimize() {
     this.items.sort((a, b) => a.peerOrder - b.peerOrder)
@@ -413,7 +419,7 @@ export class LayoutLayer extends LayoutItem {
   public updateX(x: number) {
     // if (this._x == x) return
     super.updateX(x)
-    this.layer.move(this._x, this._y)
+    this.layer.updatePosition(this._x, this._y)
     this.inputs.forEach((i) => i.updateX(this.layer.x))
     this.outputs.forEach((o) => o.updateX(this.layer.x))
     return this
@@ -421,7 +427,7 @@ export class LayoutLayer extends LayoutItem {
   public updateY(y: number) {
     if (this._y == y) return
     super.updateY(y)
-    this.layer.move(this._x, this._y)
+    this.layer.updatePosition(this._x, this._y)
     this.inputs.forEach((i) => i.updateY(this.layer.y))
     this.outputs.forEach((o) => o.updateY(this.layer.y))
     return this
