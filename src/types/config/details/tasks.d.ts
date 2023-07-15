@@ -1,4 +1,4 @@
-import { AlgorithmParameter, PreprocessParameter } from '../parameter'
+import { AlgorithmParameter, BaseAnalysisParameter, PreprocessParameter } from '../parameter'
 
 export interface DataLabelConfig {
   has_label: boolean
@@ -292,3 +292,16 @@ export type EachAlgorithmParameter =
   | OSCAlgorithmParameter
   | MNMFAlgorithmParameter
   | CustomDeepAlgorithmParameter
+
+export type LineChartAnalysisParameter = BaseAnalysisParameter<'line_chart'> & {
+  tasks_count: number
+}
+export type ScatterPlotAnalysisParameter = BaseAnalysisParameter<'scatter_plot'> & {
+  dim_reduction_type: 'PCA' | 'ICA' | 'TSNE' | 'SVD'
+}
+export type HeatMapAnalysisParameter = BaseAnalysisParameter<'heat_map'>
+
+export type EachAnalysisParameter =
+  | LineChartAnalysisParameter
+  | ScatterPlotAnalysisParameter
+  | HeatMapAnalysisParameter

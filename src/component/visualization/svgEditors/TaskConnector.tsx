@@ -26,7 +26,8 @@ const ConnectingPoint = memo(function ConnectingPoint({
         borderColor: theme.vars.palette.primary[connected || connecting ? 500 : 300],
         width: 12,
         height: 12,
-        m: -1,
+        mx: -1,
+        my: 1,
         borderRadius: 8,
         zIndex: 100,
       })}

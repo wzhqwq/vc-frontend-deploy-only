@@ -6,7 +6,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 
-import { ProjectGraph, TaskData } from '@/types/config/project'
+import { EachTaskParameter, ProjectGraph, TaskData } from '@/types/config/project'
 import { Project } from '@/types/entity/project'
 import {
   Box,
@@ -24,7 +24,7 @@ import {
 } from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useCreateTaskGroup, useTaskGroup } from '@/api/task'
-import { AlgorithmTaskCard, PreprocessTaskCard } from './TaskCard'
+import { AlgorithmTaskCard, AnalysisTaskCard, PreprocessTaskCard } from './TaskCard'
 import { nanoid } from 'nanoid'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
 import { useProject } from '@/api/project'
@@ -33,7 +33,11 @@ import Fade from '@mui/material/Fade'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { TASK_CREATED, TASK_FINISHED } from '@/utils/constants'
 import { TaskConnectingContextProvider } from '@/component/context/TaskConnectingContext'
-import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
+import {
+  algorithmConfigDict,
+  analysisConfigDict,
+  preprocessConfigDict,
+} from '@/config/projectGraph/taskData'
 import { BigSwitch } from '@/component/basic/CustomInput'
 import equal from 'deep-equal'
 import { joyTheme } from '@/theme'
@@ -141,11 +145,11 @@ export default function ProjectGraphEditor({
         }}
       >
         <Stack direction="row" alignItems="center" spacing={2} py={2}>
-          <Typography level='h5'>
-            项目配置图
-          </Typography>
+          <Typography level="h5">项目配置图</Typography>
           {readonly && (
-            <Chip size='sm' variant='outlined'>只读</Chip>
+            <Chip size="sm" variant="outlined">
+              只读
+            </Chip>
           )}
           {groupId && (
             <>
@@ -240,12 +244,17 @@ export default function ProjectGraphEditor({
                     initialParameters={algorithmConfigDict.default}
                     inCount={1}
                   />
-                  {/* <Divider orientation="vertical" />
-                <TaskSlot
-                  title="分析"
-                  renderer={() => <div>结束</div>}
-                  initialParameters={{}}
-                /> */}
+                  <Divider orientation="vertical" />
+                  <TaskSlot
+                    title="分析"
+                    name="analyses"
+                    renderer={(task, index, remove) => (
+                      <AnalysisTaskCard key={task.id} index={index} remove={remove} />
+                    )}
+                    taskType="visualization"
+                    initialParameters={analysisConfigDict.default}
+                    inCount={1}
+                  />
                 </Box>
               </TaskConnectingContextProvider>
             </Box>
@@ -258,7 +267,9 @@ export default function ProjectGraphEditor({
   return fullscreen ? (
     <Modal open>
       <ModalOverflow>
-        <ModalDialog layout="fullscreen" sx={{ p: 2 }}>{content}</ModalDialog>
+        <ModalDialog layout="fullscreen" sx={{ p: 2 }}>
+          {content}
+        </ModalDialog>
       </ModalOverflow>
     </Modal>
   ) : (
@@ -266,7 +277,7 @@ export default function ProjectGraphEditor({
   )
 }
 
-interface TaskSlotProps<T extends Record<string, any>> {
+interface TaskSlotProps<T extends EachTaskParameter> {
   title: string
   name: keyof ProjectGraph
   renderer: (task: TaskData<T>, index: number, remove: UseFieldArrayRemove) => JSX.Element
@@ -274,7 +285,7 @@ interface TaskSlotProps<T extends Record<string, any>> {
   initialParameters: T
   inCount: number
 }
-function TaskSlot<T extends Record<string, any>>({
+function TaskSlot<T extends EachTaskParameter>({
   title,
   name,
   renderer,
@@ -282,7 +293,7 @@ function TaskSlot<T extends Record<string, any>>({
   initialParameters,
   inCount,
 }: TaskSlotProps<T>) {
-  const { fields, append, remove } = useFieldArray<ProjectGraph, keyof ProjectGraph>({ name })
+  const { fields, append, remove } = useFieldArray({ name })
   const readonly = useContext(ReadonlyContext)
   const handleAdd = () => {
     const id = nanoid()
@@ -299,7 +310,7 @@ function TaskSlot<T extends Record<string, any>>({
       <Typography level="h5" sx={{ my: 2 }}>
         {title}
       </Typography>
-      {fields.map((task, index) => renderer(task, index, remove))}
+      {fields.map((task, index) => renderer(task as TaskData<T>, index, remove))}
       {!readonly && (
         <Button variant="soft" size="lg" startDecorator={<AddIcon />} fullWidth onClick={handleAdd}>
           添加

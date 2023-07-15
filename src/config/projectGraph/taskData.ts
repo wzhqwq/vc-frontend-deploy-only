@@ -25,8 +25,8 @@ import {
   SaltPepperNoiseConfig,
   TextPreprocessParameter,
 } from '@/types/config/details/tasks'
-import { ConfigParameterArray, DictConfigParameter } from '@/types/config/parameter'
-import { AlgorithmTaskData, PreprocessTaskData } from '@/types/config/project'
+import { DictConfigParameter } from '@/types/config/parameter'
+import { AlgorithmTaskData, AnalysisTaskData, PreprocessTaskData } from '@/types/config/project'
 
 export const clipArgs: DictConfigParameter<ClipConfig, 'args'> = {
   key: 'args',
@@ -712,4 +712,43 @@ export const algorithmConfigDict: DictConfigParameter<AlgorithmTaskData, 'parame
     algo_name: 'MultiCC',
     algo_config: allAlgorithmConfigParameters[0].default,
   } as AlgorithmTaskData['parameters'],
+}
+
+export const analysisConfigDict: DictConfigParameter<AnalysisTaskData, 'parameters'> = {
+  key: 'parameters',
+  type: 'dict',
+  description: '分析配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'visualization_type',
+      type: 'str',
+      description: '分析类型',
+      default: 'line_chart',
+      selections: ['line_chart', 'scatter_plot', 'heat_map'],
+    },
+    {
+      key: 'tasks_count',
+      type: 'int',
+      description: '分析算法数量',
+      default: 1,
+      canShow(p) {
+        return p.visualization_type === 'line_chart'
+      }
+    },
+    {
+      key: 'dim_reduction_type',
+      type: 'str',
+      description: '降维算法',
+      default: 'PCA',
+      selections: ['PCA', 'ICA', 'TSNE', 'SVD'],
+      canShow(p) {
+        return p.visualization_type === 'scatter_plot'
+      }
+    },
+  ],
+  default: {
+    visualization_type: 'line_chart',
+    tasks_count: 1,
+  },
 }

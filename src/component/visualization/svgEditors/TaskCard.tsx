@@ -22,7 +22,11 @@ import { taskStatus } from '@/component/basic/chips'
 import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { TaskInputConnector, TaskOutputConnector } from './TaskConnector'
 import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
-import { algorithmConfigDict, preprocessConfigDict } from '@/config/projectGraph/taskData'
+import {
+  algorithmConfigDict,
+  analysisConfigDict,
+  preprocessConfigDict,
+} from '@/config/projectGraph/taskData'
 import ParameterInput from '@/component/basic/ParameterInput'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
@@ -78,7 +82,7 @@ export function BasicTaskCard({
   return (
     <Card variant="outlined" sx={{ p: 0 }} ref={cardRef}>
       <Stack direction="row">
-        <Stack justifyContent="space-evenly">{inputConnectors}</Stack>
+        <Stack justifyContent="space-evenly" sx={{ py: 2 }}>{inputConnectors}</Stack>
         <Stack flexGrow={1} p={2} spacing={1}>
           <Stack direction="row" alignItems="center">
             {!readonly && (
@@ -93,7 +97,7 @@ export function BasicTaskCard({
           </Stack>
           {children}
         </Stack>
-        <Stack justifyContent="space-evenly">{outputConnectors}</Stack>
+        <Stack justifyContent="space-evenly" sx={{ py: 2 }}>{outputConnectors}</Stack>
       </Stack>
     </Card>
   )
@@ -210,6 +214,24 @@ export function AlgorithmTaskCard(props: TaskCardProps) {
       <Stack direction="row" spacing={4}>
         <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[0]} simple />
         <ParameterInput prefix={name} parameter={algorithmConfigDict.properties[1]} simple />
+      </Stack>
+    </BasicTaskCard>
+  )
+}
+
+export function AnalysisTaskCard(props: TaskCardProps) {
+  const { index } = props
+  const name = `analyses.${index}.parameters`
+  const tasksCount = useWatch<ProjectGraph>({
+    name: `${name}.tasks_count` as `analyses.${number}.parameters.tasks_count`,
+  })
+
+  return (
+    <BasicTaskCard {...props} name="analyses" inputCount={tasksCount ?? 1}>
+      <Stack direction="row" spacing={4}>
+        <ParameterInput prefix={name} parameter={analysisConfigDict.properties[0]} simple />
+        <ParameterInput prefix={name} parameter={analysisConfigDict.properties[1]} simple />
+        <ParameterInput prefix={name} parameter={analysisConfigDict.properties[2]} simple />
       </Stack>
     </BasicTaskCard>
   )

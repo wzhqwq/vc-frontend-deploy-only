@@ -136,3 +136,7 @@ export interface AlgorithmParameter<T extends Record<string, any>> {
   algo_config: T
   algo_name: string
 }
+
+export interface BaseAnalysisParameter<T extends string> {
+  visualization_type: T
+}
