@@ -5,9 +5,11 @@ import { baseUrl, wrapAxios } from './network'
 import { useErrorlessQuery, usePost } from './common'
 import { FileInfo } from '@/types/entity/file'
 
+export const toUrl = (filename: string) => `${baseUrl}file/files/${filename}`
+
 const fetchPlainFile: QueryFunction<string, string[]> = async ({ queryKey }) => {
   const filename = queryKey[3]
-  const response = await fetch(`${baseUrl}file/files/${filename}`)
+  const response = await fetch(toUrl(filename))
   if (response.status == 404) throw new Error('文件不存在')
   return response.text()
 }

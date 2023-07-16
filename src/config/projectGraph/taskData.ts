@@ -741,7 +741,7 @@ export const analysisConfigDict: DictConfigParameter<AnalysisTaskData, 'paramete
       type: 'str',
       description: '降维算法',
       default: 'PCA',
-      selections: ['PCA', 'ICA', 'TSNE', 'SVD'],
+      selections: ['PCA', 'ICA', 'SVD'],
       canShow(p) {
         return p.visualization_type === 'scatter_plot'
       }

@@ -298,7 +298,7 @@ export type LineChartAnalysisParameter = BaseAnalysisParameter<'line_chart'> & {
   tasks_count: number
 }
 export type ScatterPlotAnalysisParameter = BaseAnalysisParameter<'scatter_plot'> & {
-  dim_reduction_type: 'PCA' | 'ICA' | 'TSNE' | 'SVD'
+  dim_reduction_type: 'PCA' | 'ICA' | 'SVD'
 }
 export type HeatMapAnalysisParameter = BaseAnalysisParameter<'heat_map'>
 

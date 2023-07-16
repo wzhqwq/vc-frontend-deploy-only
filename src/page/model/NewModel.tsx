@@ -85,12 +85,12 @@ export default function NewModel() {
                     使用可视化编辑器构建深度学习模型
                   </Typography>
                 </Box>
-                <Box mt={2}>
+                {/* <Box mt={2}>
                   <Radio value="2" label="自定义" />
                   <Typography level="body2" sx={{ ml: 2 }}>
                     上传满足平台通信规范的python代码
                   </Typography>
-                </Box>
+                </Box> */}
               </RadioGroup>
             )}
           />
