@@ -188,11 +188,12 @@ export interface IMClustersConfig {
   /**
    * 迭代次数
    */
-  Epoch: number
+  epochs: number
   /**
    * 学习率
    */
   LR: number
+  embed_dimension: number
   /**
    * 聚类的簇数
    */
@@ -200,7 +201,7 @@ export interface IMClustersConfig {
   /**
    * 注意力机制头数
    */
-  num_head: number
+  num_heads: number
 }
 
 /**
@@ -259,7 +260,7 @@ export interface MNMFOptions {
   /**
    * 每种聚类随机初始化的次数
    */
-  nReapeat: number
+  nRepeat: number
   /**
    * 选择计算模式2
    */
@@ -271,11 +272,13 @@ export interface MNMFOptions {
   /**
    * 权重参数
    */
-  weight: number
+  Weight: number
 }
 
 export interface CustomDeepConfig {
-  json_model_name: string
+  file_name: string
+  epochs: number
+  learn_rate: number
 }
 
 export type MultiCCAlgorithmParameter = AlgorithmParameter<MultiCCConfig>
@@ -314,3 +317,5 @@ export type ScatterPlotResult = {
 }
 export type HeatMapResult = string[]
 export type EachAnalysisResult = LineChartResult | ScatterPlotResult | HeatMapResult
+
+export type DatasetParameter = Pick<Dataset, 'title' | 'task_id'>

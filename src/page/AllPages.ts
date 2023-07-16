@@ -21,6 +21,10 @@ import NewModel from './model/NewModel'
 import ViewModel from './model/ViewModel'
 import EditModel from './model/EditModel'
 
+import NewDataset from './dataset/NewDataset'
+import ViewDataset from './dataset/ViewDataset'
+import EditDataset from './dataset/EditDataset'
+
 import OwnProperty from './user/OwnProperty'
 import OwnTasks from './user/OwnTasks'
 import Notifications from './user/Notifications'
@@ -88,6 +92,19 @@ export const viewModel = {
 }
 export const editModel = {
   Component: EditModel,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+
+export const newDataset = {
+  Component: NewDataset,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const viewDataset = {
+  Component: ViewDataset,
+  ErrorBoundary: SimpleErrorBoundary,
+}
+export const editDataset = {
+  Component: EditDataset,
   ErrorBoundary: SimpleErrorBoundary,
 }
 

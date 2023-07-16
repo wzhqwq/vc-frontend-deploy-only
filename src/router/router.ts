@@ -33,6 +33,14 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: 'dataset',
+        children: [
+          { path: ':id', lazy: () => import('@/page/AllPages').then((m) => m.viewDataset) },
+          { path: ':id/edit', lazy: () => import('@/page/AllPages').then((m) => m.editDataset) },
+          { path: 'new', lazy: () => import('@/page/AllPages').then((m) => m.newDataset) },
+        ],
+      },
+      {
         path: 'user',
         children: [
           {

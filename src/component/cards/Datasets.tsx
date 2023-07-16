@@ -4,11 +4,16 @@ import { useDatasets } from '@/api/dataset'
 import { SearchInput } from '@/component/basic/CustomInput'
 import { UserWidget } from '@/component/basic/getters'
 import { formatDate } from '@/utils/time'
-import { Box, Card, CircularProgress, Grid, Stack, Typography } from '@mui/joy'
+import { Box, Card, CircularProgress, Grid, Link, Stack, Typography } from '@mui/joy'
 import InnerLink from '../basic/innerLink/InnerLink'
 import { useState } from 'react'
+import { Dataset } from '@/types/entity/dataset'
 
-export default function Datasets({ isPublic }: { isPublic: boolean }) {
+interface DatasetsProps {
+  isPublic: boolean
+  onSelect?: (dataset: Dataset) => void
+}
+export default function Datasets({ isPublic, onSelect }: DatasetsProps) {
   const [search, setSearch] = useState('')
   const { datasets, fetchingDatasets } = useDatasets(isPublic, search)
 
@@ -24,9 +29,15 @@ export default function Datasets({ isPublic }: { isPublic: boolean }) {
             <Card variant="outlined">
               <div>
                 <Typography level="h5">
-                  <InnerLink overlay to={`/dataset/${dataset.id}`} underline="none">
-                    {dataset.title}
-                  </InnerLink>
+                  {onSelect ? (
+                    <Link overlay underline="none" onClick={() => onSelect(dataset)} href="#">
+                      {dataset.title}
+                    </Link>
+                  ) : (
+                    <InnerLink overlay to={`/dataset/${dataset.id}`} underline="none">
+                      {dataset.title}
+                    </InnerLink>
+                  )}
                 </Typography>
                 <Typography level="body2">{dataset.description || '暂无描述'}</Typography>
               </div>

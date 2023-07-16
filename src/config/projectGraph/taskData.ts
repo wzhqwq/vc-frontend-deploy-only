@@ -500,10 +500,10 @@ const imClustersConfigDict: DictConfigParameter<IMClustersAlgorithmParameter, 'a
   multiChoice: false,
   properties: [
     {
-      key: 'Epoch',
+      key: 'epochs',
       type: 'int',
       description: '最大迭代次数',
-      default: 100,
+      default: 10,
     },
     {
       key: 'LR',
@@ -512,23 +512,30 @@ const imClustersConfigDict: DictConfigParameter<IMClustersAlgorithmParameter, 'a
       default: 0.01,
     },
     {
+      key: 'embed_dimension',
+      type: 'int',
+      description: '嵌入维度',
+      default: 20,
+    },
+    {
       key: 'n_clusters',
       type: 'int',
       description: '聚类的簇数',
       default: 2,
     },
     {
-      key: 'num_head',
+      key: 'num_heads',
       type: 'int',
       description: '注意力机制头数',
       default: 2,
     },
   ],
   default: {
-    Epoch: 100,
+    epochs: 10,
     LR: 0.01,
     n_clusters: 2,
-    num_head: 2,
+    num_heads: 2,
+    embed_dimension: 2,
   },
 }
 
@@ -589,7 +596,7 @@ const mnmfOptionDict: DictConfigParameter<MNMFConfig, 'options'> = {
       default: 10,
     },
     {
-      key: 'nReapeat',
+      key: 'nRepeat',
       type: 'int',
       description: '每种聚类随机初始化的次数',
       default: 10,
@@ -607,7 +614,7 @@ const mnmfOptionDict: DictConfigParameter<MNMFConfig, 'options'> = {
       default: 1,
     },
     {
-      key: 'weight',
+      key: 'Weight',
       type: 'float',
       description: '权重参数',
       default: 0.1,
@@ -617,10 +624,10 @@ const mnmfOptionDict: DictConfigParameter<MNMFConfig, 'options'> = {
     alpha: 0.1,
     error: 0.1,
     minIter: 10,
-    nReapeat: 10,
+    nRepeat: 10,
     stype: 1,
     type: 1,
-    weight: 0.1,
+    Weight: 0.1,
   },
 }
 const mnmfConfigDict: DictConfigParameter<MNMFAlgorithmParameter, 'algo_config'> = {
@@ -659,18 +666,32 @@ const mnmfConfigDict: DictConfigParameter<MNMFAlgorithmParameter, 'algo_config'>
 const customDeepConfigDict: DictConfigParameter<CustomDeepAlgorithmParameter, 'algo_config'> = {
   key: 'algo_config',
   type: 'dict',
-  description: '自定义模型配置',
+  description: '深度学习模型配置',
   multiChoice: false,
   properties: [
     {
-      key: 'json_model_name',
+      key: 'file_name',
       type: 'model',
       description: '深度学习模型',
       default: emptyLayerFile.filename,
     },
+    {
+      key: 'epochs',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 10,
+    },
+    {
+      key: 'learn_rate',
+      type: 'float',
+      description: '学习率',
+      default: 0.01,
+    },
   ],
   default: {
-    json_model_name: emptyLayerFile.filename,
+    file_name: emptyLayerFile.filename,
+    epochs: 10,
+    learn_rate: 0.01,
   },
 }
 

@@ -1,4 +1,6 @@
+import { Dataset } from '../entity/dataset'
 import {
+  DatasetParameter,
   EachAlgorithmParameter,
   EachAnalysisParameter,
   EachPreprocessParameter,
@@ -8,6 +10,7 @@ export interface ProjectGraph {
   preProcesses: PreprocessTaskData[]
   algorithms: AlgorithmTaskData[]
   analyses: AnalysisTaskData[]
+  datasets: DatasetTaskData[]
 }
 
 export interface TaskData<T extends Record<string, any>> {
@@ -21,12 +24,18 @@ export interface TaskData<T extends Record<string, any>> {
 export type PreprocessTaskData = TaskData<EachPreprocessParameter>
 export type AlgorithmTaskData = TaskData<EachAlgorithmParameter>
 export type AnalysisTaskData = TaskData<EachAnalysisParameter>
+export type DatasetTaskData = TaskData<DatasetParameter>
 
 export type EachTaskParameter =
   | EachPreprocessParameter
   | EachAlgorithmParameter
   | EachAnalysisParameter
-export type EachTaskData = PreprocessTaskData | AlgorithmTaskData | AnalysisTaskData
+  | DatasetParameter
+export type EachTaskData =
+  | PreprocessTaskData
+  | AlgorithmTaskData
+  | AnalysisTaskData
+  | DatasetTaskData
 
 export interface BasicResult {
   extension: string

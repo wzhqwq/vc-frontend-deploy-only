@@ -1,6 +1,5 @@
 import { toUrl } from '@/api/files'
-import { ScatterPlot } from '@/component/large/Diagrams'
-import { LinePlot } from '@/component/large/lazyDiagrams'
+import { LinePlot, ScatterPlot } from '@/component/large/lazyDiagrams'
 import {
   AllAnalysisType,
   EachAnalysisResult,

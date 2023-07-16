@@ -24,7 +24,7 @@ import {
 } from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useCreateTaskGroup, useTaskGroup } from '@/api/task'
-import { AlgorithmTaskCard, AnalysisTaskCard, PreprocessTaskCard } from '../piece/TaskCard'
+import { AlgorithmTaskCard, AnalysisTaskCard, DatasetTaskCard, PreprocessTaskCard } from '../piece/TaskCard'
 import { nanoid } from 'nanoid'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
 import { useProject } from '@/api/project'
@@ -181,6 +181,7 @@ export default function ProjectGraphEditor({
                       preProcesses: data.preProcesses.map(({ taskId: _, ...rest }) => rest),
                       algorithms: data.algorithms.map(({ taskId: _, ...rest }) => rest),
                       analyses: data.analyses.map(({ taskId: _, ...rest }) => rest),
+                      datasets: data.datasets,
                     },
                   }).then(() => {
                     if (groupId) setUseGroupConfig(false)
@@ -201,7 +202,7 @@ export default function ProjectGraphEditor({
               </Button>
             </Stack>
           </Fade>
-          {canRun && allTasks.length > 0 && (
+          {canRun && allTasks.length > 0 && !isDirty && (
             <Runner project={project} noRestart={!groupId} allTasks={allTasks} />
           )}
           <IconButton onClick={() => setFullscreen((s) => !s)} color="neutral">
@@ -222,16 +223,28 @@ export default function ProjectGraphEditor({
                   minWidth: 'max-content',
                 }}
               >
-                <TaskSlot
-                  title="预处理"
-                  name="preProcesses"
-                  renderer={(task, index, remove) => (
-                    <PreprocessTaskCard key={task.id} index={index} remove={remove} />
-                  )}
-                  taskType="preprocess"
-                  initialParameters={preprocessConfigDict.default}
-                  inCount={0}
-                />
+                <Box>
+                  <TaskSlot
+                    title="预处理"
+                    name="preProcesses"
+                    renderer={(task, index, remove) => (
+                      <PreprocessTaskCard key={task.id} index={index} remove={remove} />
+                    )}
+                    taskType="preprocess"
+                    initialParameters={preprocessConfigDict.default}
+                    inCount={0}
+                  />
+                  <TaskSlot
+                    title="数据集"
+                    name="datasets"
+                    renderer={(task, index, remove) => (
+                      <DatasetTaskCard key={task.id} index={index} remove={remove} />
+                    )}
+                    taskType="dataset"
+                    initialParameters={{} as any}
+                    inCount={0}
+                  />
+                </Box>
                 <Divider orientation="vertical" />
                 <TaskSlot
                   title="算法"

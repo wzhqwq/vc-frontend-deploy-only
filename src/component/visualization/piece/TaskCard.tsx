@@ -43,6 +43,9 @@ import { joyTheme } from '@/theme'
 import Visualization from './Visualization'
 import { EachAnalysisResult } from '@/types/config/details/tasks'
 import { Fade } from '@mui/material'
+import { useNavigate } from 'react-router'
+import Datasets from '@/component/cards/Datasets'
+import DatasetInput from '@/component/basic/DatasetInput'
 
 export interface TaskCardProps {
   index: number
@@ -126,6 +129,8 @@ const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) =>
   const [showLogs, setShowLogs] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     setAutoUpdate(refreshEnabled && (task?.status ?? 0) < TASK_FINISHED)
   }, [task?.status, refreshEnabled])
@@ -174,16 +179,21 @@ const TaskInfo = memo(({ name }: { name: `${keyof ProjectGraph}.${number}` }) =>
         )}
         <MenuItem onClick={() => setShowLogs(true)}>显示日志</MenuItem>
         {task.status == TASK_FINISHED && task.task_type == 'preprocess' && task.result && (
-          <MenuItem
-            onClick={() =>
-              download(
-                (task.result as BasicResult).filename,
-                (task.result as BasicResult).extension,
-              )
-            }
-          >
-            下载输出数据
-          </MenuItem>
+          <>
+            <MenuItem
+              onClick={() =>
+                download(
+                  (task.result as BasicResult).filename,
+                  (task.result as BasicResult).extension,
+                )
+              }
+            >
+              下载输出数据
+            </MenuItem>
+            <MenuItem onClick={() => navigate(`/dataset/new?taskId=${taskId}`)}>
+              导出为数据集
+            </MenuItem>
+          </>
         )}
       </Menu>
       <Fade in={showErrors}>
@@ -325,6 +335,16 @@ export function AnalysisTaskCard(props: TaskCardProps) {
           </Modal>
         </>
       )}
+    </BasicTaskCard>
+  )
+}
+
+export function DatasetTaskCard(props: TaskCardProps) {
+  const { index } = props
+
+  return (
+    <BasicTaskCard {...props} name="datasets" outputCount={1}>
+      <DatasetInput name={`datasets.${index}.parameters`} />
     </BasicTaskCard>
   )
 }
