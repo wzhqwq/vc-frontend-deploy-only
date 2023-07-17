@@ -10,7 +10,7 @@ export interface ProjectGraph {
   preProcesses: PreprocessTaskData[]
   algorithms: AlgorithmTaskData[]
   analyses: AnalysisTaskData[]
-  datasets: DatasetTaskData[]
+  datasets?: DatasetTaskData[]
 }
 
 export interface TaskData<T extends Record<string, any>> {

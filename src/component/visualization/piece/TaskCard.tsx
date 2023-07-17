@@ -26,7 +26,13 @@ import {
 import { taskStatus } from '@/component/basic/chips'
 import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { TaskInputConnector, TaskOutputConnector } from './TaskConnector'
-import { UseFieldArrayRemove, useFormContext, useFormState, useWatch } from 'react-hook-form'
+import {
+  UseFieldArrayRemove,
+  useController,
+  useFormContext,
+  useFormState,
+  useWatch,
+} from 'react-hook-form'
 import {
   algorithmConfigDict,
   analysisConfigDict,
@@ -345,6 +351,21 @@ export function DatasetTaskCard(props: TaskCardProps) {
   return (
     <BasicTaskCard {...props} name="datasets" outputCount={1}>
       <DatasetInput name={`datasets.${index}.parameters`} />
+      <DatasetIdController name={`datasets.${index}`} />
     </BasicTaskCard>
   )
+}
+
+function DatasetIdController({ name }: { name: `datasets.${number}` }) {
+  const taskId = useWatch<ProjectGraph>({ name: `${name}.parameters.task_id` })
+  const { task } = useTask(taskId)
+  const {
+    field: { onChange },
+  } = useController<ProjectGraph>({ name: `${name}.id` })
+  useEffect(() => {
+    if (!task) return
+    onChange(task.item_id)
+  }, [task, onChange])
+
+  return null
 }

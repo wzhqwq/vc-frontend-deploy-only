@@ -24,7 +24,12 @@ import {
 } from '@mui/joy'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useCreateTaskGroup, useTaskGroup } from '@/api/task'
-import { AlgorithmTaskCard, AnalysisTaskCard, DatasetTaskCard, PreprocessTaskCard } from '../piece/TaskCard'
+import {
+  AlgorithmTaskCard,
+  AnalysisTaskCard,
+  DatasetTaskCard,
+  PreprocessTaskCard,
+} from '../piece/TaskCard'
 import { nanoid } from 'nanoid'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
 import { useProject } from '@/api/project'
@@ -85,6 +90,7 @@ export default function ProjectGraphEditor({
       preProcesses: groupConfig.preProcesses.map(fillInTaskId),
       algorithms: groupConfig.algorithms.map(fillInTaskId),
       analyses: groupConfig.analyses.map(fillInTaskId),
+      datasets: groupConfig.datasets?.map((d) => ({ ...d, taskId: d.parameters.task_id })) ?? [],
     } as ProjectGraph
     // 如果用户选择查看组配置，直接返回
     if (useGroupConfig) return groupConfigWithTaskId
@@ -113,6 +119,7 @@ export default function ProjectGraphEditor({
       analyses: projectConfig.analyses.map((taskData) =>
         checkAndFillInTaskId(taskData, groupConfigWithTaskId.analyses),
       ),
+      datasets: projectConfig.datasets,
     }
   }, [group, project, tasks, useGroupConfig])
 
@@ -126,11 +133,15 @@ export default function ProjectGraphEditor({
     const keepFinishedTask = (data: TaskData<any>) => ({
       ...data,
       taskId:
-        data.taskId && tasks?.find((task) => task.id == data.taskId)?.status == TASK_FINISHED
+        data.taskId &&
+        tasks?.find((task) => task.id == data.taskId)?.status == TASK_FINISHED &&
+        data.inPeers.every(
+          (id) => tasks.find((task) => task.item_id == id)?.status == TASK_FINISHED,
+        )
           ? data.taskId
           : undefined,
     })
-    return pureTasks.map(keepFinishedTask)
+    return [...pureTasks.map(keepFinishedTask), ...(config.datasets ?? [])]
   }, [config, tasks])
 
   const content = project ? (
@@ -234,6 +245,7 @@ export default function ProjectGraphEditor({
                     initialParameters={preprocessConfigDict.default}
                     inCount={0}
                   />
+                  <Divider sx={{ mt: 2 }} />
                   <TaskSlot
                     title="数据集"
                     name="datasets"
@@ -381,8 +393,9 @@ function Runner({
           .filter((id): id is number => id != undefined),
         data_config: taskToCreate.parameters,
       })
-    } else if (group?.status == TASK_CREATED)
+    } else if (group?.status == TASK_CREATED) {
       startGroup().then(() => navigate(`/task/${newGroupId}`))
+    }
   }, [tasksToCreate])
 
   return noRestart ? (

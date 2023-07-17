@@ -105,7 +105,7 @@ export function TaskOutputConnector({ name }: TaskConnectorProps) {
     <ConnectingPoint
       connected={connected}
       connecting={selfConnecting}
-      onClick={() => toggleSelf()}
+      onClick={toggleSelf}
       id={`tc-${id}`}
     />
   )
