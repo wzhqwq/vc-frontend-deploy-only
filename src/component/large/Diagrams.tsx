@@ -6,16 +6,15 @@ const MARGIN_X = 50
 const MARGIN_Y = 30
 
 const LINE_COLORS = [
-  joyTheme.vars.palette.neutral[500],
-  joyTheme.vars.palette.primary[400],
-  joyTheme.vars.palette.danger[400],
-  joyTheme.vars.palette.warning[300],
-]
-const FILL_COLORS = [
-  joyTheme.vars.palette.neutral[100],
-  joyTheme.vars.palette.primary[100],
-  joyTheme.vars.palette.danger[100],
-  joyTheme.vars.palette.warning[100],
+  '#e60049',
+  '#0bb4ff',
+  '#50e991',
+  '#e6d800',
+  '#9b19f5',
+  '#ffa300',
+  '#dc0ab4',
+  '#b3d4ff',
+  '#00bfa0',
 ]
 
 type SvgSelection = d3.Selection<SVGSVGElement, undefined, null, undefined>
@@ -57,15 +56,47 @@ const getAxisGroup = (
         .text(yLabel),
     ),
 ]
-const updateXAxis = (group: GroupSelection, x: d3.AxisScale<d3.NumberValue>, label?: string) => {
-  const xAxis = d3.axisBottom(x).tickSizeOuter(0)
+const updateXAxis = (
+  group: GroupSelection,
+  x: d3.AxisScale<d3.NumberValue>,
+  label: string,
+  type: 'int' | 'float' | 'huge',
+) => {
+  const xAxis = d3.axisBottom(x)
+  switch (type) {
+    case 'int':
+      xAxis.tickSizeOuter(0).tickFormat(d3.format('d'))
+      break
+    case 'float':
+      xAxis.tickFormat(d3.format('.2f'))
+      break
+    case 'huge':
+      xAxis.tickFormat(d3.format('.2s'))
+      break
+  }
   group.transition().duration(300).call(xAxis)
-  if (label) group.select('text').text(label)
+  group.select('text').text(label)
 }
-const updateYAxis = (group: GroupSelection, y: d3.AxisScale<d3.NumberValue>, label?: string) => {
+const updateYAxis = (
+  group: GroupSelection,
+  y: d3.AxisScale<d3.NumberValue>,
+  label: string,
+  type: 'int' | 'float' | 'huge',
+) => {
   const yAxis = d3.axisLeft(y)
+  switch (type) {
+    case 'int':
+      yAxis.tickSizeOuter(0).tickFormat(d3.format('d'))
+      break
+    case 'float':
+      yAxis.tickFormat(d3.format('.2f'))
+      break
+    case 'huge':
+      yAxis.tickFormat(d3.format('.2s'))
+      break
+  }
   group.transition().duration(300).call(yAxis)
-  if (label) group.select('text').text(label)
+  group.select('text').text(label)
 }
 
 interface LinePlotController {
@@ -87,8 +118,8 @@ function generateLinePlot(count: number, width: number, height: number): LinePlo
   const doUpdate = (data: number[][], xLabel: string, yLabel: string) => {
     const x = d3.scaleLinear([1, data[0].length], [MARGIN_X, width - MARGIN_X])
     const y = d3.scaleLinear([0, Math.max(...data.flat())], [height - MARGIN_Y, MARGIN_Y])
-    updateXAxis(xGroup, x, xLabel)
-    updateYAxis(yGroup, y, yLabel)
+    updateXAxis(xGroup, x, xLabel, 'int')
+    updateYAxis(yGroup, y, yLabel, 'huge')
     const line = d3.line<number>(
       (_, i) => x(i + 1),
       (d) => y(d),
@@ -170,8 +201,8 @@ function generateScatterPlot(
     const ys = data.map((d) => d[1])
     const x = d3.scaleLinear([Math.min(...xs), Math.max(...xs)], [MARGIN_X, width - MARGIN_X])
     const y = d3.scaleLinear([Math.min(...ys), Math.max(...ys)], [height - MARGIN_Y, MARGIN_Y])
-    updateXAxis(xGroup, x)
-    updateYAxis(yGroup, y)
+    updateXAxis(xGroup, x, 'x', 'float')
+    updateYAxis(yGroup, y, 'y', 'float')
     for (let k = 0; k < kinds; k++) {
       dots[k].selectAll('circle').remove()
       dots[k]
