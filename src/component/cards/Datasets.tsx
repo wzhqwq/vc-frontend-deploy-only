@@ -25,7 +25,7 @@ export default function Datasets({ isPublic, onSelect }: DatasetsProps) {
       {fetchingDatasets && <CircularProgress sx={{ mx: 'auto', mt: 2, display: 'block' }} />}
       <Grid container spacing={2} py={2}>
         {datasets?.map((dataset) => (
-          <Grid sm={12} md={6} key={dataset.id}>
+          <Grid sm={12} md={onSelect ? 12 : 6} key={dataset.id}>
             <Card variant="outlined">
               <div>
                 <Typography level="h5">

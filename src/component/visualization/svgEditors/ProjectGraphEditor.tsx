@@ -371,9 +371,11 @@ function Runner({
     setTasksToCreate(allTasks.filter((d) => !d.taskId))
   }
   const restartTaskGroup = async () => {
-    const { id } = await createTaskGroup({ finished_task_ids: [] })
+    const { id } = await createTaskGroup({
+      finished_task_ids: allTasks.filter((d) => d.task_type == 'dataset').map((d) => d.taskId!),
+    })
     setNewGroupId(id)
-    setTasksToCreate(allTasks)
+    setTasksToCreate(allTasks.filter(d => d.task_type != 'dataset'))
   }
   useEffect(() => {
     if (!tasks) return
@@ -403,7 +405,7 @@ function Runner({
       variant="solid"
       startDecorator={<PlayArrowRoundedIcon />}
       color="primary"
-      onClick={startTaskGroup}
+      onClick={restartTaskGroup}
     >
       运行
     </Button>

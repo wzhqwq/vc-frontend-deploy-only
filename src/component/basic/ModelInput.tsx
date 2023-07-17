@@ -39,7 +39,7 @@ export function ModelInput({ value, onChange, onBlur, readonly }: ModelInputProp
         </ModalDialog>
       </Modal>
       <Modal open={openModels} onClose={() => setOpenModels(false)}>
-        <ModalDialog sx={{ p: 2 }}>
+        <ModalDialog sx={{ p: 2, minWidth: 400 }}>
           <Tabs onChange={(_, v) => setShowPublic(v == 1)} value={showPublic ? 1 : 0}>
             <TabList>
               <Tab value={0}>我的模型</Tab>

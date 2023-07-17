@@ -37,7 +37,7 @@ export default function DatasetInput({ name }: { name: string }) {
         {task_id ? '修改数据集' : '选择数据集'}
       </Button>
       <Modal open={openDatasets} onClose={() => setOpenDatasets(false)}>
-        <ModalDialog sx={{ p: 2 }}>
+        <ModalDialog sx={{ p: 2, minWidth: 400 }}>
           <Tabs onChange={(_, v) => setShowPublic(v == 1)} value={showPublic ? 1 : 0}>
             <TabList>
               <Tab value={0}>我的模型</Tab>
