@@ -20,7 +20,7 @@ export default function OwnProperty() {
         onChange={(_, value) => navigate(`/user/${value}`)}
         sx={{ gap: 2 }}
       >
-        <TabList variant="soft">
+        <TabList variant="soft" sx={{ flexShrink: 0 }}>
           <Tab value="projects">
             <ListItemDecorator>
               <AccountTree />
