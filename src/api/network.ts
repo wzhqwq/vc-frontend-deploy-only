@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 import { StandardResponse } from '@/types/entity/common'
 import qs from 'qs'
 
-export const baseUrl = 'http://202.194.15.150:6999/api/'
+export const baseUrl = 'https://vc-tmp-hosted.sduonline.cn/api/'
 
 export async function request(path: string, method: string, useAuth: boolean, data?: any) {
   const headers = {
