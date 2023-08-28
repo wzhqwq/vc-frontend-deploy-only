@@ -44,7 +44,8 @@ export function useSession() {
   const { data: anonymousToken } = useErrorlessQuery<string>(
     {
       queryKey: ['public', 'user', 'login', 'anon'],
-      enabled: !loggedIn,
+      staleTime: Infinity,
+      cacheTime: Infinity,
     },
     '获取匿名登录令牌',
   )
@@ -62,6 +63,7 @@ export function useSession() {
       onSuccess: (data) => {
         localStorage.setItem('token', data)
         queryClient.invalidateQueries(['state', 'loggedIn'])
+        queryClient.invalidateQueries(['private'])
       },
     },
   )
@@ -71,10 +73,10 @@ export function useSession() {
   )
 
   const logOut = useCallback(() => {
-    localStorage.removeItem('token')
+    localStorage.setItem('token', anonymousToken ?? '')
     queryClient.invalidateQueries(['state', 'loggedIn'])
-    queryClient.removeQueries(['private'])
-  }, [])
+    queryClient.invalidateQueries(['private'])
+  }, [anonymousToken])
 
   return {
     loggedIn,

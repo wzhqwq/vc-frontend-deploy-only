@@ -6,8 +6,8 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
       retry: false,
+      staleTime: 10 * 60 * 1000,
       queryFn: async ({ queryKey, pageParam }) => {
         const type = queryKey[0] as string
         const hasParams = typeof queryKey.at(-1) === 'object'
