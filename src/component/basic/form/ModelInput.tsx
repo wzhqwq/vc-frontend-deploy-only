@@ -1,7 +1,7 @@
 import { Button, Divider, Modal, ModalDialog, Stack, Tab, TabList, Tabs } from '@mui/joy'
 import { useState } from 'react'
-import { LayerGraphEditor } from '../visualization/svgEditors'
-import Models from '../cards/Models'
+import { LayerGraphEditor } from '@/component/visualization/svgEditors'
+import Models from '@/component/cards/Models'
 
 export interface ModelInputProps {
   value: string

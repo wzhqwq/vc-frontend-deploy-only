@@ -12,7 +12,7 @@ import {
 } from '@mui/joy'
 import { useState } from 'react'
 import { useController } from 'react-hook-form'
-import Datasets from '../cards/Datasets'
+import Datasets from '@/component/cards/Datasets'
 
 export default function DatasetInput({ name }: { name: string }) {
   const {

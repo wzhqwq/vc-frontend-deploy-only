@@ -38,7 +38,7 @@ import {
   analysisConfigDict,
   preprocessConfigDict,
 } from '@/config/projectGraph/taskData'
-import ParameterInput from '@/component/basic/ParameterInput'
+import ParameterInput from '@/component/basic/form/ParameterInput'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
 import { useResizeObserver } from '@/component/context/TaskConnectingContext'
@@ -50,8 +50,7 @@ import Visualization from './Visualization'
 import { EachAnalysisResult } from '@/types/config/details/tasks'
 import { Fade } from '@mui/material'
 import { useNavigate } from 'react-router'
-import Datasets from '@/component/cards/Datasets'
-import DatasetInput from '@/component/basic/DatasetInput'
+import DatasetInput from '@/component/basic/form/DatasetInput'
 
 export interface TaskCardProps {
   index: number

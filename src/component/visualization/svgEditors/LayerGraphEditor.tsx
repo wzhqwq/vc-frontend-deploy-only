@@ -6,7 +6,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
 
-import ParameterInput from '@/component/basic/ParameterInput'
+import ParameterInput from '@/component/basic/form/ParameterInput'
 import { Scene } from '@/component/svgCompoent/Scene'
 import LayerItem from '@/component/visualization/piece/LayerItem'
 import {

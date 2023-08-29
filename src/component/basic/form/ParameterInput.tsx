@@ -18,7 +18,7 @@ import {
   useFormState,
   useWatch,
 } from 'react-hook-form'
-import { TupleInput } from './CustomInput'
+import { TupleInput } from '@/component/basic/CustomInput'
 import { useContext, useEffect, useMemo } from 'react'
 import { ReadonlyContext } from '@/component/context/ReadonlyContext'
 import { checkDirty } from '@/utils/form'
