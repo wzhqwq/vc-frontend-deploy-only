@@ -1,7 +1,5 @@
 import AddIcon from '@mui/icons-material/Add'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
-import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
-import SaveIcon from '@mui/icons-material/Save'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit'
@@ -22,7 +20,7 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useCreateTaskGroup, useTaskGroup } from '@/api/task'
 import {
   AlgorithmTaskCard,
@@ -46,6 +44,7 @@ import {
 import { BigSwitch } from '@/component/basic/CustomInput'
 import equal from 'deep-equal'
 import { joyTheme } from '@/theme'
+import MutationController from '@/component/basic/MutationController'
 
 interface ProjectGraphEditorProps {
   readonly?: boolean
@@ -63,11 +62,7 @@ export default function ProjectGraphEditor({
   const { group, tasks } = useTaskGroup(groupId)
   const { project, updateProject, updatingProject } = useProject(projectId)
   const methods = useForm<ProjectGraph>({ mode: 'onBlur' })
-  const {
-    formState: { isDirty, isValid },
-    reset,
-    handleSubmit,
-  } = methods
+  const { reset } = methods
   const [useGroupConfig, setUseGroupConfig] = useState(true)
   const [fullscreen, setFullscreen] = useState(false)
   const config = useMemo(() => {
@@ -126,6 +121,25 @@ export default function ProjectGraphEditor({
   useEffect(() => {
     reset(config)
   }, [config])
+  const handleChange = useCallback(
+    async (data: ProjectGraph) => {
+      if (!project) return
+
+      await updateProject({
+        ...project,
+        config: {
+          preProcesses: data.preProcesses.map(({ taskId: _, ...rest }) => rest),
+          algorithms: data.algorithms.map(({ taskId: _, ...rest }) => rest),
+          analyses: data.analyses.map(({ taskId: _, ...rest }) => rest),
+          datasets: data.datasets,
+        },
+      })
+
+      // 是对项目配置的修改，所以如果在组配置下完成修改，需要切换回项目配置
+      if (groupId) setUseGroupConfig(false)
+    },
+    [updateProject, groupId, project],
+  )
 
   const allTasks = useMemo<TaskData<any>[]>(() => {
     if (!config) return []
@@ -145,7 +159,7 @@ export default function ProjectGraphEditor({
   }, [config, tasks])
 
   const content = project ? (
-    <>
+    <FormProvider {...methods}>
       <Box
         sx={{
           position: 'sticky',
@@ -174,117 +188,83 @@ export default function ProjectGraphEditor({
             </>
           )}
           <Box sx={{ flexGrow: 1 }} />
-          <Fade in={!readonly && isDirty}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={2}
-              sx={{ '.MuiButton-root': { flexShrink: 0 } }}
-            >
-              <Button
-                variant="solid"
-                startDecorator={<SaveIcon />}
-                color="primary"
-                onClick={handleSubmit((data) =>
-                  updateProject({
-                    ...project,
-                    config: {
-                      preProcesses: data.preProcesses.map(({ taskId: _, ...rest }) => rest),
-                      algorithms: data.algorithms.map(({ taskId: _, ...rest }) => rest),
-                      analyses: data.analyses.map(({ taskId: _, ...rest }) => rest),
-                      datasets: data.datasets,
-                    },
-                  }).then(() => {
-                    if (groupId) setUseGroupConfig(false)
-                  }),
-                )}
-                disabled={!isValid || updatingProject}
-                loading={updatingProject}
-              >
-                {groupId ? '保存至项目' : '保存'}
-              </Button>
-              <Button
-                variant="soft"
-                startDecorator={<ReplayRoundedIcon />}
-                color="primary"
-                onClick={() => reset()}
-              >
-                重置
-              </Button>
-            </Stack>
-          </Fade>
-          {canRun && allTasks.length > 0 && !isDirty && (
-            <Runner project={project} noRestart={!groupId} allTasks={allTasks} />
-          )}
+          <MutationController
+            saveText={groupId && useGroupConfig ? '保存至项目' : '保存配置图'}
+            onChange={handleChange}
+            saving={updatingProject}
+            readonly={readonly}
+          >
+            {canRun && allTasks.length > 0 ? (
+              <Runner project={project} noRestart={!groupId} allTasks={allTasks} />
+            ) : undefined}
+          </MutationController>
           <IconButton onClick={() => setFullscreen((s) => !s)} color="neutral">
             {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         </Stack>
         <Divider sx={{ mx: -2 }} />
       </Box>
-      <FormProvider {...methods}>
-        <ReadonlyContext.Provider value={readonly}>
-          <Box sx={{ overflowX: 'auto', overflowY: 'clip', pb: 4 }}>
-            <TaskConnectingContextProvider>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto 1fr auto 1fr',
-                  gap: 4,
-                  minWidth: 'max-content',
-                }}
-              >
-                <Box>
-                  <TaskSlot
-                    title="预处理"
-                    name="preProcesses"
-                    renderer={(task, index, remove) => (
-                      <PreprocessTaskCard key={task.id} index={index} remove={remove} />
-                    )}
-                    taskType="preprocess"
-                    initialParameters={preprocessConfigDict.default}
-                    inCount={0}
-                  />
-                  <Divider sx={{ mt: 2 }} />
-                  <TaskSlot
-                    title="数据集"
-                    name="datasets"
-                    renderer={(task, index, remove) => (
-                      <DatasetTaskCard key={task.id} index={index} remove={remove} />
-                    )}
-                    taskType="dataset"
-                    initialParameters={{} as any}
-                    inCount={0}
-                  />
-                </Box>
-                <Divider orientation="vertical" />
+      <ReadonlyContext.Provider value={readonly}>
+        <Box sx={{ overflowX: 'auto', overflowY: 'clip', pb: 4 }}>
+          <TaskConnectingContextProvider>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto 1fr auto 1fr',
+                gap: 4,
+                minWidth: 'max-content',
+              }}
+            >
+              <Box>
                 <TaskSlot
-                  title="算法"
-                  name="algorithms"
+                  title="预处理"
+                  name="preProcesses"
                   renderer={(task, index, remove) => (
-                    <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
+                    <PreprocessTaskCard key={task.id} index={index} remove={remove} />
                   )}
-                  taskType="algo"
-                  initialParameters={algorithmConfigDict.default}
-                  inCount={1}
+                  taskType="preprocess"
+                  initialParameters={preprocessConfigDict.default}
+                  inCount={0}
                 />
-                <Divider orientation="vertical" />
+                <Divider sx={{ mt: 2 }} />
                 <TaskSlot
-                  title="分析"
-                  name="analyses"
+                  title="数据集"
+                  name="datasets"
                   renderer={(task, index, remove) => (
-                    <AnalysisTaskCard key={task.id} index={index} remove={remove} />
+                    <DatasetTaskCard key={task.id} index={index} remove={remove} />
                   )}
-                  taskType="visualization"
-                  initialParameters={analysisConfigDict.default}
-                  inCount={1}
+                  taskType="dataset"
+                  initialParameters={{} as any}
+                  inCount={0}
                 />
               </Box>
-            </TaskConnectingContextProvider>
-          </Box>
-        </ReadonlyContext.Provider>
-      </FormProvider>
-    </>
+              <Divider orientation="vertical" />
+              <TaskSlot
+                title="算法"
+                name="algorithms"
+                renderer={(task, index, remove) => (
+                  <AlgorithmTaskCard key={task.id} index={index} remove={remove} />
+                )}
+                taskType="algo"
+                initialParameters={algorithmConfigDict.default}
+                inCount={1}
+              />
+              <Divider orientation="vertical" />
+              <TaskSlot
+                title="分析"
+                name="analyses"
+                renderer={(task, index, remove) => (
+                  <AnalysisTaskCard key={task.id} index={index} remove={remove} />
+                )}
+                taskType="visualization"
+                initialParameters={analysisConfigDict.default}
+                inCount={1}
+              />
+            </Box>
+          </TaskConnectingContextProvider>
+        </Box>
+      </ReadonlyContext.Provider>
+    </FormProvider>
   ) : null
 
   return fullscreen ? (
@@ -375,7 +355,7 @@ function Runner({
       finished_task_ids: allTasks.filter((d) => d.task_type == 'dataset').map((d) => d.taskId!),
     })
     setNewGroupId(id)
-    setTasksToCreate(allTasks.filter(d => d.task_type != 'dataset'))
+    setTasksToCreate(allTasks.filter((d) => d.task_type != 'dataset'))
   }
   useEffect(() => {
     if (!tasks) return

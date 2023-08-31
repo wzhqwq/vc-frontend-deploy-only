@@ -1,9 +1,8 @@
-import SaveIcon from '@mui/icons-material/Save'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 
 import { DatasetCreatingForm, useDataset } from '@/api/dataset'
-import { Box, Button, Card, Divider, Grid, Input, Stack, Textarea, Typography } from '@mui/joy'
+import { Box, Card, Divider, Grid, Input, Stack, Textarea, Typography } from '@mui/joy'
 import { Skeleton } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { UserWidget } from '@/component/basic/getters'
@@ -12,6 +11,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { BigSwitch } from '@/component/basic/CustomInput'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
 import { useEffect } from 'react'
+import MutationController from '@/component/basic/MutationController'
 
 export default function EditDataset() {
   const { id: datasetId } = useParams<{ id: string }>()
@@ -20,7 +20,8 @@ export default function EditDataset() {
   const isOwner = !!user && user.id === dataset?.user_id
 
   const navigate = useNavigate()
-  const { register, control, handleSubmit, reset } = useForm<DatasetCreatingForm>()
+  const methods = useForm<DatasetCreatingForm>()
+  const { register, control, reset } = methods
   const onSubmit: SubmitHandler<DatasetCreatingForm> = async (data) => {
     const { id } = await updateDataset(data)
     navigate(`/dataset/${id}`)
@@ -51,24 +52,21 @@ export default function EditDataset() {
               />
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
-            <InnerLinkButton
-              color="neutral"
-              variant="soft"
-              startDecorator={<ChevronLeftIcon />}
-              to={`/dataset/${datasetId}`}
+            <MutationController
+              saveText="保存数据集"
+              onChange={onSubmit}
+              saving={updatingDataset}
+              methods={methods}
             >
-              返回
-            </InnerLinkButton>
-            <Button
-              color="primary"
-              variant="soft"
-              startDecorator={<SaveIcon />}
-              loading={updatingDataset}
-              disabled={!isOwner || updatingDataset}
-              onClick={handleSubmit(onSubmit)}
-            >
-              保存修改
-            </Button>
+              <InnerLinkButton
+                color="neutral"
+                variant="soft"
+                startDecorator={<ChevronLeftIcon />}
+                to={`/dataset/${datasetId}`}
+              >
+                返回
+              </InnerLinkButton>
+            </MutationController>
           </>
         )}
       </Stack>

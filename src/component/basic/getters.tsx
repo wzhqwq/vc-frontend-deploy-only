@@ -9,7 +9,7 @@ export function UserWidget({ userId }: { userId?: number }) {
   const { user, fetchingUser } = useUser(userId)
   return (
     <Stack direction="row" alignItems="center" spacing={0.5} useFlexGap>
-      {fetchingUser && <CircularProgress />}
+      {fetchingUser && <CircularProgress size='sm' />}
       {user && (
         <>
           {user.is_anon ? (
@@ -28,7 +28,7 @@ export function ProjectName({ projectId }: { projectId: number }) {
   const { project, fetchingProject } = useProject(projectId)
   return (
     <>
-      {fetchingProject && <CircularProgress />}
+      {fetchingProject && <CircularProgress size='sm' />}
       {project?.name}
     </>
   )

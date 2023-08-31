@@ -1,9 +1,9 @@
 import { DictConfigParameter } from '@/types/config/parameter'
 import { Box, Button, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Fade } from '@mui/material'
+import MutationController from '../MutationController'
 
 export interface FormModalProps {
   parameter: DictConfigParameter<any, any>
@@ -35,6 +35,16 @@ export default function FormModal({
   useEffect(() => {
     methods.reset({ dict: value })
   }, [value])
+  const handleChange = useCallback(
+    (data: { dict: any }) => {
+      onChange?.(data.dict)
+    },
+    [onChange],
+  )
+  const handleClose = useCallback(() => {
+    onBlur?.()
+    setOpen(false)
+  }, [onBlur])
 
   return (
     <>
@@ -64,42 +74,11 @@ export default function FormModal({
             </Box>
             <Stack direction="row" mt={2} spacing={2}>
               <Box sx={{ flexGrow: 1 }} />
-              {!readonly && (
-                <Fade in={methods.formState.isDirty}>
-                  <Stack direction="row" spacing={2}>
-                    <Button
-                      onClick={(e) =>
-                        methods
-                          .handleSubmit((data) => onChange?.(data.dict))(e)
-                          .then(() => {
-                            setOpen(false)
-                          })
-                      }
-                      disabled={!methods.formState.isValid}
-                    >
-                      <Box sx={{ flexShrink: 0 }}>保存</Box>
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        methods.reset()
-                      }}
-                      variant="soft"
-                    >
-                      <Box sx={{ flexShrink: 0 }}>重置</Box>
-                    </Button>
-                  </Stack>
-                </Fade>
-              )}
-              <Button
-                onClick={() => {
-                  onBlur?.()
-                  setOpen(false)
-                }}
-                variant="soft"
-                color="neutral"
-              >
-                关闭
-              </Button>
+              <MutationController onChange={handleChange} readonly={readonly}>
+                <Button onClick={handleClose} variant="soft" color="neutral">
+                  关闭
+                </Button>
+              </MutationController>
             </Stack>
           </FormProvider>
         </ModalDialog>

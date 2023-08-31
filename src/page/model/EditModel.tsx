@@ -1,9 +1,8 @@
-import SaveIcon from '@mui/icons-material/Save'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 
 import { ModelCreatingForm, useModel } from '@/api/model'
-import { Box, Button, Card, Divider, Grid, Input, Stack, Textarea, Typography } from '@mui/joy'
+import { Box, Card, Divider, Grid, Input, Stack, Textarea, Typography } from '@mui/joy'
 import { Skeleton } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { UserWidget } from '@/component/basic/getters'
@@ -13,6 +12,7 @@ import { BigSwitch } from '@/component/basic/CustomInput'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
 import { LayerGraphEditor } from '@/component/visualization/svgEditors'
 import { useEffect } from 'react'
+import MutationController from '@/component/basic/MutationController'
 
 export default function EditModel() {
   const { id: modelId } = useParams<{ id: string }>()
@@ -21,7 +21,8 @@ export default function EditModel() {
   const isOwner = !!user && user.id === model?.user_id
 
   const navigate = useNavigate()
-  const { register, control, handleSubmit, reset } = useForm<ModelCreatingForm>()
+  const methods = useForm<ModelCreatingForm>()
+  const { register, control, reset } = methods
   const onSubmit: SubmitHandler<ModelCreatingForm> = async (data) => {
     const { id } = await updateModel(data)
     navigate(`/model/${id}`)
@@ -52,24 +53,21 @@ export default function EditModel() {
               />
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
-            <InnerLinkButton
-              color="neutral"
-              variant="soft"
-              startDecorator={<ChevronLeftIcon />}
-              to={`/model/${modelId}`}
+            <MutationController
+              saveText="保存算法"
+              onChange={onSubmit}
+              saving={updatingModel}
+              methods={methods}
             >
-              返回
-            </InnerLinkButton>
-            <Button
-              color="primary"
-              variant="soft"
-              startDecorator={<SaveIcon />}
-              loading={updatingModel}
-              disabled={!isOwner || updatingModel}
-              onClick={handleSubmit(onSubmit)}
-            >
-              保存修改
-            </Button>
+              <InnerLinkButton
+                color="neutral"
+                variant="soft"
+                startDecorator={<ChevronLeftIcon />}
+                to={`/model/${modelId}`}
+              >
+                返回
+              </InnerLinkButton>
+            </MutationController>
           </>
         )}
       </Stack>

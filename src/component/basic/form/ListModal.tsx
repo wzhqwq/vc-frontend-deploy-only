@@ -1,11 +1,11 @@
+import AddIcon from '@mui/icons-material/Add'
+
 import { DictConfigParameter, ListConfigParameter } from '@/types/config/parameter'
 import { Box, Button, Card, Modal, ModalDialog, Stack, Typography } from '@mui/joy'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import ParameterInput from './ParameterInput'
 import { FormProvider, UseFieldArrayRemove, useFieldArray, useForm } from 'react-hook-form'
-
-import AddIcon from '@mui/icons-material/Add'
-import { Fade } from '@mui/material'
+import MutationController from '../MutationController'
 
 export interface ListModalProps {
   parameter: ListConfigParameter<any, any>
@@ -29,6 +29,16 @@ export default function ListModal({
   useEffect(() => {
     methods.reset({ list: value })
   }, [value])
+  const handleChange = useCallback(
+    (data: { list: any[] }) => {
+      onChange?.(data.list)
+    },
+    [onChange],
+  )
+  const handleClose = useCallback(() => {
+    onBlur?.()
+    setOpen(false)
+  }, [onBlur])
 
   return (
     <>
@@ -66,42 +76,11 @@ export default function ListModal({
             </Stack>
             <Stack direction="row" mt={2} spacing={2}>
               <Box sx={{ flexGrow: 1 }} />
-              {!readonly && (
-                <Fade in={methods.formState.isDirty}>
-                  <Stack direction="row" spacing={2}>
-                    <Button
-                      onClick={(e) =>
-                        methods
-                          .handleSubmit((data) => onChange?.(data.list))(e)
-                          .then(() => {
-                            setOpen(false)
-                          })
-                      }
-                      disabled={!methods.formState.isValid}
-                    >
-                      <Box sx={{ flexShrink: 0 }}>保存</Box>
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        methods.reset()
-                      }}
-                      variant="soft"
-                    >
-                      <Box sx={{ flexShrink: 0 }}>重置</Box>
-                    </Button>
-                  </Stack>
-                </Fade>
-              )}
-              <Button
-                onClick={() => {
-                  onBlur?.()
-                  setOpen(false)
-                }}
-                variant="soft"
-                color="neutral"
-              >
-                关闭
-              </Button>
+              <MutationController onChange={handleChange} readonly={readonly}>
+                <Button onClick={handleClose} variant="soft" color="neutral">
+                  关闭
+                </Button>
+              </MutationController>
             </Stack>
           </FormProvider>
         </ModalDialog>

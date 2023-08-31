@@ -13,7 +13,8 @@ import { useUser } from '@/api/user'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { BigSwitch } from '@/component/basic/CustomInput'
 import InnerLinkButton from '@/component/basic/innerLink/InnerLinkButton'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
+import MutationController from '@/component/basic/MutationController'
 
 export default function EditProject() {
   const { id: projectId } = useParams<{ id: string }>()
@@ -22,17 +23,13 @@ export default function EditProject() {
   const isOwner = !!user && user.id === project?.user_id
 
   const navigate = useNavigate()
-  const {
-    register,
-    control,
-    handleSubmit,
-    reset,
-    formState: { isValid, isDirty },
-  } = useForm<ProjectCreatingForm>()
-  const onSubmit: SubmitHandler<ProjectCreatingForm> = async (data) => {
+  const methods = useForm<ProjectCreatingForm>()
+  const { register, control, reset } = methods
+  const onSubmit = useCallback(async (data: ProjectCreatingForm) => {
+    console.log('asdf')
     const { id } = await updateProject(data)
     navigate(`/project/${id}`)
-  }
+  }, [])
   useEffect(() => {
     reset(project)
   }, [project, reset])
@@ -59,36 +56,21 @@ export default function EditProject() {
               />
             </Stack>
             <Box sx={{ flexGrow: 1 }} />
-            <InnerLinkButton
-              color="neutral"
-              variant="soft"
-              startDecorator={<ChevronLeftIcon />}
-              to={`/project/${projectId}`}
+            <MutationController
+              saveText="保存项目"
+              onChange={onSubmit}
+              saving={updatingProject}
+              methods={methods}
             >
-              返回
-            </InnerLinkButton>
-            {isDirty && isOwner && (
-              <>
-                <Button
-                  variant="soft"
-                  startDecorator={<ReplayRoundedIcon />}
-                  color="primary"
-                  onClick={() => reset()}
-                >
-                  重置
-                </Button>
-                <Button
-                  color="primary"
-                  variant="soft"
-                  startDecorator={<SaveIcon />}
-                  loading={updatingProject}
-                  disabled={updatingProject || !isValid}
-                  onClick={handleSubmit(onSubmit)}
-                >
-                  保存修改
-                </Button>
-              </>
-            )}
+              <InnerLinkButton
+                color="neutral"
+                variant="soft"
+                startDecorator={<ChevronLeftIcon />}
+                to={`/project/${projectId}`}
+              >
+                返回
+              </InnerLinkButton>
+            </MutationController>
           </>
         )}
       </Stack>
