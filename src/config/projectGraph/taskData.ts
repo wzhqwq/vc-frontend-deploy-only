@@ -22,6 +22,7 @@ import {
   OSCAlgorithmParameter,
   OtherPreprocessParameter,
   RotateConfig,
+  SCMCSAlgorithmParameter,
   SaltPepperNoiseConfig,
   TextPreprocessParameter,
 } from '@/types/config/details/tasks'
@@ -694,6 +695,23 @@ const customDeepConfigDict: DictConfigParameter<CustomDeepAlgorithmParameter, 'a
     learn_rate: 0.01,
   },
 }
+const scMCsConfigDict: DictConfigParameter<SCMCSAlgorithmParameter, 'algo_config'> = {
+  key: 'algo_config',
+  type: 'dict',
+  description: 'scMCs算法配置',
+  multiChoice: false,
+  properties: [
+    {
+      key: 'epochs',
+      type: 'int',
+      description: '最大迭代次数',
+      default: 100,
+    },
+  ],
+  default: {
+    epochs: 100,
+  },
+}
 
 const allAlgorithmConfigParameters = [
   multiCCConfigDict,
@@ -702,8 +720,9 @@ const allAlgorithmConfigParameters = [
   oscConfigDict,
   mnmfConfigDict,
   customDeepConfigDict,
+  scMCsConfigDict,
 ] as DictConfigParameter<EachAlgorithmParameter, 'algo_config'>[]
-const algorithmNames = ['MultiCC', 'DeKMeans', 'iMClusters', 'OSC', 'MNMF', 'CustomDeep']
+const algorithmNames = ['MultiCC', 'DeKMeans', 'iMClusters', 'OSC', 'MNMF', 'CustomDeep', 'scMCs']
 export const algorithmConfigDict: DictConfigParameter<AlgorithmTaskData, 'parameters'> = {
   key: 'parameters',
   type: 'dict',

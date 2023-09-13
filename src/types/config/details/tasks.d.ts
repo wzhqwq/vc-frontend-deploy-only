@@ -281,12 +281,17 @@ export interface CustomDeepConfig {
   learn_rate: number
 }
 
+export interface SCMCSConfig {
+  epochs: number
+}
+
 export type MultiCCAlgorithmParameter = AlgorithmParameter<MultiCCConfig>
 export type DeKMeansAlgorithmParameter = AlgorithmParameter<DeKMeansConfig>
 export type IMClustersAlgorithmParameter = AlgorithmParameter<IMClustersConfig>
 export type OSCAlgorithmParameter = AlgorithmParameter<OSCConfig>
 export type MNMFAlgorithmParameter = AlgorithmParameter<MNMFConfig>
 export type CustomDeepAlgorithmParameter = AlgorithmParameter<CustomDeepConfig>
+export type SCMCSAlgorithmParameter = AlgorithmParameter<SCMCSConfig>
 
 export type EachAlgorithmParameter =
   | MultiCCAlgorithmParameter
@@ -295,6 +300,7 @@ export type EachAlgorithmParameter =
   | OSCAlgorithmParameter
   | MNMFAlgorithmParameter
   | CustomDeepAlgorithmParameter
+  | SCMCSAlgorithmParameter
 
 export type AllAnalysisType = 'line_chart' | 'scatter_plot' | 'heat_map'
 export type LineChartAnalysisParameter = BaseAnalysisParameter<'line_chart'> & {

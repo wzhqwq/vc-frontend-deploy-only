@@ -213,6 +213,7 @@ export default function ProjectGraphEditor({
                 gridTemplateColumns: '1fr auto 1fr auto 1fr',
                 gap: 4,
                 minWidth: 'max-content',
+                minHeight: 500,
               }}
             >
               <Box>
